@@ -1,0 +1,458 @@
+import React from 'react';
+import { PredictionLayout } from '../../components/prediction/PredictionLayout';
+export function PredictionFactors() {
+  return (
+    <PredictionLayout
+      title="Risk Factor Analysis"
+      subtitle="Why did the AI assign this score? Full explainability."
+      breadcrumb="Risk Factor Analysis">
+      
+      {/* Top Filter Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+            <option>District: Rusizi ▼</option>
+          </select>
+          <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+            <option>Disease: Cholera ▼</option>
+          </select>
+          <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+            <option>Date: June 5, 2026 ▼</option>
+          </select>
+        </div>
+        <button className="px-6 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
+          Analyze
+        </button>
+      </div>
+
+      {/* Main Explainability Card */}
+      <div className="bg-white rounded-lg shadow-lg border border-border overflow-hidden mb-8">
+        <div className="p-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-epi-bg/50">
+          <div>
+            <h2 className="text-[18px] font-bold text-epi-text">
+              Rusizi District — Cholera
+            </h2>
+            <div className="text-[14px] text-epi-muted mt-1">
+              Outbreak Probability:{' '}
+              <span className="font-bold text-epi-text">91%</span> | Confidence:{' '}
+              <span className="font-bold text-epi-text">89% High</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[12px] font-bold text-epi-muted uppercase tracking-wider mb-1">
+              Risk Score
+            </div>
+            <div className="text-[24px] font-bold text-epi-red flex items-center gap-2">
+              91/100{' '}
+              <span className="text-[12px] bg-epi-red text-white px-2 py-0.5 rounded uppercase">
+                🔴 CRITICAL
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+          {/* Waterfall Chart */}
+          <div className="relative mb-12">
+            {/* Grid lines */}
+            <div className="absolute left-[200px] right-0 top-0 bottom-0 flex justify-between">
+              {[0, 20, 40, 60, 80, 100].map((val) =>
+              <div
+                key={val}
+                className="h-full border-l border-dashed border-border relative">
+                
+                  <span className="absolute -top-6 -translate-x-1/2 text-[10px] text-epi-muted">
+                    {val}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="relative z-10 space-y-4">
+              {/* Base */}
+              <div className="flex items-center">
+                <div className="w-[200px] text-[13px] text-epi-muted pr-4 text-right">
+                  Starting base score: 0
+                </div>
+                <div className="flex-1"></div>
+              </div>
+
+              {/* Factor 1 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-epi-red">↑ +25 pts</div>
+                  <div className="text-epi-text">Current case count: 87</div>
+                  <div className="text-[11px] text-epi-muted">
+                    threshold = 30
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-0 h-full bg-epi-red/80 group-hover:bg-epi-red transition-colors rounded-r"
+                    style={{
+                      width: '25%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 2 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-epi-red">↑ +22 pts</div>
+                  <div className="text-epi-text">Water quality: 2/10</div>
+                  <div className="text-[11px] text-epi-muted">
+                    WASAC June 4 reading, Poor
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[25%] h-full bg-epi-red/80 group-hover:bg-epi-red transition-colors rounded-r"
+                    style={{
+                      width: '22%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 3 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-epi-red">↑ +20 pts</div>
+                  <div className="text-epi-text">
+                    Week-over-week growth: +45%
+                  </div>
+                  <div className="text-[11px] text-epi-muted">
+                    threshold = +20%
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[47%] h-full bg-epi-red/80 group-hover:bg-epi-red transition-colors rounded-r"
+                    style={{
+                      width: '20%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 4 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-[#F97316]">↑ +15 pts</div>
+                  <div className="text-epi-text">Rainfall: 145mm/week</div>
+                  <div className="text-[11px] text-epi-muted">
+                    heavy — Ruzizi River flood risk
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[67%] h-full bg-[#F97316]/80 group-hover:bg-[#F97316] transition-colors rounded-r"
+                    style={{
+                      width: '15%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 5 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-[#F97316]">↑ +9 pts</div>
+                  <div className="text-epi-text">Sanitation coverage: 34%</div>
+                  <div className="text-[11px] text-epi-muted">
+                    national avg 62%
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[82%] h-full bg-[#F97316]/80 group-hover:bg-[#F97316] transition-colors rounded-r"
+                    style={{
+                      width: '9%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 6 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-epi-amber">↑ +5 pts</div>
+                  <div className="text-epi-text">Population density</div>
+                  <div className="text-[11px] text-epi-muted">
+                    Bugarama sector: 890/km²
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[91%] h-full bg-epi-amber/80 group-hover:bg-epi-amber transition-colors rounded-r"
+                    style={{
+                      width: '5%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Factor 7 */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-epi-amber">↑ +2 pts</div>
+                  <div className="text-epi-text">DRC cross-border signal</div>
+                  <div className="text-[11px] text-epi-muted">
+                    Cholera active in South Kivu
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[96%] h-full bg-epi-amber/80 group-hover:bg-epi-amber transition-colors rounded-r"
+                    style={{
+                      width: '2%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mitigating Factor */}
+              <div className="flex items-center group">
+                <div className="w-[200px] text-[13px] pr-4 text-right">
+                  <div className="font-bold text-[#00A550]">↓ -3 pts</div>
+                  <div className="text-epi-text">Partial ORS stock</div>
+                  <div className="text-[11px] text-epi-muted">
+                    available at Rusizi HC
+                  </div>
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-[95%] h-full bg-[#00A550]/80 group-hover:bg-[#00A550] transition-colors rounded-l -translate-x-full"
+                    style={{
+                      width: '3%'
+                    }}>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="flex items-center pt-4 border-t-2 border-epi-text">
+                <div className="w-[200px] text-[16px] font-bold text-epi-text pr-4 text-right">
+                  TOTAL:
+                </div>
+                <div className="flex-1 relative h-8">
+                  <div
+                    className="absolute left-0 h-full bg-epi-text rounded-r flex items-center justify-end pr-2 text-white font-bold text-[14px]"
+                    style={{
+                      width: '91%'
+                    }}>
+                    
+                    91/100
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Factor Detail Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-epi-bg border-b border-border">
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Factor
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Value
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Source
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Last Updated
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Weight
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Contribution
+                  </th>
+                  <th className="p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
+                    Impact
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    Water quality
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">2/10</td>
+                  <td className="p-3 text-[13px] text-epi-muted">WASAC API</td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    June 4, 2026
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">
+                    Very High (30%)
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    +22 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    🔴 Critical
+                  </td>
+                </tr>
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    Weekly growth rate
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">+45%</td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    AI Vital processing
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    June 5, 2026
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">High (22%)</td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    +20 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    🔴 Critical
+                  </td>
+                </tr>
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    Case count (87)
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">87 cases</td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    RBC Lab + DHIS2
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    June 5, 2026
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">High (27%)</td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    +25 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-epi-red">
+                    🔴 Critical
+                  </td>
+                </tr>
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    Rainfall
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">145mm</td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    Rwanda Met Agency
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    June 3, 2026
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">High (16%)</td>
+                  <td className="p-3 text-[13px] font-bold text-[#F97316]">
+                    +15 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-[#F97316]">
+                    🟠 High
+                  </td>
+                </tr>
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    Sanitation
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">
+                    34% coverage
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    WASAC + NISR
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">2025 data</td>
+                  <td className="p-3 text-[13px] text-epi-text">
+                    Medium (10%)
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-[#F97316]">
+                    +9 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-[#F97316]">
+                    🟠 High
+                  </td>
+                </tr>
+                <tr className="hover:bg-epi-bg/50">
+                  <td className="p-3 text-[13px] font-bold text-epi-text">
+                    DRC border signal
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">
+                    Active in South Kivu
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-muted">WHO AFRO</td>
+                  <td className="p-3 text-[13px] text-epi-muted">
+                    June 4, 2026
+                  </td>
+                  <td className="p-3 text-[13px] text-epi-text">Low (2%)</td>
+                  <td className="p-3 text-[13px] font-bold text-epi-amber">
+                    +2 pts
+                  </td>
+                  <td className="p-3 text-[13px] font-bold text-epi-amber">
+                    🟡 Watch
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Analyst Override Section */}
+      <div className="bg-white rounded-lg shadow-card border border-border p-6 w-full max-w-3xl">
+        <h2 className="text-[16px] font-bold text-epi-text mb-4">
+          Disagree with this score? Submit an override:
+        </h2>
+
+        <div className="flex gap-6 mb-6">
+          <label className="flex items-center gap-2 text-[14px] text-epi-text cursor-pointer">
+            <input type="radio" name="override" className="w-4 h-4 text-epi" />
+            Validate
+          </label>
+          <label className="flex items-center gap-2 text-[14px] text-epi-text cursor-pointer">
+            <input
+              type="radio"
+              name="override"
+              className="w-4 h-4 text-epi"
+              defaultChecked />
+            
+            Adjust
+          </label>
+          <label className="flex items-center gap-2 text-[14px] text-epi-text cursor-pointer">
+            <input type="radio" name="override" className="w-4 h-4 text-epi" />
+            Flag
+          </label>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex justify-between text-[12px] font-bold text-epi-muted mb-2">
+            <span>0</span>
+            <span className="text-epi-text">New Score: 75</span>
+            <span>100</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            defaultValue="75"
+            className="w-full h-2 bg-epi-bg rounded-lg appearance-none cursor-pointer accent-epi" />
+          
+        </div>
+
+        <div className="mb-6">
+          <textarea
+            className="w-full h-24 p-3 border border-border rounded-md text-[13px] focus:outline-none focus:border-epi resize-none"
+            placeholder="Add notes explaining your override...">
+          </textarea>
+        </div>
+
+        <button className="px-6 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
+          Submit Override
+        </button>
+      </div>
+    </PredictionLayout>);
+
+}
