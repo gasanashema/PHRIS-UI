@@ -88,7 +88,7 @@ export function AdminSystemConfig() {
           System Configuration
         </h1>
         <p className="text-[14px] text-admin-muted">
-          Configure how PHRIS behaves across all modules and users
+          Configure how AI Vital behaves across all modules and users
         </p>
       </div>
 

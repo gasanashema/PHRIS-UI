@@ -13,7 +13,7 @@ export function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-white leading-none">
-                  PHRIS
+                  AI Vital
                 </span>
                 <span className="text-xs font-medium text-primary leading-none mt-1">
                   Rwanda
@@ -93,30 +93,30 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-bold mb-6">Institutions</h4>
+            <h4 className="text-white font-bold mb-6">Security & Trust</h4>
             <ul className="space-y-4">
               <li>
                 <a
-                  href="#roles"
+                  href="#"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
                   
-                  For RBC
+                  Data Protection
                 </a>
               </li>
               <li>
                 <a
-                  href="#roles"
+                  href="#"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
                   
-                  For District Offices
+                  Privacy Policy
                 </a>
               </li>
               <li>
                 <a
-                  href="#roles"
+                  href="#"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
                   
-                  For Epidemiologists
+                  Terms of Service
                 </a>
               </li>
             </ul>
@@ -128,13 +128,13 @@ export function Footer() {
               Built with support for Rwanda's health system.
             </p>
             <a
-              href="mailto:contact@phris.rw"
+              href="mailto:contact@aivital.rw"
               className="text-primary hover:text-primary-hover transition-colors text-[15px] block mb-8">
               
-              contact@phris.rw
+              contact@aivital.rw
             </a>
             <p className="text-[#9CA3AF] text-[13px]">
-              © 2026 PHRIS Rwanda. All rights reserved.
+              © 2026 AI Vital Rwanda. All rights reserved.
             </p>
           </div>
         </div>
