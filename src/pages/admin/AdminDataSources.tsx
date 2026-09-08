@@ -13,12 +13,15 @@ import {
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { SuccessModal } from '../../components/admin/SuccessModal';
+import { DataSourceDetailsModal, DataSourceItem } from '../../components/admin/DataSourceDetailsModal';
+
 export function AdminDataSources() {
   const [drawerConfig, setDrawerConfig] = useState({
     open: false,
     sourceName: '',
     isReconnect: false
   });
+  const [selectedSourceForDetails, setSelectedSourceForDetails] = useState<DataSourceItem | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const sparkData = [
   {
@@ -255,7 +258,10 @@ export function AdminDataSources() {
             </div>
 
             <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-              <button className="text-[13px] font-bold text-admin hover:underline">
+              <button
+                onClick={() => setSelectedSourceForDetails(s)}
+                className="text-[13px] font-bold text-admin hover:underline"
+              >
                 View Details
               </button>
               <button
@@ -427,7 +433,19 @@ export function AdminDataSources() {
         title="Data source updated"
         message="Connection settings saved. The next sync will use the new configuration."
         onClose={() => setShowSuccess(false)} />
-      
+
+      <DataSourceDetailsModal
+        open={!!selectedSourceForDetails}
+        source={selectedSourceForDetails}
+        onClose={() => setSelectedSourceForDetails(null)}
+        onConfigure={(sourceName, isReconnect) => {
+          setDrawerConfig({
+            open: true,
+            sourceName,
+            isReconnect
+          });
+        }}
+      />
     </AdminLayout>);
 
 }
