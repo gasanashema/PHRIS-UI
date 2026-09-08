@@ -21,7 +21,7 @@ export function Navbar() {
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-bold text-primary-dark leading-none">
-              PHRIS
+              AI Vital
             </span>
             <span className="text-xs font-medium text-primary leading-none mt-1">
               Rwanda

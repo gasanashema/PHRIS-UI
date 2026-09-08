@@ -26,8 +26,7 @@ export function AdminLogo({
       <div className="flex flex-col">
         <span
           className={`text-xl font-bold leading-none tracking-tight ${isLight ? 'text-white' : 'text-admin-text'}`}>
-          
-          PHRIS
+          AI Vital
         </span>
       </div>
     </div>);

@@ -50,7 +50,7 @@ export function AdminAnnouncements() {
                 </label>
                 <textarea
                   rows={5}
-                  placeholder="e.g. PHRIS will be unavailable on Sunday 8 June from 2AM–4AM for scheduled maintenance..."
+                  placeholder="e.g. AI Vital will be unavailable on Sunday 8 June from 2AM–4AM for scheduled maintenance..."
                   className="w-full p-3 border border-border rounded-md focus:outline-none focus:border-admin resize-none" />
                 
               </div>
