@@ -3,22 +3,23 @@ import { XCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 export function ProblemSection() {
   const rows = [
-  {
-    today: 'Outbreaks detected after they start',
-    phris: 'Risks detected weeks before'
-  },
-  {
-    today: 'Data scattered across systems',
-    phris: 'All data unified in one platform'
-  },
-  {
-    today: 'Manual reports taking days',
-    phris: 'Automatic reports in minutes'
-  },
-  {
-    today: 'Reactive response only',
-    phris: 'Proactive prevention'
-  }];
+    {
+      today: 'Outbreaks detected after they start',
+      aiVital: 'Risks detected weeks before'
+    },
+    {
+      today: 'Data scattered across systems',
+      aiVital: 'All data unified in one platform'
+    },
+    {
+      today: 'Manual reports taking days',
+      aiVital: 'Automatic reports in minutes'
+    },
+    {
+      today: 'Reactive response only',
+      aiVital: 'Proactive prevention'
+    }
+  ];
 
   return (
     <section id="problem" className="py-20 bg-white">
@@ -62,7 +63,7 @@ export function ProblemSection() {
                   Today
                 </div>
                 <div className="p-4 font-bold text-primary bg-primary/5">
-                  With PHRIS
+                  With AI Vital
                 </div>
               </div>
               {rows.map((row, i) =>
@@ -79,7 +80,7 @@ export function ProblemSection() {
                   <div className="p-4 flex items-start gap-3 bg-primary/5">
                     <CheckCircle2 className="w-5 h-5 text-alert-green shrink-0 mt-0.5" />
                     <span className="text-sm text-text-primary font-medium">
-                      {row.phris}
+                      {row.aiVital}
                     </span>
                   </div>
                 </div>
