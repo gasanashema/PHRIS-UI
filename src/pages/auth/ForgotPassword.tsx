@@ -5,6 +5,7 @@ import { Logo } from '../../components/auth/Logo';
 export function ForgotPassword() {
   const [isSent, setIsSent] = useState(false);
   const [email, setEmail] = useState('');
+  const [resent, setResent] = useState(false);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) setIsSent(true);
@@ -67,13 +68,30 @@ export function ForgotPassword() {
             </p>
 
             <div className="w-full space-y-4">
-              <button className="w-full h-12 bg-white border border-primary text-primary hover:bg-section text-[15px] font-semibold rounded-lg transition-colors">
-                Open Gmail
-              </button>
+              <Link
+              to="/reset-password"
+              className="flex items-center justify-center w-full h-12 bg-primary hover:bg-primary-hover text-white text-[15px] font-semibold rounded-lg transition-colors">
 
-              <button className="text-[14px] text-primary hover:underline font-medium">
-                Resend email
+                Open reset link (demo)
+              </Link>
+              <a
+              href="https://mail.google.com"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center w-full h-12 bg-white border border-primary text-primary hover:bg-section text-[15px] font-semibold rounded-lg transition-colors">
+
+                Open Gmail
+              </a>
+
+              <button
+              onClick={() => setResent(true)}
+              className="text-[14px] text-primary hover:underline font-medium">
+
+                {resent ? '✓ Reset email sent again' : 'Resend email'}
               </button>
+              <p className="text-[12px] text-text-secondary">
+                Prototype: no email is actually sent — use “Open reset link” to continue.
+              </p>
             </div>
           </>
         }

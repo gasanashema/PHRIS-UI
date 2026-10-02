@@ -1,22 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../../components/auth/Logo';
+import { useApp } from '../../store/AppStore';
+import { ROLE_HOME } from '../../data/seed';
+
+const MESSAGES: Record<string, string> = {
+  admin: 'Loading system administration…',
+  dho: 'Loading district alerts and risk map…',
+  epi: 'Loading national disease surveillance…',
+  analyst: 'Loading health indicators and risk scores…',
+  integration: 'Loading data source connections…'
+};
+
 export function RedirectLoading() {
   const navigate = useNavigate();
+  const { state } = useApp();
   const [progress, setProgress] = useState(0);
+  const role = state.user?.role;
+  const target = role ? ROLE_HOME[role] : '/login';
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(timer);
-          navigate('/profile');
-          return 100;
-        }
-        return p + 2;
-      });
+      setProgress((p) => Math.min(100, p + 2));
     }, 50);
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (progress >= 100) navigate(target, { replace: true });
+  }, [progress, navigate, target]);
+
   return (
     <div className="min-h-screen bg-section flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
       <Logo className="mb-12 transform scale-125" />
@@ -28,11 +41,11 @@ export function RedirectLoading() {
       </div>
 
       <h2 className="text-[24px] font-bold text-text-primary mb-2">
-        Setting up your dashboard...
+        {state.user ? `Welcome, ${state.user.name.split(' ').slice(-1)[0]}` : 'Setting up your dashboard...'}
       </h2>
 
       <p className="text-[16px] text-text-secondary font-medium mb-16">
-        Loading national disease surveillance...
+        {role ? MESSAGES[role] : 'Preparing your session…'}
       </p>
 
       <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-border">
@@ -41,7 +54,7 @@ export function RedirectLoading() {
           style={{
             width: `${progress}%`
           }} />
-        
+
       </div>
 
       <div className="absolute bottom-6 text-[12px] text-text-secondary font-medium">

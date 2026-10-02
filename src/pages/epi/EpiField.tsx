@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -9,6 +9,9 @@ import {
   Users } from
 'lucide-react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
+import { Modal, FieldLabel, textareaCls, btnPrimary, btnSecondary } from '../../components/shared/Modal';
+import { useApp, useCurrentUser } from '../../store/AppStore';
+import { fmtTime, nowISO } from '../../lib/format';
 
 const assignments = [
 {
@@ -47,8 +50,36 @@ const checklist = [
 { label: 'Brief district command team on early findings', complete: false }];
 
 
+const SEED_LOG: Record<string, {at: string;by: string;text: string;}[]> = {
+  'FIELD-0261': [
+  { at: '2026-06-05T08:10', by: 'Dr. Jean Paul Habimana', text: 'Team arrived Bugarama HC. 14 suspected cases line-listed.' },
+  { at: '2026-06-05T11:45', by: 'Field epidemiologist', text: '6 rectal swabs collected; cold chain confirmed for transport to RBC.' }],
+  'FIELD-0264': [{ at: '2026-06-05T09:30', by: 'Dr. Aline Uwimana', text: 'RDT positivity 41% at Rukara HC. Specimens dispatched to RBC.' }],
+  'FIELD-0268': [{ at: '2026-06-05T07:50', by: 'Rubavu DHO', text: 'Vehicle and PPE allocated. Departure scheduled 10:30.' }]
+};
+const MORE_VISITS = [
+['Jun 8 · 09:00', 'Kigeme Sector, Nyamagabe', 'Follow-up on diarrheal cluster'],
+['Jun 9 · 10:00', 'Rukara Sector, Kayonza', 'Vector control coordination'],
+['Jun 10 · 08:00', 'Gisenyi Sector, Rubavu', 'Mpox contact tracing review']];
+
 export function EpiField() {
+  const { actions } = useApp();
+  const user = useCurrentUser('epi');
   const [selectedAssignment, setSelectedAssignment] = useState('FIELD-0261');
+  const [checks, setChecks] = useState<Record<string, boolean[]>>({});
+  const [logs, setLogs] = useState(SEED_LOG);
+  const [logOpen, setLogOpen] = useState(false);
+  const [entry, setEntry] = useState('');
+  const [calendar, setCalendar] = useState(false);
+  const done = checks[selectedAssignment] ?? checklist.map((c) => c.complete);
+  const pending = done.filter((d) => !d).length;
+  const toggle = (i: number) => setChecks((p) => ({ ...p, [selectedAssignment]: done.map((d, j) => j === i ? !d : d) }));
+  const addEntry = () => {
+    if (!entry.trim()) return;
+    setLogs((p) => ({ ...p, [selectedAssignment]: [...(p[selectedAssignment] ?? []), { at: nowISO(), by: user.name, text: entry.trim() }] }));
+    setEntry('');
+    actions.toast(`Log entry added to ${selectedAssignment}.`);
+  };
 
   return (
     <EpiLayout
@@ -116,21 +147,21 @@ export function EpiField() {
               <h2 className="text-[16px] font-bold text-epi-text">Field checklist</h2>
               <p className="mt-1 text-[13px] text-epi-muted">Selected deployment: {selectedAssignment}</p>
             </div>
-            <span className="rounded-full bg-epi-amber/10 px-2.5 py-1 text-[11px] font-bold text-epi-amber">2 pending</span>
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${pending ? 'bg-epi-amber/10 text-epi-amber' : 'bg-epi-accent/10 text-epi-accent'}`}>{pending ? `${pending} pending` : 'All done'}</span>
           </div>
           <div className="mt-5 space-y-4">
-            {checklist.map((item) =>
-            <div key={item.label} className="flex gap-3">
-                <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${item.complete ? 'text-epi-accent' : 'text-border'}`} />
+            {checklist.map((item, i) =>
+            <button key={item.label} type="button" onClick={() => toggle(i)} className="flex gap-3 text-left w-full">
+                <CheckCircle2 className={`mt-0.5 h-5 w-5 shrink-0 ${done[i] ? 'text-epi-accent' : 'text-border'}`} />
                 <div>
-                  <p className={`text-[13px] font-medium ${item.complete ? 'text-epi-muted line-through' : 'text-epi-text'}`}>{item.label}</p>
-                  <p className="mt-1 text-[12px] text-epi-muted">{item.complete ? 'Completed and synced' : 'Awaiting field team confirmation'}</p>
+                  <p className={`text-[13px] font-medium ${done[i] ? 'text-epi-muted line-through' : 'text-epi-text'}`}>{item.label}</p>
+                  <p className="mt-1 text-[12px] text-epi-muted">{done[i] ? 'Completed and synced' : 'Awaiting field team confirmation'}</p>
                 </div>
-              </div>
+              </button>
             )}
           </div>
-          <button className="mt-6 flex h-10 w-full items-center justify-center rounded-md bg-epi text-[13px] font-bold text-white transition-colors hover:bg-epi-hover">
-            Open team coordination log
+          <button onClick={() => setLogOpen(true)} className="mt-6 flex h-10 w-full items-center justify-center rounded-md bg-epi text-[13px] font-bold text-white transition-colors hover:bg-epi-hover">
+            Open team coordination log ({(logs[selectedAssignment] ?? []).length})
           </button>
         </div>
       </section>
@@ -141,13 +172,14 @@ export function EpiField() {
             <h2 className="text-[16px] font-bold text-epi-text">Upcoming field visits</h2>
             <p className="mt-1 text-[13px] text-epi-muted">Confirmed deployment schedule for the next two days</p>
           </div>
-          <button className="w-fit rounded-md border border-epi px-3 py-2 text-[12px] font-bold text-epi transition-colors hover:bg-epi/5">View field calendar</button>
+          <button onClick={() => setCalendar(!calendar)} className="w-fit rounded-md border border-epi px-3 py-2 text-[12px] font-bold text-epi transition-colors hover:bg-epi/5">{calendar ? 'Show next 48 hours' : 'View field calendar'}</button>
         </div>
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
           {[
           ['Today · 14:00', 'Bugarama Sector, Rusizi', 'Water source assessment'],
           ['Tomorrow · 08:30', 'Mukamira Sector, Nyabihu', 'Measles verification visit'],
-          ['Tomorrow · 13:00', 'Rubavu border post', 'Cross-border case coordination']].
+          ['Tomorrow · 13:00', 'Rubavu border post', 'Cross-border case coordination'],
+          ...(calendar ? MORE_VISITS : [])].
           map(([time, place, activity]) =>
           <article key={place} className="rounded-md border border-border bg-epi-bg/30 p-4">
               <p className="text-[12px] font-bold text-epi">{time}</p>
@@ -157,6 +189,30 @@ export function EpiField() {
           )}
         </div>
       </section>
+
+      <Modal
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+        title={`Coordination log — ${selectedAssignment}`}
+        subtitle="Entries are kept for this session only (simulated)"
+        footer={
+        <>
+            <button className={btnSecondary} onClick={() => setLogOpen(false)}>Close</button>
+            <button className={btnPrimary} disabled={!entry.trim()} onClick={addEntry}>Add entry</button>
+          </>
+        }>
+
+        <div className="space-y-3 mb-4">
+          {(logs[selectedAssignment] ?? []).map((l, i) =>
+          <div key={i} className="border-l-2 border-epi pl-3">
+              <div className="text-[11px] text-epi-muted">{fmtTime(l.at)} · {l.by}</div>
+              <div className="text-[13px] text-epi-text">{l.text}</div>
+            </div>
+          )}
+        </div>
+        <FieldLabel>New entry</FieldLabel>
+        <textarea value={entry} onChange={(e) => setEntry(e.target.value)} className={textareaCls} rows={3} placeholder="Field update, decision or request…" />
+      </Modal>
     </EpiLayout>);
 
 }

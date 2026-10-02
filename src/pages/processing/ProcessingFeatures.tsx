@@ -1,4 +1,3 @@
-import React from 'react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 const jsonLines: {
   indent?: boolean;

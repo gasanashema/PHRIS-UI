@@ -1,26 +1,20 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Home,
   Wand2,
-  HelpCircle,
   Calculator,
-  Users,
   Map as MapIcon,
-  Clock,
   BrainCircuit,
   TrendingUp,
   CalendarClock,
   ShieldCheck,
-  Bell,
-  Search,
-  ChevronDown,
-  LogOut,
-  Settings,
-  Menu,
-  X } from
+  Settings } from
 'lucide-react';
-import { EpiLogo } from '../epi/EpiLogo';
+import { IdentityBanner, ModuleShell, Sep } from '../shared/ModuleShell';
+import { useApp } from '../../store/AppStore';
+import { PIPELINE_STAGES } from '../../data/seed';
+import { fmtNumber, fmtTime } from '../../lib/format';
 interface ProcessingLayoutProps {
   title: string;
   subtitle?: string;
@@ -33,211 +27,61 @@ export function ProcessingLayout({
   breadcrumb,
   children
 }: ProcessingLayoutProps) {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const navItems = [
-  {
-    path: '/processing',
-    icon: Home,
-    label: 'Processing Overview',
-    exact: true
-  },
-  {
-    path: '/processing/cleaning',
-    icon: Wand2,
-    label: 'Data Cleaning'
-  },
-  {
-    path: '/processing',
-    icon: HelpCircle,
-    label: 'Missing Data Handler'
-  },
-  {
-    path: '/processing/metrics',
-    icon: Calculator,
-    label: 'Metrics Calculator'
-  },
-  {
-    path: '/processing',
-    icon: Users,
-    label: 'Age Standardization'
-  },
-  {
-    path: '/processing/geographic',
-    icon: MapIcon,
-    label: 'Geographic Aggregation'
-  },
-  {
-    path: '/processing',
-    icon: Clock,
-    label: 'Temporal Aggregation'
-  },
-  {
-    path: '/processing/features',
-    icon: BrainCircuit,
-    label: 'Feature Engineering'
-  },
-  {
-    path: '/processing/trends',
-    icon: TrendingUp,
-    label: 'Trend Analysis'
-  },
-  {
-    path: '/processing/scheduler',
-    icon: CalendarClock,
-    label: 'Job Scheduler'
-  },
-  {
-    path: '/processing/quality',
-    icon: ShieldCheck,
-    label: 'Data Quality Scores'
-  }];
-
+  const { state } = useApp();
+  const p = state.pipeline;
+  const running = p.status === 'running';
+  const failed = state.jobs.filter((j) => j.status === 'failed').length;
   return (
-    <div className="min-h-screen bg-epi-bg font-sans text-epi-text flex">
-      {/* Mobile Backdrop */}
-      {isMobileMenuOpen &&
-      <div
-        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-        onClick={() => setIsMobileMenuOpen(false)} />
+    <ModuleShell
+      fallbackRole="integration"
+      homePath="/processing"
+      headerTitle="Data Processing & Feature Engineering"
+      breadcrumbPrefix="AI Vital > Data Processing"
+      breadcrumb={breadcrumb}
+      title={title}
+      subtitle={subtitle}
+      footer={false}
+      searchPlaceholder="Search processing jobs..."
+      searchTarget="/processing"
+      chip={
+      <Link
+        to="/processing"
+        className="inline-flex bg-epi-bg border border-border px-3 py-1.5 rounded-full text-[12px] font-bold text-epi-text items-center gap-1.5 whitespace-nowrap">
 
+          <Settings className={`w-3.5 h-3.5 text-epi ${running ? 'animate-spin' : ''}`} />
+          {running ?
+        `Running — ${PIPELINE_STAGES[p.stageIndex].label}` :
+        p.staleSources ?
+        'New data waiting' :
+        `Last run ${fmtTime(p.lastRunAt)}`}
+        </Link>
       }
+      nav={[
+      { path: '/processing', icon: Home, label: 'Processing Overview', exact: true },
+      { path: '/processing/cleaning', icon: Wand2, label: 'Data Cleaning' },
+      { path: '/processing/metrics', icon: Calculator, label: 'Metrics Calculator' },
+      { path: '/processing/geographic', icon: MapIcon, label: 'Geographic Aggregation' },
+      { path: '/processing/features', icon: BrainCircuit, label: 'Feature Engineering' },
+      { path: '/processing/trends', icon: TrendingUp, label: 'Trend Analysis' },
+      { path: '/processing/scheduler', icon: CalendarClock, label: 'Job Scheduler', badge: failed },
+      { path: '/processing/quality', icon: ShieldCheck, label: 'Data Quality Scores' }]
+      }
+      banner={
+      <IdentityBanner tone="calm">
+          <Settings className="w-4 h-4 text-white/80 mr-1 shrink-0" />
+          <span className="font-bold">Data Processing Engine</span>
+          <Sep />
+          <span>Rwanda National Health Data Pipeline</span>
+          <Sep />
+          <span>Records Processed: {fmtNumber(p.recordsProcessed)}</span>
+          <Sep />
+          <span>Overall Data Quality Score: {p.qualityScore}% {p.qualityScore >= 85 ? '🟢' : '🟡'}</span>
+          <Sep />
+          <span>Latest batch: {p.lastBatchId}</span>
+        </IdentityBanner>
+      }>
 
-      {/* Sidebar */}
-      <aside
-        className={`w-[240px] bg-[#104E49] flex flex-col fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        
-        <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
-          <EpiLogo variant="light" />
-          <button
-            className="lg:hidden text-white/70 hover:text-white"
-            onClick={() => setIsMobileMenuOpen(false)}>
-            
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <nav className="flex-1 py-6 space-y-1 overflow-y-auto">
-          {navItems.map((item, i) => {
-            const isActive = item.exact ?
-            currentPath === item.path :
-            currentPath.startsWith(item.path) && item.path !== '/processing';
-            return (
-              <Link
-                key={i}
-                to={item.path}
-                className={`flex items-center gap-3 px-6 py-3 text-[14px] font-medium transition-colors relative ${isActive ? 'bg-white/10 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}>
-                
-                {isActive &&
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-white" />
-                }
-                <item.icon
-                  className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
-                
-                <span className="flex-1">{item.label}</span>
-              </Link>);
-
-          })}
-        </nav>
-      </aside>
-
-      <div className="flex-1 lg:ml-[240px] flex flex-col min-h-screen w-full lg:w-auto">
-        {/* Top Nav */}
-        <header className="h-16 bg-white border-b border-border px-4 lg:px-6 flex items-center justify-between sticky top-0 z-10">
-          <div className="flex items-center gap-4 shrink-0">
-            <button
-              className="lg:hidden text-epi-muted hover:text-epi-text"
-              onClick={() => setIsMobileMenuOpen(true)}>
-              
-              <Menu className="w-6 h-6" />
-            </button>
-            <span className="text-[15px] font-bold text-epi-text hidden sm:block">
-              Data Processing & Feature Engineering
-            </span>
-          </div>
-
-          <div className="flex-1 max-w-md mx-4 lg:mx-8 hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-epi-muted" />
-              <input
-                type="text"
-                placeholder="Search jobs, metrics, districts..."
-                className="w-full h-10 pl-10 pr-4 bg-epi-bg border border-border rounded-md text-[14px] focus:outline-none focus:border-epi" />
-              
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 lg:gap-4 shrink-0">
-            <button className="relative text-epi-muted hover:text-epi-text">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-epi-red rounded-full border-2 border-white text-[9px] font-bold text-white flex items-center justify-center">
-                2
-              </span>
-            </button>
-            <span className="hidden sm:inline-flex bg-epi-bg border border-border px-3 py-1.5 rounded-full text-[12px] font-bold text-epi-text flex items-center gap-1.5">
-              <Settings className="w-3.5 h-3.5 text-epi animate-spin" />3 Jobs
-              Running
-            </span>
-            <div className="flex items-center gap-2 pl-3 lg:pl-4 border-l border-border cursor-pointer hover:opacity-80">
-              <div className="w-8 h-8 rounded-full bg-[#104E49] flex items-center justify-center text-white font-bold text-xs shrink-0">
-                CN
-              </div>
-              <div className="hidden lg:flex flex-col">
-                <span className="text-[13px] font-bold text-epi-text leading-tight">
-                  Celestin Nzeyimana
-                </span>
-                <span className="text-[11px] text-epi-muted leading-tight">
-                  Administrator, RBC
-                </span>
-              </div>
-              <ChevronDown className="w-4 h-4 text-epi-muted ml-1 hidden lg:block" />
-            </div>
-            <Link
-              to="/login"
-              replace
-              aria-label="Log out"
-              title="Log out"
-              className="text-epi-muted hover:text-epi-red ml-1 lg:ml-2 transition-colors">
-              
-              <LogOut className="w-5 h-5" />
-            </Link>
-          </div>
-        </header>
-
-        {/* Identity Banner */}
-        <div className="h-12 bg-gradient-to-r from-[#104E49] to-[#0B3A36] flex items-center px-4 lg:px-8 text-white text-[13px] font-medium justify-between shadow-sm overflow-x-auto whitespace-nowrap hide-scrollbar">
-          <div className="flex items-center gap-2 shrink-0">
-            <Settings className="w-4 h-4 text-white/80" />
-            <span className="font-bold">Data Processing Engine</span>
-            <span className="mx-2 text-white/40">|</span>
-            <span>Rwanda National Health Data Pipeline</span>
-            <span className="mx-2 text-white/40">|</span>
-            <span>Records Processed Today: 47,230</span>
-            <span className="mx-2 text-white/40">|</span>
-            <span>Overall Data Quality Score: 89% 🟢</span>
-          </div>
-        </div>
-
-        <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
-          <div className="max-w-[1400px] mx-auto">
-            <div className="mb-8">
-              <div className="text-[13px] text-epi-muted font-medium mb-1">
-                AI Vital &gt; Data Processing &gt; {breadcrumb}
-              </div>
-              <h1 className="text-[24px] font-bold text-epi-text">{title}</h1>
-              {subtitle &&
-              <p className="text-[14px] text-epi-muted">{subtitle}</p>
-              }
-            </div>
-            {children}
-          </div>
-        </main>
-
-        <footer className="py-6 text-center text-[12px] text-epi-muted border-t border-border mt-auto">
-          AI Vital | Rwanda Biomedical Centre | Ministry of Health Rwanda | AUCA
-          June 2026
-        </footer>
-      </div>
-    </div>);
+      {children}
+    </ModuleShell>);
 
 }

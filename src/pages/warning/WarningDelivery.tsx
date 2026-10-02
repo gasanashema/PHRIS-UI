@@ -1,6 +1,12 @@
-import React from 'react';
+import { useState } from 'react';
 import { WarningLayout } from '../../components/warning/WarningLayout';
+import { useApp } from '../../store/AppStore';
+import { isOpenStatus } from '../../lib/format';
 export function WarningDelivery() {
+  const { state, actions } = useApp();
+  const [retry, setRetry] = useState<'idle' | 'sending' | 'delivered'>('idle');
+  const gicumbi = state.alerts.find((a) => a.id === 'ALT-2026-003');
+  const canEscalate = !!gicumbi && isOpenStatus(gicumbi.status) && gicumbi.status !== 'escalated';
   return (
     <WarningLayout
       title="Notification Delivery Tracking"
@@ -40,14 +46,26 @@ export function WarningDelivery() {
           </div>
         </div>
         <div className="flex flex-col gap-3 shrink-0 w-full md:w-64">
-          <button className="w-full py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
-            Retry via Airtel Number
+          <button
+            disabled={retry !== 'idle'}
+            onClick={() => {
+              setRetry('sending');
+              window.setTimeout(() => {
+                setRetry('delivered');
+                if (gicumbi) actions.addAlertNote(gicumbi.id, 'Alert SMS re-sent via Airtel (+250 788 300 401) — delivered to Alice Niyonzima (simulated).');
+              }, 1500);
+            }}
+            className="w-full py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark disabled:opacity-70 transition-colors shadow-sm">
+            {retry === 'idle' ? 'Retry via Airtel Number' : retry === 'sending' ? 'Sending via Airtel…' : '✅ Delivered via Airtel'}
           </button>
-          <button className="w-full py-2 bg-white border border-epi text-epi text-[13px] font-bold rounded-md hover:bg-epi/5 transition-colors">
+          <a href="tel:+250788300401" className="w-full py-2 bg-white border border-epi text-epi text-[13px] font-bold rounded-md hover:bg-epi/5 transition-colors text-center">
             Call Directly
-          </button>
-          <button className="w-full py-2 bg-white border border-epi-red text-epi-red text-[13px] font-bold rounded-md hover:bg-epi-red/10 transition-colors">
-            Escalate Without Waiting
+          </a>
+          <button
+            disabled={!canEscalate}
+            onClick={() => gicumbi && actions.escalateAlert(gicumbi.id, 'Northern Province Director (Level 2)', 'DHO unreachable — SMS delivery failed twice')}
+            className="w-full py-2 bg-white border border-epi-red text-epi-red text-[13px] font-bold rounded-md hover:bg-epi-red/10 disabled:opacity-50 transition-colors">
+            {gicumbi?.status === 'escalated' ? `Escalated — ${gicumbi.escalatedTo?.split(' (')[0]}` : canEscalate ? 'Escalate Without Waiting' : 'Alert already handled'}
           </button>
         </div>
       </div>

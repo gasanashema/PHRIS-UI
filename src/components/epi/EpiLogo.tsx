@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield, Activity } from 'lucide-react';
 interface EpiLogoProps {
   variant?: 'dark' | 'light';

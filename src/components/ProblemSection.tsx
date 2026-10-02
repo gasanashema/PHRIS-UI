@@ -1,4 +1,3 @@
-import React from 'react';
 import { XCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 export function ProblemSection() {

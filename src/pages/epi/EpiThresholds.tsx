@@ -1,5 +1,7 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { EpiLayout } from '../../components/epi/EpiLayout';
+import { useApp, useCurrentUser } from '../../store/AppStore';
 const THRESHOLDS = [
 {
   disease: 'Cholera',
@@ -83,6 +85,23 @@ const THRESHOLDS = [
 }];
 
 export function EpiThresholds() {
+  const { actions } = useApp();
+  const user = useCurrentUser('epi');
+  const [requested, setRequested] = useState(false);
+  const requestReview = () => {
+    actions.sendNotification(
+      {
+        title: 'Threshold review requested',
+        body: `${user.name} requested a review of epidemic thresholds (Cholera, Malaria) from the Threshold Monitoring screen.`,
+        severity: 'info',
+        roles: ['admin'],
+        link: '/admin/config'
+      },
+      { module: 'Epidemiology', action: 'Requested threshold review' }
+    );
+    setRequested(true);
+    actions.toast('Review request sent to system administrators.');
+  };
   return (
     <EpiLayout
       title="Epidemic Threshold Monitoring"
@@ -155,17 +174,23 @@ export function EpiThresholds() {
         </div>
       </div>
 
-      <div className="text-[12px] text-epi-muted mb-8 flex justify-between items-center">
+      <div className="text-[12px] text-epi-muted mb-8 flex flex-col sm:flex-row gap-2 justify-between sm:items-center">
         <span>
           Thresholds set by RBC Epidemiology Division in accordance with WHO
           AFRO and IHR 2005 standards. Last reviewed: March 2026.
         </span>
-        <button className="text-epi font-bold hover:underline">
-          [Configure Thresholds — Admin only]
-        </button>
+        {user.role === 'admin' ?
+        <Link to="/admin/config" className="text-epi font-bold hover:underline whitespace-nowrap">
+            Configure Thresholds →
+          </Link> :
+
+        <button onClick={requestReview} disabled={requested} className="text-epi font-bold hover:underline disabled:opacity-60 disabled:no-underline whitespace-nowrap">
+            {requested ? '✓ Review requested from Admin' : 'Request threshold review (Admin only)'}
+          </button>
+        }
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-card border border-border p-4">
           <h4 className="text-[13px] font-bold text-epi-text mb-2">
             Cholera Trend (8 weeks)

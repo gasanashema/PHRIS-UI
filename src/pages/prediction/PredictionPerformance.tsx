@@ -1,7 +1,20 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { useApp } from '../../store/AppStore';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
 import { ArrowUpRight, ArrowRight, ArrowDownRight } from 'lucide-react';
 export function PredictionPerformance() {
+  const { actions } = useApp();
+  const [retrain, setRetrain] = useState<'idle' | 'running' | 'done'>('idle');
+  const startRetrain = () => {
+    setRetrain('running');
+    actions.logAdminEvent('Prediction', 'Triggered model retrain (simulated)', 'Corrections from missed predictions applied');
+    window.setTimeout(() => {
+      setRetrain('done');
+      actions.toast('Model retrain finished (simulated). Validation accuracy 85.1% — v3.3 ready for review.');
+    }, 3000);
+  };
   return (
     <PredictionLayout
       title="AI Model Performance"
@@ -484,12 +497,13 @@ export function PredictionPerformance() {
                 "Apply corrections to model" → triggers retraining workflow.
               </div>
               <div className="flex gap-3">
-                <button className="flex-1 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
-                  Trigger Model Retrain
+                <button onClick={startRetrain} disabled={retrain !== 'idle'} className="flex-1 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark disabled:opacity-70 transition-colors flex items-center justify-center gap-2">
+                  {retrain === 'running' && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {retrain === 'idle' ? 'Trigger Model Retrain' : retrain === 'running' ? 'Retraining (simulated)…' : '✓ v3.3 trained — pending review'}
                 </button>
-                <button className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg transition-colors">
+                <Link to="/prediction/history" className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg transition-colors text-center">
                   View All Missed Predictions
-                </button>
+                </Link>
               </div>
             </div>
           </div>

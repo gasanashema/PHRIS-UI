@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Activity, Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 export function Navbar() {

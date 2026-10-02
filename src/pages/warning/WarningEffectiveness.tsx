@@ -1,7 +1,30 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { WarningLayout } from '../../components/warning/WarningLayout';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useApp } from '../../store/AppStore';
+import { downloadFile, toCSV } from '../../lib/format';
 export function WarningEffectiveness() {
+  const { state, actions } = useApp();
+  const [howOpen, setHowOpen] = useState(false);
+  const report = () => {
+    const byDistrict = new Map<string, {alerts: number;acked: number;hours: number;}>();
+    state.alerts.forEach((a) => {
+      const d = byDistrict.get(a.district) ?? { alerts: 0, acked: 0, hours: 0 };
+      d.alerts += 1;
+      if (a.acknowledgedAt) {
+        d.acked += 1;
+        d.hours += (new Date(a.acknowledgedAt).getTime() - new Date(a.triggeredAt).getTime()) / 3600000;
+      }
+      byDistrict.set(a.district, d);
+    });
+    downloadFile(
+      'district-alert-performance.csv',
+      toCSV(Array.from(byDistrict.entries()).map(([district, d]) => ({ district, alerts: d.alerts, acknowledged: d.acked, avg_hours_to_ack: d.acked ? (d.hours / d.acked).toFixed(1) : '' }))),
+      'text/csv'
+    );
+    actions.toast('District performance report exported (CSV).', 'info');
+  };
   return (
     <WarningLayout
       title="Alert Effectiveness Metrics"
@@ -91,9 +114,14 @@ export function WarningEffectiveness() {
           <p className="text-[11px] text-epi-muted mb-2 leading-tight">
             Estimated this year through early intervention
           </p>
+          {howOpen &&
+          <p className="text-[11px] text-epi-text bg-epi-bg rounded p-2 mb-2 leading-snug">
+              Cases averted (forecast without action − observed) × disease-specific case fatality rate, summed across alerts acknowledged within 4 hours. Illustrative estimate.
+            </p>
+          }
           <div className="mt-auto flex justify-between items-end">
-            <button className="text-[10px] font-bold text-epi hover:underline">
-              How calculated →
+            <button onClick={() => setHowOpen(!howOpen)} className="text-[10px] font-bold text-epi hover:underline text-left">
+              {howOpen ? 'Hide ↑' : 'How calculated →'}
             </button>
             <span className="text-[11px] font-bold text-[#00A550]">🟢</span>
           </div>
@@ -131,9 +159,9 @@ export function WarningEffectiveness() {
             Districts responding within 4-hour window
           </p>
           <div className="mt-auto flex flex-col gap-1">
-            <button className="text-[10px] font-bold text-epi hover:underline text-left">
+            <Link to="/warning/history" className="text-[10px] font-bold text-epi hover:underline text-left">
               View underperforming districts →
-            </button>
+            </Link>
             <div className="flex justify-end items-end">
               <span className="text-[11px] font-bold text-epi-amber">
                 🟡 Below 100% target
@@ -367,7 +395,7 @@ export function WarningEffectiveness() {
           </div>
 
           <div className="p-5 border-t border-border mt-auto">
-            <button className="w-full py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
+            <button onClick={report} className="w-full py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
               Generate District Performance Report
             </button>
           </div>

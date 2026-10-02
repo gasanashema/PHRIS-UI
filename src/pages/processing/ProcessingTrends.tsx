@@ -1,6 +1,16 @@
-import React from 'react';
+import { useState } from 'react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 export function ProcessingTrends() {
+  const [disease, setDisease] = useState('all');
+  const [district, setDistrict] = useState('all');
+  const [type, setType] = useState('all');
+  const [level, setLevel] = useState('all');
+  const show = (m: {disease: string;district: string;type: string;level: string;}) =>
+  (disease === 'all' || m.disease === disease) && (
+  district === 'all' || m.district === district) && (
+  type === 'all' || m.type === type) && (
+  level === 'all' || m.level === level);
+  const filtered = disease !== 'all' || district !== 'all' || type !== 'all' || level !== 'all';
   return (
     <ProcessingLayout
       title="Automated Trend Analysis"
@@ -22,22 +32,36 @@ export function ProcessingTrends() {
 
       {/* Filter Bar */}
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Disease: All ▼</option>
+        <select value={disease} onChange={(e) => setDisease(e.target.value)} aria-label="Disease" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+          <option value="all">Disease: All</option>
+          {['Cholera', 'Malaria', 'Measles', 'CHW Reports'].map((d) => <option key={d}>{d}</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>District: All ▼</option>
+        <select value={district} onChange={(e) => setDistrict(e.target.value)} aria-label="District" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+          <option value="all">District: All</option>
+          {['Rusizi', 'Kayonza', 'Eastern Province', 'Huye', 'Kigali City'].map((d) => <option key={d}>{d}</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Trend type: All Types ▼</option>
+        <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Trend type" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+          <option value="all">Trend type: All Types</option>
+          <option value="spike">Sudden spike</option>
+          <option value="rising">Consistently rising</option>
+          <option value="seasonal">Seasonal pattern</option>
+          <option value="drop">Suspicious drop</option>
+          <option value="falling">Consistently falling</option>
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Alert level: All ▼</option>
+        <select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Alert level" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+          <option value="all">Alert level: All</option>
+          <option value="red">🔴 Red</option>
+          <option value="orange">🟠 Orange</option>
+          <option value="yellow">🟡 Yellow</option>
+          <option value="green">🟢 Green</option>
         </select>
+        {filtered &&
+        <button onClick={() => {setDisease('all');setDistrict('all');setType('all');setLevel('all');}} className="text-[13px] font-bold text-epi hover:underline">Clear filters</button>
+        }
       </div>
 
       <div className="space-y-4">
-        {/* TREND 1 */}
+        {show({ disease: 'Cholera', district: 'Rusizi', type: 'spike', level: 'red' }) &&
         <div className="bg-white rounded-lg p-6 shadow-card border-2 border-epi-red flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -92,7 +116,8 @@ export function ProcessingTrends() {
           </div>
         </div>
 
-        {/* TREND 2 */}
+        }
+        {show({ disease: 'Malaria', district: 'Kayonza', type: 'rising', level: 'orange' }) &&
         <div className="bg-white rounded-lg p-6 shadow-card border border-[#F97316] flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -139,7 +164,8 @@ export function ProcessingTrends() {
           </div>
         </div>
 
-        {/* TREND 3 */}
+        }
+        {show({ disease: 'Malaria', district: 'Eastern Province', type: 'seasonal', level: 'yellow' }) &&
         <div className="bg-white rounded-lg p-6 shadow-card border border-epi-amber flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -184,7 +210,8 @@ export function ProcessingTrends() {
           </div>
         </div>
 
-        {/* TREND 4 */}
+        }
+        {show({ disease: 'CHW Reports', district: 'Huye', type: 'drop', level: 'yellow' }) &&
         <div className="bg-white rounded-lg p-6 shadow-card border border-epi-info flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -236,7 +263,8 @@ export function ProcessingTrends() {
           </div>
         </div>
 
-        {/* TREND 5 */}
+        }
+        {show({ disease: 'Measles', district: 'Kigali City', type: 'falling', level: 'green' }) &&
         <div className="bg-white rounded-lg p-6 shadow-card border border-[#00A550] flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -279,6 +307,7 @@ export function ProcessingTrends() {
             </svg>
           </div>
         </div>
+        }
       </div>
     </ProcessingLayout>);
 

@@ -34,6 +34,8 @@ interface DataSourceDetailsModalProps {
   source: DataSourceItem | null;
   onClose: () => void;
   onConfigure: (sourceName: string, isReconnect: boolean) => void;
+  /** When provided, “Trigger Sync” runs the shared store sync instead of a local simulation. */
+  onSync?: () => void;
 }
 
 // Detailed Metadata mapping per source
@@ -195,7 +197,8 @@ export function DataSourceDetailsModal({
   open,
   source,
   onClose,
-  onConfigure
+  onConfigure,
+  onSync
 }: DataSourceDetailsModalProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'schema'>('overview');
   const [copied, setCopied] = useState(false);
@@ -226,6 +229,12 @@ export function DataSourceDetailsModal({
   };
 
   const handleTriggerSync = () => {
+    if (onSync) {
+      onSync();
+      setSyncToast(source.isRed ? 'Sync attempted — the source is disconnected. Use Reconnect.' : 'Sync started — progress is shown on the source card.');
+      setTimeout(() => setSyncToast(null), 5000);
+      return;
+    }
     setIsSyncing(true);
     setSyncToast(null);
     setTimeout(() => {

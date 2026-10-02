@@ -1,397 +1,282 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { GeoLayout } from '../../components/geo/GeoLayout';
+import { useApp } from '../../store/AppStore';
+import { DISTRICT_XY, rainfallFor } from '../../data/geo';
+import { fmtDateTime } from '../../lib/format';
+
+type EnvKey = 'rainfall' | 'temperature' | 'water' | 'flood';
+type DiseaseKey = 'Cholera' | 'Malaria' | 'Diarrheal';
+const ENV: Record<EnvKey, {label: string;icon: string;unit: string;source: string;}> = {
+  rainfall: { label: 'Rainfall', icon: '🌧️', unit: 'mm', source: 'met' },
+  temperature: { label: 'Temperature', icon: '🌡️', unit: '°C', source: 'met' },
+  water: { label: 'Water quality (risk)', icon: '🚿', unit: '/10', source: 'wasac' },
+  flood: { label: 'Flood risk', icon: '🌊', unit: '/10', source: 'met' }
+};
+const DISEASE_ICON: Record<DiseaseKey, string> = { Cholera: '💧', Malaria: '🦟', Diarrheal: '🚽' };
+const CHOLERA: Record<string, number> = { Rusizi: 87, Nyamasheke: 34, Rutsiro: 28, Karongi: 15, Ngororero: 12, Rubavu: 8, Huye: 23, Nyamagabe: 6, Nyabihu: 4 };
+const FLOOD: Record<string, number> = { Rusizi: 9, Nyamasheke: 7, Rubavu: 7, Nyabihu: 6, Karongi: 6, Rutsiro: 5, Ngororero: 6, Musanze: 5, Gakenke: 6, Nyarugenge: 4 };
+
+function envValue(k: EnvKey, d: string, days: number) {
+  const p = DISTRICT_XY[d];
+  const scale = days === 30 ? 3.6 : 1; // monthly totals vs weekly
+  if (k === 'rainfall') return Math.round(rainfallFor(d) * 0.85 * scale);
+  if (k === 'temperature') return Math.round((15.5 + p.x * 0.07 + p.y * 0.02) * 10) / 10;
+  if (k === 'water') return Math.min(10, Math.round(((CHOLERA[d] ?? 0) / 12 + (p.x < 30 ? 4 : 2)) * 10) / 10);
+  return FLOOD[d] ?? 2;
+}
+function diseaseValue(k: DiseaseKey, d: string, days: number) {
+  const p = DISTRICT_XY[d];
+  const scale = days === 30 ? 3.4 : 1;
+  if (k === 'Cholera') return Math.round((CHOLERA[d] ?? 1) * scale);
+  if (k === 'Malaria') return Math.round((40 + p.x * 4.5 + (p.y > 50 ? 30 : 0)) * scale);
+  return Math.round((20 + (CHOLERA[d] ?? 0) * 0.9 + (p.x < 30 ? 15 : 0)) * scale);
+}
+function pearson(xs: number[], ys: number[]) {
+  const n = xs.length;
+  const mx = xs.reduce((a, b) => a + b, 0) / n,my = ys.reduce((a, b) => a + b, 0) / n;
+  let sxy = 0,sxx = 0,syy = 0;
+  xs.forEach((x, i) => {
+    sxy += (x - mx) * (ys[i] - my);
+    sxx += (x - mx) ** 2;
+    syy += (ys[i] - my) ** 2;
+  });
+  return sxx && syy ? sxy / Math.sqrt(sxx * syy) : 0;
+}
+const envColor = (t: number) => t >= 0.75 ? '#1E3A8A' : t >= 0.5 ? '#3B82F6' : t >= 0.25 ? '#60A5FA' : '#93C5FD';
+
 export function GeoEnvironment() {
-  const [showPopup, setShowPopup] = useState(false);
+  const { state } = useApp();
+  const [env, setEnv] = useState<EnvKey>('rainfall');
+  const [disease, setDisease] = useState<DiseaseKey>('Cholera');
+  const [days, setDays] = useState(7);
+  const [correlation, setCorrelation] = useState(true);
+  const [layers, setLayers] = useState({ env: true, disease: true, rivers: true });
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const met = state.sources.find((s) => s.id === 'met');
+  const metDown = !!met && met.status === 'disconnected';
+  const rows = Object.keys(DISTRICT_XY).map((d) => ({ district: d, env: envValue(env, d, days), cases: diseaseValue(disease, d, days) }));
+  const maxEnv = Math.max(...rows.map((r) => r.env)),minEnv = Math.min(...rows.map((r) => r.env));
+  const maxCases = Math.max(...rows.map((r) => r.cases), 1);
+  const norm = (v: number) => maxEnv === minEnv ? 0.5 : (v - minEnv) / (maxEnv - minEnv);
+  const r = pearson(rows.map((x) => x.env), rows.map((x) => x.cases));
+  const strength = `${Math.abs(r) >= 0.7 ? 'Strong' : Math.abs(r) >= 0.4 ? 'Moderate' : 'Weak'} ${r >= 0 ? 'Positive' : 'Negative'}`;
+  const top = [...rows].sort((a, b) => b.env - a.env);
+  const highEnv = top.slice(0, Math.ceil(rows.length / 4));
+  const rest = top.slice(Math.ceil(rows.length / 4));
+  const avg = (xs: typeof rows) => xs.reduce((s, x) => s + x.cases, 0) / Math.max(1, xs.length);
+  const ratio = avg(rest) ? avg(highEnv) / avg(rest) : 0;
+  const sel = selected ? rows.find((x) => x.district === selected) : undefined;
+  const e = ENV[env];
+  const toggle = (k: keyof typeof layers) => setLayers((l) => ({ ...l, [k]: !l[k] }));
+  const Toggle = ({ on, onClick, label }: {on: boolean;onClick: () => void;label: string;}) =>
+  <button role="switch" aria-checked={on} aria-label={label} onClick={onClick} className={`w-8 h-4 rounded-full relative ${on ? 'bg-[#00A550]' : 'bg-border'}`}>
+      <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${on ? 'right-0.5' : 'left-0.5'}`} />
+    </button>;
+
+
   return (
     <GeoLayout breadcrumb="Environmental Overlays" hideHeader={true}>
       {/* Top Control Bar (Floating) */}
-      <div className="absolute top-6 left-6 right-6 bg-white rounded-lg shadow-lg border border-border p-2 flex flex-col md:flex-row items-center justify-between gap-4 z-20">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-              Primary layer:
-            </span>
-            <select className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg shadow-sm">
-              <option>🌧️ Rainfall ▼</option>
+      <div className="absolute top-6 left-6 right-6 lg:right-[37%] bg-white rounded-lg shadow-lg border border-border p-2 flex flex-wrap items-center justify-between gap-3 z-20">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2">
+            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">Primary layer:</span>
+            <select value={env} onChange={(ev) => setEnv(ev.target.value as EnvKey)} className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg shadow-sm">
+              {(Object.keys(ENV) as EnvKey[]).map((k) => <option key={k} value={k}>{ENV[k].icon} {ENV[k].label}</option>)}
             </select>
-          </div>
-          <div className="w-px h-6 bg-border"></div>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-              Disease overlay:
-            </span>
-            <select className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg shadow-sm">
-              <option>💧 Cholera ▼</option>
+          </label>
+          <label className="flex items-center gap-2">
+            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">Disease overlay:</span>
+            <select value={disease} onChange={(ev) => setDisease(ev.target.value as DiseaseKey)} className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg shadow-sm">
+              {(Object.keys(DISEASE_ICON) as DiseaseKey[]).map((k) => <option key={k} value={k}>{DISEASE_ICON[k]} {k}</option>)}
             </select>
-          </div>
-          <div className="w-px h-6 bg-border"></div>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-              Period:
-            </span>
-            <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-white shadow-sm">
-              <option>Last 7 Days ▼</option>
+          </label>
+          <label className="flex items-center gap-2">
+            <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">Period:</span>
+            <select value={days} onChange={(ev) => setDays(Number(ev.target.value))} className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-white shadow-sm">
+              <option value={7}>Last 7 Days</option>
+              <option value={30}>Last 30 Days</option>
             </select>
-          </div>
+          </label>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-bold text-epi-text">
-            Show correlation
-          </span>
-          <div className="w-10 h-5 bg-[#00A550] rounded-full relative cursor-pointer shadow-inner">
-            <div className="absolute right-1 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"></div>
-          </div>
-          <span className="text-[12px] font-bold text-[#00A550] ml-1">ON</span>
+          <span className="text-[13px] font-bold text-epi-text">Show correlation</span>
+          <Toggle on={correlation} onClick={() => setCorrelation(!correlation)} label="Show correlation" />
+          <span className={`text-[12px] font-bold ml-1 ${correlation ? 'text-[#00A550]' : 'text-epi-muted'}`}>{correlation ? 'ON' : 'OFF'}</span>
         </div>
       </div>
 
-      <div className="absolute inset-0 flex">
-        {/* Main Map Area (65%) */}
-        <div className="w-[65%] h-full relative bg-[#1A1A1A] overflow-hidden">
-          {/* Simulated Dark Terrain Map */}
+      <div className="absolute inset-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+        {/* Main Map Area */}
+        <div className="w-full lg:w-[65%] min-h-[560px] lg:h-full relative bg-[#1A1A1A] overflow-hidden shrink-0">
           <div
             className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: 'radial-gradient(#404040 1px, transparent 1px)',
-              backgroundSize: '20px 20px'
-            }}>
+            style={{ backgroundImage: 'radial-gradient(#404040 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
           </div>
 
-          {/* District Boundaries (White 40%) */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none opacity-40"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none">
-            
-            <path
-              d="M20,20 L40,10 L60,20 L80,10 L90,40 L80,70 L60,90 L40,80 L20,90 L10,60 Z"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="0.5" />
-            
-            <path
-              d="M40,10 L50,40 L20,20"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="0.5" />
-            
-            <path
-              d="M60,20 L50,40 L80,10"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="0.5" />
-            
-            <path
-              d="M50,40 L60,90"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="0.5" />
-            
-            <path
-              d="M50,40 L40,80"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="0.5" />
-            
-          </svg>
-
-          {/* Layer 1: Rainfall Heat Map (Blue gradient) */}
-          {/* Deep blue (>120mm) - Western Province */}
-          <div className="absolute top-[20%] left-[10%] w-48 h-64 bg-[#1E3A8A]/60 rounded-full blur-3xl mix-blend-screen"></div>
-          <div className="absolute bottom-[10%] left-[10%] w-40 h-48 bg-[#1E3A8A]/70 rounded-full blur-3xl mix-blend-screen"></div>
-
-          {/* Medium blue (80-120mm) - Southern Province */}
-          <div className="absolute bottom-[20%] left-[30%] w-56 h-40 bg-[#3B82F6]/40 rounded-full blur-3xl mix-blend-screen"></div>
-
-          {/* Light blue (<80mm) - Eastern Province */}
-          <div className="absolute top-[30%] right-[10%] w-64 h-64 bg-[#93C5FD]/20 rounded-full blur-3xl mix-blend-screen"></div>
-
-          {/* River Lines (Ruzizi River prominent) */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none">
-            
-            <path
-              d="M10,80 Q15,85 20,90"
-              fill="none"
-              stroke="#60A5FA"
-              strokeWidth="1" />
-            
-            <path
-              d="M15,20 Q20,30 15,40 T10,60 T10,80"
-              fill="none"
-              stroke="#60A5FA"
-              strokeWidth="0.5" />
-            
-          </svg>
-
-          {/* Flood Risk Zones (Orange Hatched) */}
-          <div
-            className="absolute bottom-[15%] left-[15%] w-24 h-24 rounded-full blur-md opacity-60"
-            style={{
-              background:
-              'repeating-linear-gradient(45deg, rgba(249,115,22,0.6), rgba(249,115,22,0.6) 2px, transparent 2px, transparent 6px)'
-            }}>
-          </div>
-
-          {/* Layer 2: Cholera Cases (Red circles) */}
-          {/* Rusizi (Overlapping deep blue) */}
-          <div
-            className="absolute bottom-[18%] left-[18%] flex flex-wrap w-16 h-16 gap-0.5 justify-center items-center cursor-pointer z-20"
-            onMouseEnter={() => setShowPopup(true)}
-            onMouseLeave={() => setShowPopup(false)}>
-            
-            {[...Array(12)].map((_, i) =>
-            <div
-              key={i}
-              className="w-2.5 h-2.5 bg-[#D32F2F] rounded-full shadow-[0_0_5px_rgba(211,47,47,0.8)]">
+          {metDown && ENV[env].source === 'met' &&
+          <div className="absolute top-[150px] md:top-24 left-6 z-20 bg-epi-amber text-white text-[11px] font-bold px-3 py-1.5 rounded shadow">
+              ⚠️ Rwanda Met Agency disconnected — showing last received values.{' '}
+              <Link to="/integration/sources?q=Met" className="underline">Check source</Link>
             </div>
-            )}
+          }
+
+          <div className="absolute top-[190px] md:top-[120px] bottom-10 left-8 right-8">
+            {layers.rivers &&
+            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-80" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M6,40 Q10,55 8,70 T10,92" fill="none" stroke="#60A5FA" strokeWidth="0.8" />
+                <path d="M60,98 Q70,85 85,80 T98,70" fill="none" stroke="#60A5FA" strokeWidth="0.5" />
+                <path d="M30,35 Q38,45 45,52 T58,62" fill="none" stroke="#60A5FA" strokeWidth="0.4" />
+              </svg>
+            }
+            {rows.map((row) => {
+              const p = DISTRICT_XY[row.district];
+              const t = norm(row.env);
+              const caseDots = Math.min(12, Math.ceil(row.cases / maxCases * 12));
+              return (
+                <button
+                  key={row.district}
+                  onClick={() => setSelected(selected === row.district ? null : row.district)}
+                  className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                  style={{ left: `${p.x}%`, top: `${p.y}%` }}>
+
+                  {layers.env &&
+                  <span
+                    className="absolute rounded-full blur-md mix-blend-screen"
+                    style={{
+                      width: 30 + t * 50,
+                      height: 30 + t * 50,
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%,-60%)',
+                      background: env === 'temperature' ? `rgba(239,68,68,${0.15 + t * 0.6})` : env === 'flood' ? `rgba(249,115,22,${0.15 + t * 0.6})` : envColor(t),
+                      opacity: env === 'temperature' || env === 'flood' ? 1 : 0.35 + t * 0.4
+                    }} />
+                  }
+                  {layers.disease &&
+                  <span className="relative flex flex-wrap w-10 gap-0.5 justify-center">
+                      {Array.from({ length: caseDots }).map((_, i) =>
+                    <span key={i} className="w-1.5 h-1.5 bg-[#D32F2F] rounded-full shadow-[0_0_5px_rgba(211,47,47,0.8)]" />
+                    )}
+                    </span>
+                  }
+                  <span className={`relative text-[10px] font-medium mt-0.5 ${selected === row.district ? 'text-white font-bold' : 'text-white/70'}`}>{row.district}</span>
+                </button>);
+
+            })}
           </div>
 
-          {/* Karongi (Overlapping medium blue) */}
-          <div className="absolute top-[40%] left-[18%] flex flex-wrap w-8 h-8 gap-0.5 justify-center items-center">
-            {[...Array(3)].map((_, i) =>
-            <div
-              key={i}
-              className="w-2 h-2 bg-[#D32F2F] rounded-full shadow-[0_0_5px_rgba(211,47,47,0.8)]">
+          {correlation &&
+          <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-border max-w-[240px] z-10">
+              <div className="text-[12px] font-bold text-epi-text mb-1">
+                r = {r >= 0 ? '+' : ''}{r.toFixed(2)} | {strength}
+              </div>
+              <div className="text-[11px] text-epi-muted leading-relaxed">
+                The top quarter of districts by {e.label.toLowerCase()} have {ratio.toFixed(1)}× the {disease.toLowerCase()} cases of the rest ({days === 7 ? 'this week' : 'last 30 days'}).
+              </div>
             </div>
-            )}
-          </div>
+          }
 
-          {/* Correlation Annotation (Floating text box) */}
-          <div className="absolute top-[40%] left-[35%] bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-border max-w-[200px] z-10">
-            <div className="text-[12px] font-bold text-epi-text mb-1">
-              r = +0.83 | Strong correlation
-            </div>
-            <div className="text-[11px] text-epi-muted leading-relaxed">
-              Districts with &gt;120mm rainfall have 6× more cholera cases this
-              week. Source: WASAC + Rwanda Met Agency.
-            </div>
-          </div>
-
-          {/* Hover Popup */}
-          {showPopup &&
-          <div className="absolute bottom-[25%] left-[25%] bg-white rounded-lg shadow-xl border border-border p-4 w-72 z-30 pointer-events-none">
-              <h3 className="text-[13px] font-bold text-epi-text flex items-center gap-2 mb-1">
-                🌧️ + 💧 Environmental Risk Zone
-              </h3>
-              <div className="text-[12px] font-bold text-epi-text">
-                Bugarama Sector, Rusizi
+          {sel &&
+          <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-xl border border-border p-4 w-64 z-30">
+              <div className="flex justify-between">
+                <h3 className="text-[13px] font-bold text-epi-text mb-1">{e.icon} + {DISEASE_ICON[disease]} {sel.district}</h3>
+                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted text-[12px]">✕</button>
               </div>
-
-              <div className="space-y-2 text-[12px] my-3">
-                <div className="flex justify-between">
-                  <span className="text-epi-muted">Rainfall this week:</span>{' '}
-                  <span className="font-bold text-epi-red">145mm 🔴</span>
-                </div>
-                <div className="text-[10px] text-epi-muted text-right -mt-2">
-                  (Normal June: 65mm)
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-epi-muted">Water quality score:</span>{' '}
-                  <span className="font-bold text-epi-red">2/10 🔴</span>
-                </div>
-                <div className="text-[10px] text-epi-muted text-right -mt-2">
-                  (WASAC June 4 reading)
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-epi-muted">Flood risk:</span>{' '}
-                  <span className="font-bold text-[#F97316]">
-                    HIGH (Ruzizi River)
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-epi-muted">Cholera cases:</span>{' '}
-                  <span className="font-bold text-epi-red">38 🔴</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-epi-muted">Correlation strength:</span>{' '}
-                  <span className="font-bold text-epi-text">Very High</span>
-                </div>
+              <div className="space-y-1.5 text-[12px] my-2">
+                {(Object.keys(ENV) as EnvKey[]).map((k) =>
+              <div key={k} className="flex justify-between">
+                    <span className="text-epi-muted">{ENV[k].label}:</span>
+                    <span className={`font-bold ${k === env ? 'text-epi' : 'text-epi-text'}`}>{envValue(k, sel.district, days)}{ENV[k].unit === 'mm' ? ' mm' : ENV[k].unit}</span>
+                  </div>
+              )}
+                <div className="flex justify-between"><span className="text-epi-muted">{disease} cases:</span> <span className="font-bold text-epi-red">{sel.cases}</span></div>
               </div>
-
-              <div className="flex justify-between items-center pt-2 border-t border-border mb-3">
-                <span className="text-[12px] font-bold text-epi-text">
-                  Environmental risk score:
-                </span>
-                <span className="text-[16px] font-bold text-epi-red">
-                  9.1/10
-                </span>
-              </div>
-
-              <div className="bg-epi-red/10 border border-epi-red/20 p-2 rounded text-[11px] font-medium text-epi-red">
-                <span className="font-bold">AI Alert:</span> 'Heavy rainfall +
-                poor water quality + active cases = maximum cholera outbreak
-                conditions'
-              </div>
+              <Link to={`/warning/history?q=${sel.district}`} className="text-[12px] font-bold text-epi hover:underline">Alert history →</Link>
             </div>
           }
         </div>
 
-        {/* Right Panel (35%) */}
-        <div className="w-[35%] h-full bg-white border-l border-border flex flex-col pt-20 overflow-y-auto">
+        {/* Right Panel */}
+        <div className="w-full lg:w-[35%] lg:h-full bg-white border-l border-border flex flex-col lg:pt-6 lg:overflow-y-auto">
           <div className="p-6">
             <h2 className="text-[18px] font-bold text-epi-text mb-6">
-              Rainfall vs Cholera — Correlation Analysis
+              {e.label} vs {disease} — Correlation Analysis
             </h2>
 
             {/* Scatter Plot */}
-            <div className="mb-8">
-              <div className="relative h-48 w-full border-l border-b border-border mb-4">
-                {/* Y Axis */}
+            <div className="mb-8 pl-10">
+              <div className="relative h-48 w-full border-l border-b border-border mb-12">
                 <div className="absolute -left-8 top-0 bottom-0 w-6 flex flex-col justify-between text-[10px] text-epi-muted font-medium text-right">
-                  <span>100</span>
-                  <span>50</span>
+                  <span>{maxCases}</span>
+                  <span>{Math.round(maxCases / 2)}</span>
                   <span>0</span>
                 </div>
-                <div className="absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-bold text-epi-muted whitespace-nowrap">
-                  Cholera Cases
-                </div>
-
-                {/* X Axis */}
-                <div className="absolute left-0 right-0 -bottom-6 h-6 flex justify-between items-end text-[10px] text-epi-muted font-medium">
-                  <span>0mm</span>
-                  <span>50mm</span>
-                  <span>100mm</span>
-                  <span>150mm</span>
+                <div className="absolute left-0 right-0 -bottom-5 flex justify-between text-[10px] text-epi-muted font-medium">
+                  <span>{minEnv}</span>
+                  <span>{Math.round((minEnv + maxEnv) / 2)}</span>
+                  <span>{maxEnv}</span>
                 </div>
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] font-bold text-epi-muted whitespace-nowrap">
-                  Rainfall this week (mm)
+                  {e.label} ({e.unit}) — {days === 7 ? 'last 7 days' : 'last 30 days'}
                 </div>
-
-                {/* Plot Area */}
-                <svg
-                  className="absolute inset-0 w-full h-full overflow-visible"
-                  preserveAspectRatio="none"
-                  viewBox="0 0 100 100">
-                  
-                  {/* Trend Line */}
-                  <line
-                    x1="10"
-                    y1="90"
-                    x2="90"
-                    y2="10"
-                    stroke="#104E49"
-                    strokeWidth="1"
-                    strokeDasharray="4,4" />
-                  
-
-                  {/* Dots (Simulated) */}
-                  <circle cx="10" cy="95" r="2" fill="#1D72B8" />
-                  <circle cx="15" cy="90" r="2" fill="#1D72B8" />
-                  <circle cx="20" cy="98" r="2" fill="#1D72B8" />
-                  <circle cx="25" cy="85" r="2" fill="#1D72B8" />
-                  <circle cx="30" cy="92" r="2" fill="#1D72B8" />
-
-                  <circle cx="40" cy="80" r="2" fill="#1D72B8" />
-                  <circle cx="45" cy="75" r="2" fill="#1D72B8" />
-                  <circle cx="50" cy="85" r="2" fill="#1D72B8" />
-
-                  <circle cx="60" cy="60" r="2" fill="#1D72B8" />
-                  <circle cx="70" cy="50" r="2" fill="#1D72B8" />
-
-                  {/* Rusizi Dot */}
-                  <circle cx="90" cy="15" r="4" fill="#D32F2F" />
-                  <text
-                    x="85"
-                    y="10"
-                    fontSize="8"
-                    fill="#D32F2F"
-                    fontWeight="bold">
-                    
-                    Rusizi
-                  </text>
+                <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+                  {correlation &&
+                  <line x1="0" y1={r >= 0 ? 95 : 10} x2="100" y2={r >= 0 ? 10 : 95} stroke="#104E49" strokeWidth="0.8" strokeDasharray="4,4" opacity={Math.abs(r)} />
+                  }
+                  {rows.map((row) =>
+                  <circle
+                    key={row.district}
+                    cx={norm(row.env) * 100}
+                    cy={100 - row.cases / maxCases * 100}
+                    r={row.district === selected ? 3.5 : 2}
+                    fill={row.district === selected ? '#D32F2F' : '#1D72B8'}>
+                      <title>{`${row.district}: ${row.env}${e.unit}, ${row.cases} cases`}</title>
+                    </circle>
+                  )}
                 </svg>
               </div>
 
-              <div className="bg-epi-bg p-3 rounded border border-border">
-                <div className="flex justify-between items-center mb-1">
+              <div className="bg-epi-bg p-3 rounded border border-border -ml-10">
+                <div className="flex flex-wrap justify-between items-center gap-1 mb-1">
                   <span className="text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Factor: Rainfall vs Cholera
+                    Factor: {e.label} vs {disease}
                   </span>
-                  <span className="text-[13px] font-bold text-epi-text">
-                    r = +0.83 | Strong Positive
-                  </span>
+                  <span className="text-[13px] font-bold text-epi-text">r = {r >= 0 ? '+' : ''}{r.toFixed(2)} | {strength}</span>
                 </div>
                 <div className="text-[13px] text-epi-text font-medium">
-                  "6× more cases in districts with &gt;120mm rainfall"
+                  {ratio.toFixed(1)}× more cases in the highest-{e.label.toLowerCase()} districts
                 </div>
               </div>
             </div>
 
             {/* Layer Options */}
             <div className="mb-6">
-              <h3 className="text-[14px] font-bold text-epi-text mb-4">
-                Active Layers
-              </h3>
+              <h3 className="text-[14px] font-bold text-epi-text mb-4">Active Layers</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#1E3A8A]"></div>
-                    🌧️ Rainfall
+                {([
+                ['env', `${e.icon} ${e.label}`, '#1E3A8A'],
+                ['disease', `${DISEASE_ICON[disease]} ${disease} cases`, '#D32F2F'],
+                ['rivers', '🌊 Rivers & lakes', '#60A5FA']] as const).
+                map(([k, label, color]) =>
+                <div key={k} className={`flex items-center justify-between ${layers[k] ? '' : 'opacity-50'}`}>
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
+                      <div className="w-3 h-3 rounded-full" style={{ background: color }}></div>
+                      {label}
+                    </div>
+                    <Toggle on={layers[k]} onClick={() => toggle(k)} label={label} />
                   </div>
-                  <div className="w-8 h-4 bg-[#00A550] rounded-full relative cursor-pointer">
-                    <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between opacity-50">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
-                    🌡️ Temperature
-                  </div>
-                  <div className="w-8 h-4 bg-border rounded-full relative cursor-pointer">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between opacity-50">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#3B82F6]"></div>
-                    🚿 Water quality
-                  </div>
-                  <div className="w-8 h-4 bg-border rounded-full relative cursor-pointer">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between opacity-50">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#F97316]"></div>
-                    🌊 Flood zones
-                  </div>
-                  <div className="w-8 h-4 bg-border rounded-full relative cursor-pointer">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between opacity-50">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
-                    🌿 Vegetation
-                  </div>
-                  <div className="w-8 h-4 bg-border rounded-full relative cursor-pointer">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between opacity-50">
-                  <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
-                    <div className="w-3 h-3 rounded-full bg-[#8B5CF6]"></div>
-                    🏭 Sanitation
-                  </div>
-                  <div className="w-8 h-4 bg-border rounded-full relative cursor-pointer">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                </div>
+                )}
               </div>
+              <p className="text-[11px] text-epi-muted mt-3">Switch the primary layer above to compare temperature, water quality or flood risk.</p>
             </div>
 
-            {/* Data Sources Note */}
-            <div className="mt-auto pt-4 border-t border-border text-[11px] text-epi-muted leading-relaxed">
-              <span className="font-bold">Environmental data:</span> Rwanda
-              Meteorological Agency (June 3), WASAC water quality (June 4),
-              RLMUA flood maps
+            <div className="pt-4 border-t border-border text-[11px] text-epi-muted leading-relaxed">
+              <span className="font-bold">Environmental data:</span> Rwanda Meteorological Agency
+              {met ? ` (${metDown ? 'disconnected — last sync ' : 'last sync '}${met.lastSync ? fmtDateTime(met.lastSync) : 'n/a'})` : ''}, WASAC water quality, RLMUA flood maps. Demonstration values.
             </div>
           </div>
         </div>

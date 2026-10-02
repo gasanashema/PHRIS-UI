@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldAlert, Clock } from 'lucide-react';
 import { Logo } from '../../components/auth/Logo';
@@ -29,9 +28,18 @@ export function AccountLocked() {
         </div>
 
         <div className="w-full space-y-4 mb-8">
-          <button className="w-full h-12 bg-white border border-primary text-primary hover:bg-section text-[15px] font-semibold rounded-lg transition-colors">
+          <a
+            href="mailto:admin@rbc.gov.rw?subject=AI%20Vital%20account%20locked"
+            className="flex items-center justify-center w-full h-12 bg-white border border-primary text-primary hover:bg-section text-[15px] font-semibold rounded-lg transition-colors">
+
             Contact System Administrator
-          </button>
+          </a>
+          <Link
+            to="/login"
+            className="block text-[14px] text-text-secondary hover:text-text-primary font-medium">
+
+            ← Back to Sign In
+          </Link>
 
           <Link
             to="/reset-password"

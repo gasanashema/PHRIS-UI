@@ -1,7 +1,10 @@
-import React, { useState, Fragment } from 'react';
+import { useState, Fragment } from 'react';
 import { Check, X, AlertCircle } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { SuccessModal } from '../../components/admin/SuccessModal';
+import { useApp } from '../../store/AppStore';
+import { SEED_PERMISSIONS } from '../../data/seed';
+import type { PermissionGroup } from '../../types';
 export function AdminRoles() {
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState('All Roles');
@@ -13,101 +16,10 @@ export function AdminRoles() {
   'Public Health Analyst',
   'District Health Officer'];
 
-  const [matrix, setMatrix] = useState([
-  {
-    group: 'DATA ACCESS',
-    perms: [
-    {
-      name: 'View national-level data',
-      vals: [true, true, true, false]
-    },
-    {
-      name: 'View all 30 districts',
-      vals: [true, true, true, false]
-    },
-    {
-      name: 'View own district only',
-      vals: [true, true, true, true]
-    },
-    {
-      name: 'Access laboratory data',
-      vals: [true, true, true, false]
-    }]
-
-  },
-  {
-    group: 'AI & ANALYTICS',
-    perms: [
-    {
-      name: 'Run AI risk predictions',
-      vals: [true, true, true, false]
-    },
-    {
-      name: 'Configure AI models',
-      vals: [true, false, false, false]
-    },
-    {
-      name: 'View risk scores',
-      vals: [true, true, true, true]
-    }]
-
-  },
-  {
-    group: 'ALERTS',
-    perms: [
-    {
-      name: 'Receive alerts',
-      vals: [true, true, true, true]
-    },
-    {
-      name: 'Configure alert thresholds',
-      vals: [true, true, false, false]
-    },
-    {
-      name: 'Acknowledge alerts',
-      vals: [true, true, true, true]
-    },
-    {
-      name: 'Escalate alerts',
-      vals: [true, true, false, true]
-    }]
-
-  },
-  {
-    group: 'REPORTS',
-    perms: [
-    {
-      name: 'Generate reports',
-      vals: [true, true, true, true]
-    },
-    {
-      name: 'Approve reports',
-      vals: [true, true, false, false]
-    },
-    {
-      name: 'Schedule auto-reports',
-      vals: [true, false, false, false]
-    }]
-
-  },
-  {
-    group: 'USER & SYSTEM',
-    perms: [
-    {
-      name: 'Manage users',
-      vals: [true, false, false, false]
-    },
-    {
-      name: 'View audit trail',
-      vals: [true, false, false, false]
-    },
-    {
-      name: 'System configuration',
-      vals: [true, false, false, false]
-    }]
-
-  }]
-  );
+  const { state, actions } = useApp();
+  const [matrix, setMatrix] = useState<PermissionGroup[]>(state.permissions);
+  const colIndex = tabs.indexOf(activeTab) - 1; // -1 = all roles
+  const visible = (k: number) => colIndex < 0 || colIndex === k;
   const toggleCell = (gi: number, pi: number, vi: number) => {
     setMatrix((prev) =>
     prev.map((group, g) =>
@@ -129,8 +41,17 @@ export function AdminRoles() {
     setHasChanges(true);
   };
   const handleSave = () => {
+    actions.savePermissions(matrix);
     setHasChanges(false);
     setShowSuccess(true);
+  };
+  const resetDefaults = () => {
+    setMatrix(SEED_PERMISSIONS);
+    setHasChanges(JSON.stringify(SEED_PERMISSIONS) !== JSON.stringify(state.permissions));
+  };
+  const discard = () => {
+    setMatrix(state.permissions);
+    setHasChanges(false);
   };
   return (
     <AdminLayout>
@@ -141,10 +62,10 @@ export function AdminRoles() {
             You have unsaved changes to role permissions.
           </p>
           <button
-          onClick={() => setHasChanges(false)}
+          onClick={discard}
           className="text-[13px] font-bold text-admin-amber hover:underline">
           
-            Dismiss
+            Discard changes
           </button>
         </div>
       }
@@ -180,10 +101,9 @@ export function AdminRoles() {
             <thead className="bg-admin-bg/50 text-admin-text font-bold border-b border-border">
               <tr>
                 <th className="px-6 py-4 w-[300px]">Permission / Feature</th>
-                <th className="px-4 py-4 text-center">Administrator</th>
-                <th className="px-4 py-4 text-center">Epidemiologist</th>
-                <th className="px-4 py-4 text-center">Analyst</th>
-                <th className="px-4 py-4 text-center">District Officer</th>
+                {['Administrator', 'Epidemiologist', 'Analyst', 'District Officer'].map((h, k) =>
+                visible(k) && <th key={h} className="px-4 py-4 text-center">{h}</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -191,7 +111,7 @@ export function AdminRoles() {
               <Fragment key={i}>
                   <tr className="bg-admin-bg/30">
                     <td
-                    colSpan={5}
+                    colSpan={colIndex < 0 ? 5 : 2}
                     className="px-6 py-2 text-[11px] font-bold text-admin-muted uppercase tracking-wider">
                     
                       {group.group}
@@ -203,6 +123,7 @@ export function AdminRoles() {
                         {perm.name}
                       </td>
                       {perm.vals.map((val, k) =>
+                  visible(k) &&
                   <td key={k} className="px-4 py-3 text-center">
                           <button
                       onClick={() => toggleCell(i, j, k)}
@@ -228,14 +149,15 @@ export function AdminRoles() {
 
       <div className="fixed bottom-0 left-0 lg:left-[240px] right-0 bg-white border-t border-border p-4 px-8 flex items-center justify-end gap-3 z-10 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
         <button
-          onClick={() => setHasChanges(false)}
+          onClick={resetDefaults}
           className="h-10 px-6 bg-white border border-border hover:bg-admin-bg text-admin-text text-[14px] font-semibold rounded-md transition-colors">
           
           Reset to Default
         </button>
         <button
           onClick={handleSave}
-          className="h-10 px-6 bg-admin hover:bg-admin-hover text-white text-[14px] font-semibold rounded-md transition-colors">
+          disabled={!hasChanges}
+          className="h-10 px-6 disabled:opacity-50 bg-admin hover:bg-admin-hover text-white text-[14px] font-semibold rounded-md transition-colors">
           
           Save Changes
         </button>

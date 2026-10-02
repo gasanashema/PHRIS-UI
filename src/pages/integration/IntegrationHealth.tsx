@@ -1,13 +1,10 @@
-import React from 'react';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
 import {
   Activity,
   CheckCircle2,
   AlertTriangle,
   Clock,
-  ArrowDown,
-  ArrowRight,
-  ArrowUp } from
+  ArrowDown } from
 'lucide-react';
 import {
   LineChart,

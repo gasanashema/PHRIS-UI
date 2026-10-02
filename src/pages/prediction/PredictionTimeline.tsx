@@ -1,26 +1,127 @@
-import React from 'react';
+import { useState } from 'react';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
 import { ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react';
+import { sortAlerts, useApp } from '../../store/AppStore';
+import { downloadFile, isOpenStatus, nowISO } from '../../lib/format';
+import type { Alert } from '../../types';
+
+const DETAILED = 'ALT-2026-001';
+
+function forecast(a: Alert) {
+  const g = Math.max(0.05, Number(a.change.replace(/[^0-9.-]/g, '')) / 100 || 0.15);
+  return [1, 2, 3, 4].map((w) => ({
+    week: `Week +${w}`,
+    none: Math.round(a.cases * Math.pow(1 + g, w)),
+    act: Math.round(a.cases * Math.pow(1 + g, 1) * Math.pow(0.7, w - 1))
+  }));
+}
+
+function TimelineActions({ alert }: {alert?: Alert;}) {
+  const { actions } = useApp();
+  const [done, setDone] = useState<string[]>([]);
+  if (!alert) return null;
+  const mark = (k: string) => setDone((d) => [...d, k]);
+  return (
+    <div className="flex flex-wrap gap-3">
+      <button
+        disabled={done.includes('deploy')}
+        onClick={() => {
+          actions.addIntervention({
+            date: nowISO(),
+            action: `Deploy scenario-2 response for ${alert.disease} (water treatment, ORS, CHW visits)`,
+            disease: alert.disease,
+            sector: alert.sector ?? 'All sectors',
+            district: alert.district,
+            who: `${alert.district} DHO + RBC`,
+            status: 'Planned',
+            outcome: 'Deployment requested from prediction timeline',
+            alertId: alert.id
+          });
+          mark('deploy');
+        }}
+        className="px-6 py-3 bg-epi text-white text-[14px] font-bold rounded-md hover:bg-epi-dark disabled:opacity-60 transition-colors shadow-sm">
+
+        {done.includes('deploy') ? '✓ Intervention planned' : 'Deploy Intervention Now'}
+      </button>
+      <button
+        disabled={done.includes('share')}
+        onClick={() => {
+          actions.sendNotification(
+            {
+              title: `4-week forecast — ${alert.disease}, ${alert.district}`,
+              body: `Without intervention cases are forecast to reach ${forecast(alert)[3].none}; with the recommended response about ${forecast(alert)[3].act}.`,
+              severity: alert.severity,
+              alertId: alert.id,
+              link: `/dho/alerts/${alert.id}`,
+              roles: ['dho'],
+              district: alert.district
+            },
+            { module: 'Prediction', action: `Shared forecast timeline with ${alert.district} DHO` }
+          );
+          actions.toast(`Timeline shared with the ${alert.district} DHO.`);
+          mark('share');
+        }}
+        className="px-6 py-3 bg-white border border-border text-epi-text text-[14px] font-bold rounded-md hover:bg-epi-bg disabled:opacity-60 transition-colors shadow-sm">
+
+        {done.includes('share') ? '✓ Shared with DHO' : 'Share Timeline with DHO'}
+      </button>
+      <button
+        onClick={() => {
+          const rows = forecast(alert).map((r) => `<tr><td>${r.week}</td><td>${r.none}</td><td>${r.act}</td></tr>`).join('');
+          downloadFile(`forecast-${alert.id}.html`, `<!doctype html><html><head><meta charset="utf-8"><title>Forecast</title><style>body{font-family:Arial;max-width:700px;margin:40px auto}td,th{border:1px solid #ddd;padding:6px}table{border-collapse:collapse}</style></head><body><h1>${alert.disease} — ${alert.district}: 4-week forecast</h1><table><tr><th>Week</th><th>No action</th><th>With intervention</th></tr>${rows}</table><p>Printable export — use your browser's Save as PDF. Simulated forecast.</p></body></html>`, 'text/html');
+          actions.toast('Forecast exported as a printable document (save as PDF from your browser).', 'info');
+        }}
+        className="px-6 py-3 bg-white border border-border text-epi-text text-[14px] font-bold rounded-md hover:bg-epi-bg transition-colors shadow-sm">
+
+        Export as PDF
+      </button>
+    </div>);
+
+}
+
 export function PredictionTimeline() {
+  const { state } = useApp();
+  const options = sortAlerts(state.alerts.filter((a) => isOpenStatus(a.status)), 'severity');
+  const [choice, setChoice] = useState(DETAILED);
+  const [shown, setShown] = useState(DETAILED);
+  const alert = state.alerts.find((a) => a.id === shown) ?? options[0];
   return (
     <PredictionLayout
       title="Prediction Timeline"
       subtitle="Week-by-week disease forecast — act now vs wait"
       breadcrumb="Prediction Timeline">
-      
-      {/* Selector */}
+
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Rusizi ▼</option>
+        <select value={choice} onChange={(e) => setChoice(e.target.value)} aria-label="Outbreak" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
+          {options.map((a) => <option key={a.id} value={a.id}>{a.district} — {a.disease}</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Cholera ▼</option>
-        </select>
-        <button className="px-6 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
+        <button onClick={() => setShown(choice)} className="px-6 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
           Generate Timeline
         </button>
       </div>
 
+      {alert && alert.id !== DETAILED ?
+      <div className="bg-white rounded-lg shadow-card border border-border p-6 mb-8">
+          <h2 className="text-[18px] font-bold text-epi-text mb-1">{alert.disease} — {alert.district} District 4-Week Forecast — Two Scenarios</h2>
+          <p className="text-[13px] text-epi-muted mb-6">Starting from {alert.cases} cases this week, growth {alert.change} week-on-week (simulated model)</p>
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full text-left text-[13px]">
+              <thead className="bg-epi-bg"><tr><th className="p-3">Week</th><th className="p-3">🔴 No action</th><th className="p-3">🟢 With intervention</th><th className="p-3">Cases averted</th></tr></thead>
+              <tbody className="divide-y divide-border">
+                {forecast(alert).map((r) =>
+              <tr key={r.week}>
+                    <td className="p-3 font-bold">{r.week}</td>
+                    <td className="p-3 text-epi-red font-bold">{r.none}</td>
+                    <td className="p-3 text-[#00A550] font-bold">{r.act}</td>
+                    <td className="p-3">{Math.max(0, r.none - r.act)}</td>
+                  </tr>
+              )}
+              </tbody>
+            </table>
+          </div>
+          <TimelineActions alert={alert} />
+        </div> :
+      <>
       {/* Hero Visual */}
       <div className="bg-white rounded-lg shadow-card border border-border overflow-hidden mb-8">
         <div className="p-6 border-b border-border">
@@ -296,20 +397,12 @@ export function PredictionTimeline() {
               Water treatment at Ruzizi water point by June 7 + ORS deployed by
               June 8 + CHW household visits in Bugarama sector by June 10
             </div>
-            <div className="flex flex-wrap gap-3">
-              <button className="px-6 py-3 bg-epi text-white text-[14px] font-bold rounded-md hover:bg-epi-dark transition-colors shadow-sm">
-                Deploy Intervention Now
-              </button>
-              <button className="px-6 py-3 bg-white border border-border text-epi-text text-[14px] font-bold rounded-md hover:bg-epi-bg transition-colors shadow-sm">
-                Share Timeline with DHO
-              </button>
-              <button className="px-6 py-3 bg-white border border-border text-epi-text text-[14px] font-bold rounded-md hover:bg-epi-bg transition-colors shadow-sm">
-                Export as PDF
-              </button>
-            </div>
+            <TimelineActions alert={alert} />
           </div>
         </div>
       </div>
+      </>
+      }
     </PredictionLayout>);
 
 }

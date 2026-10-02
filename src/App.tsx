@@ -1,5 +1,14 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AppProvider } from './store/AppStore';
+import { Toaster } from './components/shared/Toaster';
+import { NotFound } from './pages/NotFound';
+import { Legal } from './pages/Legal';
+import { DhoNotifications } from './pages/dho/DhoNotifications';
+import { DhoAlertDetail } from './pages/dho/DhoAlertDetail';
+import { DhoInvestigations } from './pages/dho/DhoInvestigations';
+import { WarningHistory } from './pages/warning/WarningHistory';
+import { PredictionHistory } from './pages/prediction/PredictionHistory';
 import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/auth/Login';
 import { Mfa } from './pages/auth/Mfa';
@@ -85,11 +94,24 @@ import { GeoEnvironment } from './pages/geo/GeoEnvironment';
 import { GeoCrossBorder } from './pages/geo/GeoCrossBorder';
 import { GeoVulnerability } from './pages/geo/GeoVulnerability';
 import { GeoExport } from './pages/geo/GeoExport';
+// Reset scroll position on navigation (hash links on the landing page still work).
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
+  return null;
+}
+
 export function App() {
   return (
+    <AppProvider>
     <BrowserRouter>
+      <ScrollToTop />
+      <Toaster />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/legal" element={<Legal />} />
         <Route path="/login" element={<Login />} />
         <Route path="/mfa" element={<Mfa />} />
         <Route path="/register" element={<Register />} />
@@ -113,6 +135,10 @@ export function App() {
         <Route path="/dho" element={<DhoOverview />} />
         <Route path="/dho/risk-map" element={<DhoRiskMap />} />
         <Route path="/dho/alerts" element={<DhoAlerts />} />
+        <Route path="/dho/alerts/:id" element={<DhoAlertDetail />} />
+        <Route path="/dho/notifications" element={<DhoNotifications />} />
+        <Route path="/dho/investigations" element={<DhoInvestigations />} />
+        <Route path="/dho/investigations/:id" element={<DhoInvestigations />} />
         <Route path="/dho/facilities" element={<DhoFacilities />} />
         <Route path="/dho/trends" element={<DhoTrends />} />
         <Route path="/dho/chw-reports" element={<DhoCHWReports />} />
@@ -185,7 +211,8 @@ export function App() {
         <Route
           path="/prediction/performance"
           element={<PredictionPerformance />} />
-        
+        <Route path="/prediction/history" element={<PredictionHistory />} />
+
 
         {/* Early Warning Module */}
         <Route path="/warning" element={<WarningOverview />} />
@@ -199,6 +226,7 @@ export function App() {
           element={<WarningEffectiveness />} />
         
         <Route path="/warning/cross-border" element={<WarningCrossBorder />} />
+        <Route path="/warning/history" element={<WarningHistory />} />
 
         {/* Geographic Health Intelligence Module */}
         <Route path="/geo" element={<GeoOverview />} />
@@ -210,7 +238,10 @@ export function App() {
         <Route path="/geo/cross-border" element={<GeoCrossBorder />} />
         <Route path="/geo/vulnerability" element={<GeoVulnerability />} />
         <Route path="/geo/export" element={<GeoExport />} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>);
+    </BrowserRouter>
+    </AppProvider>);
 
 }

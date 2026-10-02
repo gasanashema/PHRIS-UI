@@ -1,7 +1,29 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { WarningLayout } from '../../components/warning/WarningLayout';
 import { ArrowDown } from 'lucide-react';
+import { useAlertDialogs } from '../../components/shared/AlertDialogs';
+import { sortAlerts, useApp } from '../../store/AppStore';
+import { SEVERITY_META, demoNow, isOpenStatus } from '../../lib/format';
+
+function hoursSince(iso: string) {
+  return (demoNow().getTime() - new Date(iso).getTime()) / 3600000;
+}
+function fmtDuration(h: number) {
+  const hh = Math.floor(Math.abs(h));
+  const mm = Math.round((Math.abs(h) - hh) * 60);
+  return hh > 0 ? `${hh}h ${mm}m` : `${mm} min`;
+}
+
 export function WarningEscalation() {
+  const { state, actions } = useApp();
+  const dialogs = useAlertDialogs();
+  const open = state.alerts.filter((a) => isOpenStatus(a.status));
+  const unack = sortAlerts(open.filter((a) => a.status === 'active'), 'severity');
+  const pending = unack[0];
+  const others = Math.max(0, unack.length - 1);
+  const waitedH = pending ? hoursSince(pending.triggeredAt) : 0;
+  const overdueH = waitedH - state.rules.autoEscalateHours;
+  const rows = [...unack, ...sortAlerts(open.filter((a) => a.status === 'escalated'), 'severity')];
   return (
     <WarningLayout
       title="Alert Escalation Manager"
@@ -110,133 +132,126 @@ export function WarningEscalation() {
         </div>
 
         {/* Pending Auto-Escalation Card */}
+        {pending ?
         <div className="lg:col-span-12 bg-[#F97316]/10 border-2 border-[#F97316] rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-[12px] font-bold bg-[#F97316] text-white px-2 py-0.5 rounded animate-pulse">
-                ⚠️ AUTO-ESCALATION PENDING
-              </span>
-              <span className="text-[16px] font-bold text-epi-text">
-                ALT-2026-003 (Measles — Gicumbi)
-              </span>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <span className="text-[12px] font-bold bg-[#F97316] text-white px-2 py-0.5 rounded animate-pulse">
+                  ⚠️ AUTO-ESCALATION {overdueH > 0 ? 'OVERDUE' : 'PENDING'}
+                </span>
+                <Link to={`/warning/detail?id=${pending.id}`} className="text-[16px] font-bold text-epi-text hover:underline">
+                  {pending.id} ({pending.disease} — {pending.district})
+                </Link>
+              </div>
+              <p className="text-[14px] text-epi-text mb-2">
+                {pending.district} District Health Officer has not responded in{' '}
+                <span className="font-bold text-epi-red">{fmtDuration(waitedH)}</span>.
+              </p>
+              <p className="text-[14px] text-epi-text font-medium mb-3">
+                {overdueH > 0 ?
+                <>Response window ({state.rules.autoEscalateHours}h) exceeded by <span className="font-bold text-[#F97316]">{fmtDuration(overdueH)}</span> — escalate to the Provincial Director.</> :
+                <>Automatic escalation to Provincial Director in <span className="font-bold text-[#F97316]">{fmtDuration(-overdueH)}</span>.</>
+                }
+              </p>
+              {others > 0 &&
+              <div className="text-[13px] text-epi-muted">
+                  +{others} more unacknowledged alert{others > 1 ? 's' : ''} — see table below.
+                </div>
+              }
             </div>
-            <p className="text-[14px] text-epi-text mb-2">
-              Gicumbi District Health Officer has not responded in{' '}
-              <span className="font-bold text-epi-red">
-                22 hours 13 minutes
-              </span>
-              .
-            </p>
-            <p className="text-[14px] text-epi-text font-medium mb-3">
-              Automatic escalation to Northern Province Director in{' '}
-              <span className="font-bold text-[#F97316]">47 minutes</span>.
-            </p>
-            <div className="text-[13px] text-epi-muted">
-              Contact: Dr. Marie Mukamana —{' '}
-              <span className="font-bold text-epi-text">+250 788 200 300</span>
+            <div className="flex flex-col gap-3 shrink-0 w-full md:w-64">
+              <button
+              onClick={() => dialogs.open('escalate', pending)}
+              className="w-full py-3 bg-epi-red text-white text-[14px] font-bold rounded-md hover:bg-epi-red/90 transition-colors shadow-sm">
+              
+                Escalate Now — Don't Wait
+              </button>
+              <button
+              onClick={() => actions.addAlertNote(pending.id, `SMS reminder sent to ${pending.district} DHO (simulated).`)}
+              className="w-full py-2 bg-white border border-[#F97316] text-[#F97316] text-[13px] font-bold rounded-md hover:bg-[#F97316]/10 transition-colors">
+              
+                Send SMS Reminder to DHO
+              </button>
+              <button
+              onClick={() => actions.acknowledgeAlert(pending.id, 'Override: marked as in progress by national team.')}
+              className="w-full py-2 bg-white border border-epi text-epi text-[13px] font-bold rounded-md hover:bg-epi/5 transition-colors">
+              
+                Override — Mark as In Progress
+              </button>
             </div>
+          </div> :
+
+        <div className="lg:col-span-12 bg-[#00A550]/10 border-2 border-[#00A550] rounded-lg p-6 text-[14px] font-bold text-epi-text">
+            ✅ No pending auto-escalations — every open alert has been acknowledged.
           </div>
-          <div className="flex flex-col gap-3 shrink-0 w-full md:w-64">
-            <button className="w-full py-3 bg-epi-red text-white text-[14px] font-bold rounded-md hover:bg-epi-red/90 transition-colors shadow-sm">
-              Escalate Now — Don't Wait
-            </button>
-            <button className="w-full py-2 bg-white border border-[#F97316] text-[#F97316] text-[13px] font-bold rounded-md hover:bg-[#F97316]/10 transition-colors">
-              Send SMS Reminder to DHO
-            </button>
-            <button className="w-full py-2 bg-white border border-epi text-epi text-[13px] font-bold rounded-md hover:bg-epi/5 transition-colors">
-              Override — Mark as In Progress
-            </button>
-          </div>
-        </div>
+        }
 
         {/* Active Escalation Status Table */}
         <div className="lg:col-span-12 bg-white rounded-lg shadow-card border border-border overflow-hidden">
           <div className="p-5 border-b border-border">
-            <h2 className="text-[16px] font-bold text-epi-text">
-              Active Escalation Status
-            </h2>
+            <h2 className="text-[16px] font-bold text-epi-text">Active Escalation Status</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-epi-bg border-b border-border">
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Alert
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Current Level
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Time at Level
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Escalated To
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Next Escalation
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider text-right">
-                    Actions
-                  </th>
+                  {['Alert', 'Current Level', 'Time at Level', 'Responsible', 'Next Step', 'Actions'].map((h) =>
+                  <th key={h} className={`p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider ${h === 'Actions' ? 'text-right' : ''}`}>
+                      {h}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                <tr className="hover:bg-epi-bg/50">
-                  <td className="p-4 text-[13px] font-mono font-bold text-epi-text">
-                    ALT-2026-001
-                  </td>
-                  <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                    Level 3 — RBC
-                  </td>
-                  <td className="p-4 text-[13px] text-epi-text">18 hours</td>
-                  <td className="p-4 text-[13px] text-epi-text">
-                    Dr. Jean Paul Habimana
-                  </td>
-                  <td className="p-4 text-[13px] text-epi-muted">
-                    Level 4 if not resolved in 6h
-                  </td>
-                  <td className="p-4 text-[13px] text-epi-text">
-                    +250 788 000 001
-                  </td>
-                  <td className="p-4 text-[13px] text-epi font-medium text-right">
-                    <button className="hover:underline">View</button> ·{' '}
-                    <button className="hover:underline">Override</button>
-                  </td>
-                </tr>
-                <tr className="bg-[#F97316]/5 hover:bg-[#F97316]/10">
-                  <td className="p-4 text-[13px] font-mono font-bold text-epi-text">
-                    ALT-2026-003
-                  </td>
-                  <td className="p-4 text-[13px] font-bold text-epi">
-                    Level 1 — District
-                  </td>
-                  <td className="p-4 text-[13px] font-bold text-epi-red">
-                    22h 13m ⚠️
-                  </td>
-                  <td className="p-4 text-[13px] text-epi-text">
-                    Gicumbi DHO — no response
-                  </td>
-                  <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                    AUTO-ESCALATE in 47 min
-                  </td>
-                  <td className="p-4 text-[13px] text-epi-text">
-                    +250 788 200 300
-                  </td>
-                  <td className="p-4 text-[13px] text-epi font-medium text-right">
-                    <button className="text-epi-red hover:underline">
-                      Escalate Now
-                    </button>{' '}
-                    · <button className="hover:underline">View</button>
-                  </td>
-                </tr>
+                {rows.length === 0 &&
+                <tr>
+                    <td colSpan={6} className="p-6 text-center text-[13px] text-epi-muted">No escalated or pending alerts.</td>
+                  </tr>
+                }
+                {rows.map((a) => {
+                  const levelStart = a.escalatedAt ?? a.triggeredAt;
+                  const atLevel = hoursSince(levelStart);
+                  const isPending = a.status === 'active';
+                  return (
+                    <tr key={a.id} className={isPending ? 'bg-[#F97316]/5 hover:bg-[#F97316]/10' : 'hover:bg-epi-bg/50'}>
+                      <td className="p-4 text-[13px] font-mono font-bold text-epi-text">
+                        {SEVERITY_META[a.severity].emoji} {a.id}
+                        <div className="font-sans font-normal text-[12px] text-epi-muted">{a.disease}, {a.district}</div>
+                      </td>
+                      <td className={`p-4 text-[13px] font-bold ${isPending ? 'text-epi' : 'text-[#F97316]'}`}>
+                        {a.escalatedTo ?? 'Level 1 — District'}
+                      </td>
+                      <td className={`p-4 text-[13px] ${isPending && atLevel > state.rules.autoEscalateHours ? 'font-bold text-epi-red' : 'text-epi-text'}`}>
+                        {fmtDuration(atLevel)}{isPending && atLevel > state.rules.autoEscalateHours ? ' ⚠️' : ''}
+                      </td>
+                      <td className="p-4 text-[13px] text-epi-text">
+                        {isPending ? `${a.district} DHO — no response` : a.acknowledgedBy}
+                      </td>
+                      <td className="p-4 text-[13px] text-epi-muted">
+                        {isPending ? 'Escalate to Provincial Director' : 'Next level if not resolved in 6h'}
+                      </td>
+                      <td className="p-4 text-[13px] text-epi font-medium text-right whitespace-nowrap">
+                        {isPending &&
+                        <button onClick={() => dialogs.open('escalate', a)} className="text-epi-red hover:underline mr-2">
+                            Escalate Now
+                          </button>
+                        }
+                        {!isPending &&
+                        <button onClick={() => dialogs.open('escalate', a)} className="hover:underline mr-2">
+                            Escalate further
+                          </button>
+                        }
+                        · <Link to={`/warning/detail?id=${a.id}`} className="hover:underline ml-1">View</Link>
+                      </td>
+                    </tr>);
+
+                })}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+      {dialogs.element}
     </WarningLayout>);
 
 }
