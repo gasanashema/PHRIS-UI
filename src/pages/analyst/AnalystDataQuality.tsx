@@ -1,5 +1,9 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
+import { useApp } from '../../store/AppStore';
+import { DISTRICTS } from '../../data/seed';
+import type { AppNotification, Role } from '../../types';
 const SOURCES = [
 {
   name: 'DHIS2 / HMIS',
@@ -94,7 +98,45 @@ const getPillColor = (val: string) => {
   return 'bg-epi-amber/10 text-epi-amber border border-epi-amber/20';
   return 'bg-epi-red/10 text-epi-red border border-epi-red/20';
 };
+const DAYS = ['May 30', 'May 31', 'Jun 1', 'Jun 2', 'Jun 3', 'Jun 4', 'Jun 5'];
+// Deterministic demo completeness (0–100) per district/day
+const completeness = (d: string, day: number) => {
+  let h = day * 31;
+  for (const c of d) h = (h * 33 + c.charCodeAt(0)) % 1000;
+  if (d === 'Nyamagabe' && day >= 4) return 0;
+  return h % 13 === 0 ? 0 : h % 5 === 0 ? 60 : 100;
+};
+
+type IssueKey = 'met' | 'chw' | 'kirehe' | 'lab';
+
 export function AnalystDataQuality() {
+  const { state, actions } = useApp();
+  const [flagged, setFlagged] = useState<string[]>([]);
+  const [handled, setHandled] = useState<IssueKey[]>([]);
+  const met = state.sources.find((s) => s.id === 'met');
+  const metOk = !!met && met.status !== 'disconnected';
+  const notify = (key: IssueKey, n: {title: string;body: string;roles: Role[];link?: string;severity?: AppNotification['severity'];district?: string;}, toastMsg: string) => {
+    actions.sendNotification({ severity: 'info', ...n }, { module: 'Analytics', action: n.title });
+    setHandled((p) => [...p, key]);
+    actions.toast(toastMsg);
+  };
+  const flagSource = (name: string, escalate: boolean) => {
+    actions.sendNotification(
+      {
+        title: escalate ? `Data source escalated: ${name}` : `Data quality flag: ${name}`,
+        body: `Flagged from Data Quality Management by the analytics team.`,
+        severity: escalate ? 'orange' : 'yellow',
+        roles: escalate ? ['integration', 'admin'] : ['integration'],
+        link: `/integration/sources?q=${encodeURIComponent(name)}`
+      },
+      { module: 'Analytics', action: escalate ? 'Escalated data source' : 'Flagged data source' }
+    );
+    setFlagged((p) => [...p, name]);
+    actions.toast(`${name} ${escalate ? 'escalated to Integration & IT Admin' : 'flagged to the Integration team'}.`);
+  };
+  const doneBtn = (label: string) =>
+  <span className="inline-flex h-8 px-4 items-center bg-epi-accent/10 text-epi-accent text-[12px] font-bold rounded-md">✓ {label}</span>;
+
   return (
     <AnalystLayout
       title="Data Quality Management"
@@ -168,12 +210,20 @@ export function AnalystDataQuality() {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-bold">{row.status}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <Link to={`/integration/sources?q=${encodeURIComponent(row.name)}`} className="text-[12px] font-bold hover:underline text-epi">
+                      {row.action === 'View Details' ? 'View Details' : 'View'}
+                    </Link>
+                    {(row.action.includes('Flag') || row.action.includes('Escalate')) && (
+                    flagged.includes(row.name) ?
+                    <span className="ml-3 text-[12px] font-bold text-epi-muted">✓ {row.action.includes('Escalate') ? 'Escalated' : 'Flagged'}</span> :
+
                     <button
-                    className={`text-[12px] font-bold hover:underline ${row.critical ? 'text-epi-red' : 'text-epi'}`}>
-                    
-                      {row.action}
-                    </button>
+                      onClick={() => flagSource(row.name, row.action.includes('Escalate'))}
+                      className={`ml-3 text-[12px] font-bold hover:underline ${row.critical ? 'text-epi-red' : 'text-epi'}`}>
+                          {row.action.includes('Escalate') ? 'Escalate' : 'Flag'}
+                        </button>)
+                    }
                   </td>
                 </tr>
               )}
@@ -182,17 +232,27 @@ export function AnalystDataQuality() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[60%_40%] gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-[60%_minmax(0,1fr)] gap-6">
         {/* Left - Heatmap */}
         <div className="bg-white rounded-lg shadow-card border border-border p-6 flex flex-col">
           <h2 className="text-[16px] font-bold text-epi-text mb-4">
             DHIS2 Facility Reporting — Last 7 Days
           </h2>
-          <div className="flex-1 bg-epi-bg border border-border rounded-lg flex items-center justify-center min-h-[300px] relative">
-            <div className="text-[13px] text-epi-muted">
-              [Heatmap Grid Visualization: 30 districts x 7 days]
+          <div className="flex-1 bg-epi-bg border border-border rounded-lg p-3 overflow-x-auto">
+            <div className="grid grid-cols-[90px_repeat(7,minmax(28px,1fr))] gap-0.5 text-[10px] min-w-[330px]">
+              <span />
+              {DAYS.map((d) => <span key={d} className="text-center font-bold text-epi-muted">{d}</span>)}
+              {DISTRICTS.map((d) =>
+              <div key={d} className="contents">
+                  <span className="font-medium text-epi-text truncate pr-1">{d}</span>
+                  {DAYS.map((day, i) => {
+                  const v = completeness(d, i);
+                  return <span key={day} title={`${d} · ${day}: ${v}% of facilities reported`} className={`h-4 rounded-sm ${v === 100 ? 'bg-epi' : v > 0 ? 'bg-epi/40' : 'bg-epi-red'}`} />;
+                })}
+                </div>
+              )}
             </div>
-            <div className="absolute bottom-4 left-4 flex gap-3 text-[11px] font-medium bg-white/90 p-2 rounded shadow-sm">
+            <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-medium bg-white/90 p-2 rounded shadow-sm w-fit">
               <span className="flex items-center gap-1">
                 <span className="w-3 h-3 bg-epi rounded-sm" /> 100% reported
               </span>
@@ -209,7 +269,7 @@ export function AnalystDataQuality() {
         {/* Right - Queue */}
         <div className="bg-white rounded-lg shadow-card border border-border p-6">
           <h2 className="text-[16px] font-bold text-epi-text mb-4">
-            Flagged Data Issues (4)
+            Flagged Data Issues ({4 - handled.length - (metOk && !handled.includes('met') ? 1 : 0)} open)
           </h2>
           <div className="space-y-4">
             <div className="border-l-4 border-l-epi-red border border-border rounded-r-lg p-4 bg-white">
@@ -220,9 +280,13 @@ export function AnalystDataQuality() {
                 Rwanda Met Agency disconnected 3 days — environmental risk model
                 affected
               </div>
-              <button className="h-8 px-4 bg-epi-red hover:bg-epi-red/90 text-white text-[12px] font-bold rounded-md">
-                Escalate to IT Admin
-              </button>
+              {metOk ? doneBtn('Resolved — source reconnected') : handled.includes('met') ? doneBtn('Escalated to IT Admin') :
+              <button
+                onClick={() => notify('met', { title: 'Met Agency outage escalated', body: 'Analytics escalated the Rwanda Met Agency disconnection (3 days). Environmental risk model inputs are stale.', roles: ['admin', 'integration'], link: '/integration/sources?q=Met', severity: 'red' }, 'Escalated to IT Admin and Integration team.')}
+                className="h-8 px-4 bg-epi-red hover:bg-epi-red/90 text-white text-[12px] font-bold rounded-md">
+                  Escalate to IT Admin
+                </button>
+              }
             </div>
             <div className="border-l-4 border-l-epi-amber border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-epi-amber mb-1">
@@ -231,9 +295,13 @@ export function AnalystDataQuality() {
               <div className="text-[13px] text-epi-text font-medium mb-3">
                 CHW reports from Mukura sector not received 5 days
               </div>
-              <button className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
-                Send reminder
-              </button>
+              {handled.includes('chw') ? doneBtn('Reminder sent to Huye DHO') :
+              <button
+                onClick={() => notify('chw', { title: 'CHW reporting gap — Mukura', body: 'No CHW reports received from Mukura sector for 5 days. Please follow up with the CHW supervisor.', roles: ['dho'], district: 'Huye', link: '/dho/chw-reports', severity: 'yellow' }, 'Reminder sent to Huye District Health Office.')}
+                className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
+                  Send reminder
+                </button>
+              }
             </div>
             <div className="border-l-4 border-l-[#EAB308] border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-[#A16207] mb-1">
@@ -243,9 +311,13 @@ export function AnalystDataQuality() {
                 3 facilities in Kirehe submitted impossible values (negative
                 case counts)
               </div>
-              <button className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
-                Request resubmission
-              </button>
+              {handled.includes('kirehe') ? doneBtn('Resubmission requested') :
+              <button
+                onClick={() => notify('kirehe', { title: 'Resubmission requested — Kirehe', body: '3 Kirehe facilities submitted negative case counts. Records quarantined pending resubmission.', roles: ['integration'], link: '/integration/validation' }, 'Resubmission request sent; records quarantined.')}
+                className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
+                  Request resubmission
+                </button>
+              }
             </div>
             <div className="border-l-4 border-l-[#EAB308] border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-[#A16207] mb-1">
@@ -255,9 +327,13 @@ export function AnalystDataQuality() {
                 Lab turnaround time above 2-day target for Ruhengeri Hospital
                 (4.1 days avg)
               </div>
-              <button className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
-                Flag to lab manager
-              </button>
+              {handled.includes('lab') ? doneBtn('Flagged to lab manager') :
+              <button
+                onClick={() => notify('lab', { title: 'Lab turnaround above target — Ruhengeri', body: 'Ruhengeri Hospital Lab averaging 4.1 days (target 2 days).', roles: ['epi'], link: '/epi/lab' }, 'Flag sent to lab manager and Epidemiology.')}
+                className="h-8 px-4 bg-epi-bg border border-border hover:border-epi text-epi-text text-[12px] font-bold rounded-md">
+                  Flag to lab manager
+                </button>
+              }
             </div>
           </div>
         </div>

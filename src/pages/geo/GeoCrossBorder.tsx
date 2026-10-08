@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { GeoLayout } from '../../components/geo/GeoLayout';
 export function GeoCrossBorder() {
   const [showPopup, setShowPopup] = useState(false);

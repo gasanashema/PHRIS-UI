@@ -1,5 +1,15 @@
-import React from 'react';
+import { useState } from 'react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
+const OTHER_LABS: [string, string][] = [
+['Rwamagana Hospital Lab', '🟢 Online | 4 pending'],
+['Gihundwe Hospital Lab (Rusizi)', '🟢 Online | 7 pending'],
+['Gisenyi Hospital Lab', '🟢 Online | 3 pending'],
+['Kabgayi Hospital Lab', '🟢 Online | 2 pending'],
+['Nyagatare Hospital Lab', '🟡 Delayed | 4 pending'],
+['Kibogora Hospital Lab', '🟢 Online | 1 pending'],
+['Byumba Hospital Lab', '🟢 Online | 2 pending'],
+['Kigeme Hospital Lab', '🟢 Online | 3 pending']];
+
 const LABS = [
 {
   disease: 'Cholera',
@@ -53,6 +63,7 @@ const LABS = [
 }];
 
 export function EpiLab() {
+  const [allLabs, setAllLabs] = useState(false);
   return (
     <EpiLayout
       title="Laboratory Data Integration"
@@ -248,9 +259,15 @@ export function EpiLab() {
                 </span>
                 <span className="text-epi-muted">🟢 Online | 5 pending</span>
               </div>
+              {allLabs && OTHER_LABS.map(([name, status]) =>
+              <div key={name} className="flex justify-between items-center py-2 border-t border-border">
+                  <span className="font-medium text-epi-text">{name}</span>
+                  <span className={status.includes('Delayed') ? 'text-epi-amber font-medium' : 'text-epi-muted'}>{status}</span>
+                </div>
+              )}
             </div>
-            <button className="text-[12px] font-bold text-epi hover:underline mt-3">
-              View all 12 labs →
+            <button onClick={() => setAllLabs(!allLabs)} className="text-[12px] font-bold text-epi hover:underline mt-3">
+              {allLabs ? 'Show fewer ↑' : 'View all 12 labs →'}
             </button>
           </div>
         </div>

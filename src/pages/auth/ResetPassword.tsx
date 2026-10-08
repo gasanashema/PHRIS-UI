@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Key, Check, Clock } from 'lucide-react';
 import { Logo } from '../../components/auth/Logo';
+import { useApp } from '../../store/AppStore';
 export function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const navigate = useNavigate();
+  const { actions } = useApp();
   const getPasswordStrength = () => {
     let score = 0;
     if (password.length >= 12) score++;
@@ -26,6 +28,7 @@ export function ResetPassword() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === confirm && score >= 3) {
+      actions.toast('Password updated. Please sign in with your new password.');
       navigate('/login');
     }
   };

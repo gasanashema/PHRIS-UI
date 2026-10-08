@@ -1,157 +1,126 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
+import { Modal, FieldLabel, inputCls, btnPrimary, btnSecondary } from '../../components/shared/Modal';
+import { useApp } from '../../store/AppStore';
+import { PIPELINE_STAGES } from '../../data/seed';
+import { demoNow, fmtDate, fmtTime, nowISO } from '../../lib/format';
+
+interface JobDef {
+  name: string;
+  frequency: string;
+  duration: string;
+  pipeline: boolean; // part of the main processing pipeline
+  next: string;
+}
+
+const INITIAL: JobDef[] = [
+{ name: 'Data Cleaning', frequency: 'Every 2 hours', duration: '~15 min', pipeline: true, next: '15:00' },
+{ name: 'Metric Calculation', frequency: 'Every 2 hours', duration: '~20 min', pipeline: true, next: '15:00' },
+{ name: 'Feature Engineering', frequency: 'Every 6 hours', duration: '~45 min', pipeline: true, next: '19:00' },
+{ name: 'Trend Analysis', frequency: 'Daily — 07:00', duration: '~30 min', pipeline: false, next: 'Tomorrow 07:00' },
+{ name: 'Geographic Aggregation', frequency: 'Daily — 07:00', duration: '~25 min', pipeline: true, next: 'Tomorrow 07:00' },
+{ name: 'Temporal Aggregation', frequency: 'Daily — 07:30', duration: '~20 min', pipeline: false, next: 'Tomorrow 07:30' },
+{ name: 'Age Standardization', frequency: 'Weekly — Monday', duration: '~40 min', pipeline: false, next: 'Next Monday' },
+{ name: 'Met Agency Import', frequency: 'Every 3 hours', duration: '~5 min', pipeline: false, next: 'Retry manually' }];
+
+
+const FREQS = ['Every 1 hour', 'Every 2 hours', 'Every 3 hours', 'Every 6 hours', 'Daily — 07:00', 'Daily — 07:30', 'Weekly — Monday'];
+
+const TIMELINE = [
+{ h: 3, label: 'Full backup' },
+{ h: 7, label: 'Trend + Geo' },
+{ h: 10, label: 'Features' },
+{ h: 13, label: 'Clean + Metrics' },
+{ h: 15, label: 'Clean + Metrics' },
+{ h: 17, label: 'Features' },
+{ h: 19, label: 'Features' }];
+
+
 export function ProcessingScheduler() {
+  const { state, actions } = useApp();
+  const [defs, setDefs] = useState<JobDef[]>(INITIAL);
+  const [editing, setEditing] = useState<{mode: 'new' | 'edit';index?: number;name: string;frequency: string;} | null>(null);
+  const running = state.pipeline.status === 'running';
+  const now = demoNow();
+  const nowPct = (now.getHours() * 60 + now.getMinutes()) / 1440 * 100;
+
+  const latest = (name: string) => state.jobs.find((j) => j.name === name);
+  const stageRunning = (name: string) =>
+  running && (
+  name === 'Data Cleaning' && state.pipeline.stageIndex === 1 ||
+  name === 'Metric Calculation' && state.pipeline.stageIndex === 2 ||
+  name === 'Geographic Aggregation' && state.pipeline.stageIndex === 3 ||
+  name === 'Feature Engineering' && state.pipeline.stageIndex === 4);
+
+  const save = () => {
+    if (!editing || !editing.name.trim()) return;
+    if (editing.mode === 'new') {
+      setDefs([...defs, { name: editing.name.trim(), frequency: editing.frequency, duration: '—', pipeline: false, next: 'Scheduled' }]);
+      actions.logAdminEvent('Processing', `Added processing job — ${editing.name.trim()}`, editing.frequency);
+      actions.toast(`Job “${editing.name.trim()}” scheduled ${editing.frequency.toLowerCase()}.`);
+    } else {
+      setDefs(defs.map((d, i) => i === editing.index ? { ...d, frequency: editing.frequency } : d));
+      actions.logAdminEvent('Processing', `Changed job schedule — ${editing.name}`, editing.frequency);
+      actions.toast(`${editing.name} now runs ${editing.frequency.toLowerCase()}.`);
+    }
+    setEditing(null);
+  };
+
   return (
     <ProcessingLayout
       title="Processing Job Scheduler"
       subtitle="Automated data processing pipeline — Rwanda national health data"
       breadcrumb="Job Scheduler">
-      
-      {/* Timeline */}
-      <div className="bg-white rounded-lg shadow-card border border-border p-6 mb-8">
-        <h2 className="text-[16px] font-bold text-epi-text mb-6">
-          Today's Processing Schedule — June 5, 2026
-        </h2>
 
-        <div className="relative pt-8 pb-4">
-          {/* Base line */}
+      <div className="bg-white rounded-lg shadow-card border border-border p-6 mb-8 overflow-x-auto">
+        <h2 className="text-[16px] font-bold text-epi-text mb-6">Today's Processing Schedule — {fmtDate(nowISO())}</h2>
+        <div className="relative pt-8 pb-16 min-w-[640px]">
           <div className="absolute left-0 right-0 top-10 h-1 bg-epi-bg rounded-full"></div>
-
-          {/* Time markers */}
           <div className="flex justify-between text-[11px] font-bold text-epi-muted absolute left-0 right-0 top-0">
-            <span>00:00</span>
-            <span>04:00</span>
-            <span>08:00</span>
-            <span>12:00</span>
-            <span>16:00</span>
-            <span>20:00</span>
-            <span>24:00</span>
+            {['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'].map((t) => <span key={t}>{t}</span>)}
           </div>
+          {TIMELINE.map((t) => {
+            const done = t.h * 60 < now.getHours() * 60 + now.getMinutes();
+            return (
+              <div
+                key={`${t.h}-${t.label}`}
+                className={`absolute top-8 w-3 h-5 rounded-full z-10 ${done ? 'bg-epi' : 'bg-epi-bg border-2 border-epi'}`}
+                style={{ left: `${t.h / 24 * 100}%` }}>
 
-          {/* Jobs */}
-          {/* 03:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi-muted rounded-full z-10"
-            style={{
-              left: '12.5%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi-muted text-center">
-              03:00 AM
-              <br />
-              Full backup ✅
-            </div>
-          </div>
+                <div className={`absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-center ${done ? 'text-epi' : 'text-epi-muted'}`}>
+                  {String(t.h).padStart(2, '0')}:00
+                  <br />
+                  {t.label} {done ? '✅' : '🔄'}
+                </div>
+              </div>);
 
-          {/* 07:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi rounded-full z-10"
-            style={{
-              left: '29.1%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi text-center">
-              07:00 AM
-              <br />
-              Trend + Geo ✅
-            </div>
-          </div>
-
-          {/* 09:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi rounded-full z-10"
-            style={{
-              left: '37.5%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi text-center">
-              09:00 AM
-              <br />
-              Cleaning ✅
-            </div>
-          </div>
-
-          {/* 11:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi rounded-full z-10"
-            style={{
-              left: '45.8%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi text-center">
-              11:00 AM
-              <br />
-              Features ✅
-            </div>
-          </div>
-
-          {/* 13:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi rounded-full z-10"
-            style={{
-              left: '54.1%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi text-center">
-              13:00 PM
-              <br />
-              Clean + Metrics ✅
-            </div>
-          </div>
-
-          {/* 15:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi-bg border-2 border-epi rounded-full z-10"
-            style={{
-              left: '62.5%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi-muted text-center">
-              15:00 PM
-              <br />
-              Clean + Metrics 🔄
-            </div>
-          </div>
-
-          {/* 17:00 */}
-          <div
-            className="absolute top-8 w-3 h-5 bg-epi-bg border-2 border-epi rounded-full z-10"
-            style={{
-              left: '70.8%'
-            }}>
-            
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-epi-muted text-center">
-              17:00 PM
-              <br />
-              Features 🔄
-            </div>
-          </div>
-
-          {/* Current Time Marker */}
-          <div
-            className="absolute top-4 bottom-0 w-px border-l-2 border-dashed border-epi-amber z-0"
-            style={{
-              left: '57.2%'
-            }}>
-            
+          })}
+          <div className="absolute top-4 bottom-0 w-px border-l-2 border-dashed border-epi-amber z-0" style={{ left: `${nowPct}%` }}>
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold text-epi-amber whitespace-nowrap bg-white px-1">
-              📍 Now — 13:45 PM
+              📍 Now — {fmtTime(nowISO())}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Jobs Table */}
       <div className="bg-white rounded-lg shadow-card border border-border overflow-hidden">
-        <div className="p-5 border-b border-border flex items-center justify-between">
-          <h2 className="text-[16px] font-bold text-epi-text">
-            All Processing Jobs
-          </h2>
+        <div className="p-5 border-b border-border flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[16px] font-bold text-epi-text">All Processing Jobs</h2>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg transition-colors">
-              Run All Jobs Now
+            <button
+              onClick={actions.runPipeline}
+              disabled={running}
+              className="px-4 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg disabled:opacity-60 transition-colors flex items-center gap-2">
+
+              {running && <Loader2 className="w-4 h-4 animate-spin" />}
+              {running ? `Running — ${PIPELINE_STAGES[state.pipeline.stageIndex].label}` : 'Run All Jobs Now'}
             </button>
-            <button className="px-4 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
+            <button
+              onClick={() => setEditing({ mode: 'new', name: '', frequency: FREQS[1] })}
+              className="px-4 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
+
               Add New Job
             </button>
           </div>
@@ -160,175 +129,91 @@ export function ProcessingScheduler() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-epi-bg border-b border-border">
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Job Name
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Frequency
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Last Run
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider">
-                  Next Run
-                </th>
-                <th className="p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider text-right">
-                  Actions
-                </th>
+                {['Job Name', 'Frequency', 'Duration', 'Last Run', 'Status', 'Next Run', 'Actions'].map((h) =>
+                <th key={h} className={`p-4 text-[12px] font-bold text-epi-muted uppercase tracking-wider ${h === 'Actions' ? 'text-right' : ''}`}>{h}</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Data Cleaning
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Every 2 hours</td>
-                <td className="p-4 text-[13px] text-epi-muted">~15 min</td>
-                <td className="p-4 text-[13px] text-epi-text">13:00 PM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">15:00 PM</td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button> ·{' '}
-                  <button className="hover:underline">Run Now</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Metric Calculation
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Every 2 hours</td>
-                <td className="p-4 text-[13px] text-epi-muted">~20 min</td>
-                <td className="p-4 text-[13px] text-epi-text">13:00 PM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">15:00 PM</td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button> ·{' '}
-                  <button className="hover:underline">Run Now</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Feature Engineering
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Every 6 hours</td>
-                <td className="p-4 text-[13px] text-epi-muted">~45 min</td>
-                <td className="p-4 text-[13px] text-epi-text">13:00 PM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Running
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">19:00 PM</td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">View Progress</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Trend Analysis
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Daily — 07:00 AM
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted">~30 min</td>
-                <td className="p-4 text-[13px] text-epi-text">07:00 AM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Tomorrow 07:00
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Geographic Aggregation
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Daily — 07:00 AM
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted">~25 min</td>
-                <td className="p-4 text-[13px] text-epi-text">07:00 AM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Tomorrow 07:00
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Temporal Aggregation
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Daily — 07:30 AM
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted">~20 min</td>
-                <td className="p-4 text-[13px] text-epi-text">07:30 AM ✅</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Tomorrow 07:30
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button>
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Age Standardization
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Weekly — Monday
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted">~40 min</td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Monday 07:00 ✅
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Success
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next Monday</td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Edit</button>
-                </td>
-              </tr>
-              <tr className="bg-epi-red/5 hover:bg-epi-red/10">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Met Agency Import
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Every 3 hours</td>
-                <td className="p-4 text-[13px] text-epi-muted">~5 min</td>
-                <td className="p-4 text-[13px] text-epi-text">04:28 AM 🔴</td>
-                <td className="p-4 text-[13px] font-bold text-epi-red">
-                  🔴 Failed
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">
-                  Retry manually
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right">
-                  <button className="hover:underline">Retry</button> ·{' '}
-                  <button className="hover:underline">Fix</button>
-                </td>
-              </tr>
+              {defs.map((d, i) => {
+                const job = latest(d.name);
+                const isRunning = stageRunning(d.name) || job?.status === 'running';
+                const failed = !isRunning && job?.status === 'failed';
+                return (
+                  <tr key={d.name} className={failed ? 'bg-epi-red/5 hover:bg-epi-red/10' : 'hover:bg-epi-bg/50'}>
+                    <td className="p-4 text-[14px] font-bold text-epi-text">{d.name}</td>
+                    <td className="p-4 text-[13px] text-epi-text">{d.frequency}</td>
+                    <td className="p-4 text-[13px] text-epi-muted">{job?.duration && job.duration !== '—' ? job.duration : d.duration}</td>
+                    <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">
+                      {job ? `${fmtTime(job.at)} ${job.status === 'failed' ? '🔴' : '✅'}` : '—'}
+                    </td>
+                    <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${failed ? 'text-epi-red' : isRunning ? 'text-epi-amber' : 'text-[#00A550]'}`}>
+                      {isRunning ? '🟡 Running' : failed ? '🔴 Failed' : job ? '🟢 Success' : '⚪ Not run yet'}
+                    </td>
+                    <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">{failed ? 'Retry manually' : d.next}</td>
+                    <td className="p-4 text-[13px] text-epi font-medium text-right whitespace-nowrap">
+                      {failed && job ?
+                      <>
+                          <button onClick={() => actions.retryJob(job.id)} className="hover:underline">Retry</button> ·{' '}
+                          {d.name === 'Met Agency Import' ?
+                        <Link to="/integration/sources" className="hover:underline">Fix</Link> :
+
+                        <Link to="/integration/mapping" className="hover:underline">Fix</Link>
+                        }
+                        </> :
+                      isRunning ?
+                      <Link to="/processing" className="hover:underline">View Progress</Link> :
+
+                      <>
+                          <button onClick={() => setEditing({ mode: 'edit', index: i, name: d.name, frequency: d.frequency })} className="hover:underline">Edit</button>
+                          {d.pipeline &&
+                        <>
+                              {' · '}
+                              <button onClick={actions.runPipeline} disabled={running} className="hover:underline disabled:opacity-40">Run Now</button>
+                            </>
+                        }
+                        </>
+                      }
+                    </td>
+                  </tr>);
+
+              })}
             </tbody>
           </table>
         </div>
+        <div className="px-5 py-3 border-t border-border text-[12px] text-epi-muted">
+          Cleaning, metrics, aggregation and feature engineering run together as one pipeline; “Run Now” starts the full pipeline.
+        </div>
       </div>
+
+      <Modal
+        open={!!editing}
+        title={editing?.mode === 'new' ? 'Add processing job' : `Edit schedule — ${editing?.name}`}
+        onClose={() => setEditing(null)}
+        footer={
+        <>
+            <button className={btnSecondary} onClick={() => setEditing(null)}>Cancel</button>
+            <button className={btnPrimary} disabled={!editing?.name.trim()} onClick={save}>Save</button>
+          </>
+        }>
+
+        {editing &&
+        <div className="space-y-4">
+            {editing.mode === 'new' &&
+          <div>
+                <FieldLabel>Job name</FieldLabel>
+                <input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} placeholder="e.g. Nutrition indicator refresh" className={inputCls} />
+              </div>
+          }
+            <div>
+              <FieldLabel>Frequency</FieldLabel>
+              <select value={editing.frequency} onChange={(e) => setEditing({ ...editing, frequency: e.target.value })} className={inputCls}>
+                {Array.from(new Set([editing.frequency, ...FREQS])).map((f) => <option key={f}>{f}</option>)}
+              </select>
+            </div>
+          </div>
+        }
+      </Modal>
     </ProcessingLayout>);
 
 }

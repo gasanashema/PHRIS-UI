@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -127,11 +127,39 @@ const seasonal = [
   levels: [1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1]
 }];
 
+// Monthly totals (Jul 2025 – Jun 2026) for the 12-month view
+const monthlyData = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((m, i) => ({
+  week: m,
+  Malaria: [150, 132, 140, 190, 240, 210, 168, 150, 230, 262, 290, 250][i],
+  Diarrheal: [118, 110, 112, 126, 134, 128, 116, 108, 124, 128, 132, 121][i],
+  Diarrhea: [118, 110, 112, 126, 134, 128, 116, 108, 124, 128, 132, 121][i],
+  Cholera: [4, 3, 2, 6, 9, 5, 3, 2, 8, 9, 12, 70][i],
+  Measles: [40, 44, 38, 42, 46, 50, 48, 44, 46, 50, 52, 55][i],
+  Respiratory: [44, 48, 52, 46, 40, 38, 42, 46, 40, 38, 40, 40][i]
+}));
+
+const DISEASE_KEY: Record<string, string | null> = {
+  'All Diseases': null,
+  Cholera: 'Cholera',
+  Malaria: 'Malaria',
+  Measles: 'Measles',
+  Diarrhea: 'Diarrhea',
+  Respiratory: 'Respiratory',
+  Typhoid: 'Typhoid'
+};
+
 const levelColor = (l: number) =>
 l === 3 ? 'bg-admin-red' : l === 2 ? 'bg-admin-amber' : 'bg-admin-accent/40';
 export function DhoTrends() {
   const [range, setRange] = useState('4w');
-  const [disease, setDisease] = useState('All');
+  const [disease, setDisease] = useState('All Diseases');
+  const key = DISEASE_KEY[disease];
+  const visibleData = range === '4w' ? trendData.slice(-4) : range === '3m' ? trendData : monthlyData;
+  const lines = Object.entries(lineColors).filter(([k]) => !key || k === key);
+  const matches = (name: string) => !key || name.startsWith(key === 'Diarrhea' ? 'Diarrh' : key);
+  const rankingRows = ranking.filter((d) => matches(d.name));
+  const wowRows = wow.filter((d) => matches(d.name));
+  const rangeLabel = range === '4w' ? 'last 4 weeks (May–June 2026)' : range === '3m' ? 'last 10 weeks (April–June 2026)' : 'last 12 months (monthly totals)';
   return (
     <DhoLayout
       title="Disease Trends — Huye District"
@@ -190,15 +218,20 @@ export function DhoTrends() {
       {/* Main trend chart */}
       <div className="bg-white rounded-lg shadow-card border border-border p-6 mb-6">
         <h2 className="text-[16px] font-bold text-admin-text mb-1">
-          Weekly Case Count — All Diseases
+          {range === '12m' ? 'Monthly' : 'Weekly'} Case Count — {disease}
         </h2>
         <p className="text-[13px] text-admin-muted mb-4">
-          Huye District, April–June 2026
+          Huye District, {rangeLabel}
         </p>
+        {lines.length === 0 &&
+        <div className="mb-4 text-[13px] font-medium text-admin-amber bg-admin-amber/10 rounded px-3 py-2">
+            No {disease.toLowerCase()} cases recorded in Huye for this period.
+          </div>
+        }
         <div className="h-[340px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={trendData}
+              data={visibleData}
               margin={{
                 top: 10,
                 right: 20,
@@ -222,7 +255,7 @@ export function DhoTrends() {
                 tickLine={false} />
               
               <YAxis
-                domain={[0, 200]}
+                domain={[0, 'auto']}
                 tick={{
                   fontSize: 12,
                   fill: '#6B7280'
@@ -263,11 +296,11 @@ export function DhoTrends() {
                   position: 'insideBottomRight'
                 }} />
               
-              {Object.entries(lineColors).map(([key, color]) =>
+              {lines.map(([lineKey, color]) =>
               <Line
-                key={key}
+                key={lineKey}
                 type="monotone"
-                dataKey={key}
+                dataKey={lineKey}
                 stroke={color}
                 strokeWidth={2.5}
                 dot={false}
@@ -282,14 +315,15 @@ export function DhoTrends() {
       </div>
 
       {/* Row 2 — three panels */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Ranking */}
         <div className="bg-white rounded-lg shadow-card border border-border p-6">
           <h3 className="text-[15px] font-bold text-admin-text mb-4">
             This Week's Case Ranking
           </h3>
           <div className="space-y-4">
-            {ranking.map((d, i) =>
+            {rankingRows.length === 0 && <div className="text-[13px] text-admin-muted">No cases this week.</div>}
+            {rankingRows.map((d, i) =>
             <div key={i}>
                 <div className="flex items-center justify-between text-[13px] mb-1">
                   <span className="font-bold text-admin-text">
@@ -324,7 +358,7 @@ export function DhoTrends() {
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={wow}
+                data={wowRows}
                 margin={{
                   top: 0,
                   right: 0,

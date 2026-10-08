@@ -1,4 +1,3 @@
-import React from 'react';
 import { Database, BrainCircuit, BellRing, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 export function HowItWorks() {

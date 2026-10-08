@@ -1,4 +1,3 @@
-import React from 'react';
 import { Map } from 'lucide-react';
 import { motion } from 'framer-motion';
 export function TrustTestimonial() {

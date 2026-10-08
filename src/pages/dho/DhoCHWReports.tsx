@@ -1,5 +1,7 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AlertTriangle, Send } from 'lucide-react';
+import { useApp } from '../../store/AppStore';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 const CHW = [
 {
@@ -101,6 +103,10 @@ v === 2 ?
 'bg-admin-red' :
 'bg-gray-200';
 export function DhoCHWReports() {
+  const { actions } = useApp();
+  const [smsSent, setSmsSent] = useState(false);
+  const [flagged, setFlagged] = useState<string[]>([]);
+  const inactive = CHW.filter((c) => !c.active);
   return (
     <DhoLayout
       title="Community Health Worker Reports — Huye District"
@@ -132,8 +138,15 @@ export function DhoCHWReports() {
             Please follow up immediately.
           </p>
         </div>
-        <button className="h-9 px-4 bg-admin-amber hover:bg-admin-amber/90 text-white text-[13px] font-semibold rounded-md flex items-center gap-2 shrink-0">
-          <Send className="w-4 h-4" /> Send Follow-Up SMS to All 3
+        <button
+          disabled={smsSent}
+          onClick={() => {
+            setSmsSent(true);
+            actions.logAdminEvent('CHW', `Sent follow-up SMS to ${inactive.length} inactive CHWs`, inactive.map((c) => c.name).join(', '));
+            actions.toast(`Follow-up SMS queued for ${inactive.map((c) => c.name).join(', ')} (simulated).`);
+          }}
+          className="h-9 px-4 bg-admin-amber hover:bg-admin-amber/90 disabled:opacity-60 text-white text-[13px] font-semibold rounded-md flex items-center gap-2 shrink-0">
+          <Send className="w-4 h-4" /> {smsSent ? 'Follow-up SMS sent' : `Send Follow-Up SMS to All ${inactive.length}`}
         </button>
       </div>
 
@@ -181,17 +194,25 @@ export function DhoCHWReports() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2 text-[12px] font-bold">
                       {c.active ?
-                    <button className="text-admin hover:underline">
-                          View
-                        </button> :
+                    <Link to={`/dho/risk-map?sector=${c.sector}`} className="text-admin hover:underline">
+                          View sector
+                        </Link> :
 
                     <>
-                          <button className="text-admin hover:underline">
+                          <a href="tel:+250788000000" className="text-admin hover:underline">
                             Contact
-                          </button>
+                          </a>
                           <span className="text-border">·</span>
-                          <button className="text-admin-red hover:underline">
-                            Flag
+                          <button
+                        onClick={() => {
+                          if (flagged.includes(c.name)) return;
+                          setFlagged([...flagged, c.name]);
+                          actions.logAdminEvent('CHW', `Flagged inactive CHW — ${c.name}`, `${c.sector}, ${c.days} days without report`);
+                          actions.toast(`${c.name} flagged to the CHW supervisor.`, 'warning');
+                        }}
+                        className="text-admin-red hover:underline">
+                        
+                            {flagged.includes(c.name) ? 'Flagged' : 'Flag'}
                           </button>
                         </>
                     }

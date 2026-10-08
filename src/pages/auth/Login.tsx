@@ -14,36 +14,43 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Logo } from '../../components/auth/Logo';
+import { useApp } from '../../store/AppStore';
+import type { Role } from '../../types';
 
-const demoAccounts = [
+const demoAccounts: {role: string;email: string;route: string;icon: typeof MapPin;key: Role;}[] = [
   {
     role: 'System Administrator',
     email: 'admin@rbc.gov.rw',
     route: '/admin',
+    key: 'admin',
     icon: AdminIcon
   },
   {
     role: 'District Health Officer',
     email: 'dho@huye.gov.rw',
     route: '/dho',
+    key: 'dho',
     icon: MapPin
   },
   {
     role: 'Epidemiologist',
     email: 'epi@rbc.gov.rw',
     route: '/epi',
+    key: 'epi',
     icon: Microscope
   },
   {
     role: 'Public Health Analyst',
     email: 'analyst@moh.gov.rw',
     route: '/analyst',
+    key: 'analyst',
     icon: BarChart3
   },
   {
     role: 'Data Integration',
     email: 'integration@rbc.gov.rw',
     route: '/integration',
+    key: 'integration',
     icon: Plug
   }
 ];
@@ -51,11 +58,36 @@ const demoAccounts = [
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  const [email, setEmail] = useState('');
   const navigate = useNavigate();
+  const { actions } = useApp();
+
+  // Simulated authentication: any password is accepted. The email decides
+  // which demo persona signs in (matching a demo account, or by domain).
+  const roleForEmail = (value: string): Role => {
+    const v = value.trim().toLowerCase();
+    const match = demoAccounts.find((a) => a.email === v);
+    if (match) return match.key;
+    if (v.startsWith('admin')) return 'admin';
+    if (v.includes('analyst') || v.endsWith('@moh.gov.rw') || v.endsWith('@nisr.gov.rw')) return 'analyst';
+    if (v.includes('integration') || v.includes('data')) return 'integration';
+    if (/@(huye|[a-z]+)\.gov\.rw$/.test(v) && !v.endsWith('@rbc.gov.rw')) return 'dho';
+    return 'epi';
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/mfa');
+    try {
+      sessionStorage.setItem('aivital-pending-role', roleForEmail(email));
+    } catch {
+      /* storage unavailable */
+    }
+    navigate('/mfa', { state: { role: roleForEmail(email), email } });
+  };
+
+  const demoLogin = (key: Role, route: string) => {
+    actions.login(key);
+    navigate(route);
   };
 
   return (
@@ -93,6 +125,8 @@ export function Login() {
                   </div>
                   <input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="your.email@rbc.gov.rw"
                     className="block w-full pl-9 pr-3 h-10 bg-page border border-border rounded-lg text-[14px] text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
                     required
@@ -152,6 +186,10 @@ export function Login() {
               >
                 Sign In
               </button>
+              <p className="text-[12px] text-text-secondary text-center">
+                Prototype sign-in: any password is accepted and the MFA code is{' '}
+                <span className="font-mono font-bold text-text-primary">123456</span>.
+              </p>
             </form>
 
             {/* Demo Accounts */}
@@ -177,7 +215,7 @@ export function Login() {
                     <button
                       key={acct.route}
                       type="button"
-                      onClick={() => navigate(acct.route)}
+                      onClick={() => demoLogin(acct.key, acct.route)}
                       className="group flex items-center gap-2.5 p-2 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-colors text-left"
                     >
                       <div className="w-7 h-7 rounded-md bg-section group-hover:bg-white flex items-center justify-center text-primary shrink-0 transition-colors">

@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Logo } from '../../components/auth/Logo';
-import { Check } from 'lucide-react';
+import { Check, CheckCircle2 } from 'lucide-react';
+import { useApp } from '../../store/AppStore';
+const ROLE_NAMES: Record<string, string> = {
+  analyst: 'Public Health Analyst',
+  epidemiologist: 'Epidemiologist',
+  dho: 'District Health Officer',
+  admin: 'Administrator'
+};
+
 export function Register() {
   const navigate = useNavigate();
+  const { actions } = useApp();
   const [role, setRole] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [form, setForm] = useState({ first: '', last: '', email: '', phone: '', org: '', instType: '', district: '' });
+  const [submitted, setSubmitted] = useState(false);
+  const setField = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  setForm((f) => ({ ...f, [k]: e.target.value }));
   const getPasswordStrength = () => {
     let score = 0;
     if (password.length >= 12) score++;
@@ -14,7 +28,7 @@ export function Register() {
     if (/[^A-Za-z0-9]/.test(password)) score++;
     return score;
   };
-  const strength = getPasswordStrength();
+  const score = getPasswordStrength();
   const strengthColors = [
   'bg-border',
   'bg-alert-red',
@@ -88,10 +102,54 @@ export function Register() {
             </p>
           </div>
 
+          {submitted ?
+          <div className="py-16 text-center">
+              <div className="w-14 h-14 bg-alert-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="w-7 h-7 text-alert-green" />
+              </div>
+              <h2 className="text-[26px] font-bold text-text-primary mb-3">Access request submitted</h2>
+              <p className="text-[15px] text-text-secondary leading-relaxed mb-8 max-w-md mx-auto">
+                Thank you, {form.first}. Your request for a {ROLE_NAMES[role]} account has been sent to the AI Vital
+                administrators for review. You will receive an activation email at{' '}
+                <span className="font-medium text-text-primary">{form.email}</span> within 24 hours.
+              </p>
+              <button
+              onClick={() => navigate('/login')}
+              className="h-12 px-8 bg-primary hover:bg-primary-hover text-white text-[15px] font-semibold rounded-lg">
+
+                Back to Sign In
+              </button>
+              <p className="text-[12px] text-text-secondary mt-6">
+                Demo: the request now appears under Admin → User Management as “Pending Approval”.
+              </p>
+            </div> :
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              navigate('/login');
+              if (password !== confirm || score < 3) return;
+              const name = `${form.first.trim()} ${form.last.trim()}`;
+              actions.addUser({
+                name,
+                email: form.email.trim(),
+                phone: form.phone.trim(),
+                role: ROLE_NAMES[role],
+                inst: form.org.trim(),
+                dist: role === 'dho' ? form.district : 'National',
+                status: 'Pending Approval',
+                mfa: true
+              });
+              actions.sendNotification(
+                {
+                  title: `New access request — ${name}`,
+                  body: `${ROLE_NAMES[role]} at ${form.org.trim()} — ${form.instType} (${form.email.trim()}) is awaiting approval.`,
+                  severity: 'info',
+                  link: '/admin/users',
+                  roles: ['admin']
+                },
+                { module: 'Auth', action: `Access request submitted — ${form.email.trim()}` }
+              );
+              setSubmitted(true);
             }}
             className="space-y-12">
             
@@ -106,7 +164,7 @@ export function Register() {
                     First Name
                   </label>
                   <input
-                    type="text"
+                    type="text" value={form.first} onChange={setField('first')}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     required />
                   
@@ -116,7 +174,7 @@ export function Register() {
                     Last Name
                   </label>
                   <input
-                    type="text"
+                    type="text" value={form.last} onChange={setField('last')}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     required />
                   
@@ -128,7 +186,7 @@ export function Register() {
                     Email Address
                   </label>
                   <input
-                    type="email"
+                    type="email" value={form.email} onChange={setField('email')}
                     placeholder="name@rbc.gov.rw"
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     required />
@@ -143,7 +201,7 @@ export function Register() {
                       🇷🇼 +250
                     </div>
                     <input
-                      type="tel"
+                      type="tel" value={form.phone} onChange={setField('phone')}
                       placeholder="78X XXX XXX"
                       className="flex-1 h-12 px-4 bg-page border border-border rounded-r-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                       required />
@@ -182,7 +240,7 @@ export function Register() {
                     Organization / Institution
                   </label>
                   <input
-                    type="text"
+                    type="text" value={form.org} onChange={setField('org')}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     required />
                   
@@ -192,7 +250,7 @@ export function Register() {
                   <label className="text-[14px] font-medium text-[#374151]">
                     Institution Type
                   </label>
-                  <select
+                  <select value={form.instType} onChange={setField('instType')}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none"
                     required>
                     
@@ -214,7 +272,7 @@ export function Register() {
                     <label className="text-[14px] font-medium text-[#374151]">
                       District
                     </label>
-                    <select
+                    <select value={form.district} onChange={setField('district')}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none"
                     required>
                     
@@ -314,10 +372,12 @@ export function Register() {
                     Confirm Password
                   </label>
                   <input
-                    type="password"
+                    type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
                     className="w-full h-12 px-4 bg-page border border-border rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     required />
-                  
+                  {confirm.length > 0 && confirm !== password &&
+                  <p className="text-[13px] text-alert-red font-medium">Passwords do not match.</p>
+                  }
                 </div>
 
                 <div className="space-y-3">
@@ -387,10 +447,16 @@ export function Register() {
                 </label>
               </div>
 
+              {password.length > 0 && score < 3 &&
+              <p className="text-[13px] text-text-secondary text-center">
+                  Password must be at least “Good” strength (3 of the 4 rules above) to submit.
+                </p>
+              }
               <button
                 type="submit"
-                className="w-full h-12 bg-primary hover:bg-primary-hover text-white text-[15px] font-semibold rounded-lg transition-colors">
-                
+                disabled={password !== confirm || score < 3}
+                className="w-full h-12 bg-primary hover:bg-primary-hover disabled:bg-border disabled:text-text-secondary disabled:cursor-not-allowed text-white text-[15px] font-semibold rounded-lg transition-colors">
+
                 Submit Access Request
               </button>
 
@@ -407,6 +473,7 @@ export function Register() {
               </div>
             </section>
           </form>
+          }
         </div>
       </div>
     </div>);

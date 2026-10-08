@@ -1,4 +1,3 @@
-import React from 'react';
 import { WarningLayout } from '../../components/warning/WarningLayout';
 export function WarningCrossBorder() {
   return (

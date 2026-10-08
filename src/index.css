@@ -19,3 +19,42 @@ body {
 h1, h2, h3, h4, h5, h6 {
   color: #111827;
 }
+
+/* Horizontal scroll strips (identity banners) without a visible scrollbar */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Lightweight entrance animations for the `animate-in` utility classes used
+   across the prototype (the tailwindcss-animate plugin is not installed). */
+@keyframes aiv-fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes aiv-slide-right {
+  from { transform: translateX(100%); }
+  to { transform: none; }
+}
+@keyframes aiv-zoom {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.animate-in {
+  animation: aiv-fade-up 0.18s ease-out;
+}
+.animate-in.slide-in-from-right {
+  animation: aiv-slide-right 0.22s ease-out;
+}
+.animate-in.zoom-in-95 {
+  animation: aiv-zoom 0.16s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-in.slide-in-from-right,
+  .animate-in.zoom-in-95 {
+    animation: none;
+  }
+}

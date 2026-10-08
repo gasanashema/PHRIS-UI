@@ -1,6 +1,36 @@
-import React from 'react';
+import { Fragment, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
+import { useApp } from '../../store/AppStore';
+import { isOpenStatus } from '../../lib/format';
+
+const TIMEFRAME: Record<string, number> = {
+  'Timeframe: Next 1 week': 0.85,
+  'Timeframe: Next 2–4 weeks': 1,
+  'Timeframe: Next 4–8 weeks': 1.1
+};
+const BANDS = [
+['HIGH PROBABILITY', 70, 101, 'bg-epi-red/5 text-epi-red', 'bg-epi-red'],
+['MODERATE PROBABILITY', 50, 70, 'bg-epi-amber/10 text-[#F97316]', 'bg-[#F97316]'],
+['LOW PROBABILITY', 0, 50, 'bg-[#00A550]/5 text-[#00A550]', 'bg-epi-amber']] as
+const;
+const sel = 'text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm';
+
 export function PredictionProbability() {
+  const { state } = useApp();
+  const [disease, setDisease] = useState('all');
+  const [province, setProvince] = useState('all');
+  const [minP, setMinP] = useState(30);
+  const [timeframe, setTimeframe] = useState('Timeframe: Next 2–4 weeks');
+  const open = state.alerts.filter((a) => isOpenStatus(a.status));
+  const rows = open.
+  map((a) => {
+    const g = Math.max(0.02, Number(a.change.replace(/[^0-9.-]/g, '')) / 100 || 0.1);
+    const risk = state.districtRisk.find((r) => r.district === a.district);
+    return { a, p: Math.min(99, Math.round(a.probability * TIMEFRAME[timeframe])), conf: risk?.confidence ?? 80, r0: Math.min(4, 1 + g * 0.9) };
+  }).
+  filter((r) => (disease === 'all' || r.a.disease === disease) && (province === 'all' || r.a.province === province) && r.p > minP).
+  sort((x, y) => y.p - x.p);
   return (
     <PredictionLayout
       title="Outbreak Probability Calculator"
@@ -19,18 +49,20 @@ export function PredictionProbability() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Disease: All Diseases ▼</option>
+      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6 flex-wrap">
+        <select value={disease} onChange={(e) => setDisease(e.target.value)} aria-label="Disease" className={sel}>
+          <option value="all">Disease: All Diseases</option>
+          {Array.from(new Set(open.map((a) => a.disease))).sort().map((d) => <option key={d}>{d}</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Province: All ▼</option>
+        <select value={province} onChange={(e) => setProvince(e.target.value)} aria-label="Province" className={sel}>
+          <option value="all">Province: All</option>
+          {['Kigali', 'Northern', 'Southern', 'Eastern', 'Western'].map((p) => <option key={p}>{p}</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Min probability: &gt;30% ▼</option>
+        <select value={minP} onChange={(e) => setMinP(Number(e.target.value))} aria-label="Minimum probability" className={sel}>
+          {[0, 30, 50, 70].map((p) => <option key={p} value={p}>Min probability: &gt;{p}%</option>)}
         </select>
-        <select className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
-          <option>Timeframe: Next 2–4 weeks ▼</option>
+        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} aria-label="Timeframe" className={sel}>
+          {Object.keys(TIMEFRAME).map((t) => <option key={t}>{t}</option>)}
         </select>
       </div>
 
@@ -67,305 +99,41 @@ export function PredictionProbability() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {/* HIGH PROBABILITY */}
-              <tr className="bg-epi-red/5">
-                <td
-                  colSpan={8}
-                  className="p-2 text-[11px] font-bold text-epi-red uppercase tracking-wider pl-4">
-                  
-                  HIGH PROBABILITY
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Rusizi
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Cholera</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-epi-red w-8">
-                      91%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-epi-red"
-                        style={{
-                          width: '91%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 2 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 High (89%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-epi-red">2.3</td>
-                <td className="p-4 text-[13px] font-bold text-epi-red">
-                  🔴 Act immediately
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Respond
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Kayonza
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Malaria</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-epi-red w-8">
-                      74%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-epi-red"
-                        style={{
-                          width: '74%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 3 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 High (82%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  1.8
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  🟠 Urgent
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Monitor
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Bugesera
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Malaria</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-epi-red w-8">
-                      67%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-epi-red"
-                        style={{
-                          width: '67%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 3 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 High (79%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  1.6
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  🟠 Urgent
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Monitor
-                </td>
-              </tr>
+              {rows.length === 0 &&
+              <tr><td colSpan={8} className="p-6 text-center text-[13px] text-epi-muted">No outbreaks match these filters.</td></tr>
+              }
+              {BANDS.map(([label, lo, hi, cls, bar]) => {
+                const band = rows.filter((r) => r.p >= lo && r.p < hi);
+                if (band.length === 0) return null;
+                return (
+                  <Fragment key={label}>
+                    <tr className={cls}>
+                      <td colSpan={8} className="p-2 text-[11px] font-bold uppercase tracking-wider pl-4">{label}</td>
+                    </tr>
+                    {band.map((r) =>
+                    <tr key={r.a.id} className="hover:bg-epi-bg/50">
+                        <td className="p-4 text-[14px] font-bold text-epi-text">{r.a.district}</td>
+                        <td className="p-4 text-[13px] text-epi-text">{r.a.disease}</td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[14px] font-bold w-10">{r.p}%</span>
+                            <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
+                              <div className={`h-full ${bar}`} style={{ width: `${r.p}%` }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-[13px] text-epi-text">{timeframe.replace('Timeframe: ', '')}</td>
+                        <td className="p-4 text-[13px] font-bold text-[#00A550]">{r.conf >= 85 ? '🟢 High' : '🟡 Medium'} ({r.conf}%)</td>
+                        <td className={`p-4 text-[13px] font-bold ${r.r0 > 2 ? 'text-epi-red' : r.r0 > 1 ? 'text-[#F97316]' : 'text-[#00A550]'}`}>{r.r0.toFixed(1)}</td>
+                        <td className="p-4 text-[13px] font-bold">{r.p >= 70 ? '🔴 Act immediately' : r.p >= 50 ? '🟠 Prepare response' : '🟡 Monitor'}</td>
+                        <td className="p-4 text-[13px] text-right">
+                          <Link to={`/warning/detail?id=${r.a.id}`} className="text-epi font-medium hover:underline">{r.p >= 70 ? 'Respond' : 'Review'}</Link>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>);
 
-              {/* MODERATE PROBABILITY */}
-              <tr className="bg-epi-amber/10">
-                <td
-                  colSpan={8}
-                  className="p-2 text-[11px] font-bold text-[#F97316] uppercase tracking-wider pl-4">
-                  
-                  MODERATE PROBABILITY
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Gicumbi
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Measles</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-[#F97316] w-8">
-                      58%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#F97316]"
-                        style={{
-                          width: '58%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 4 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 Medium (71%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  1.4
-                </td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 Watch
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Monitor
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Rubavu
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Mpox</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-epi-amber w-8">
-                      44%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-epi-amber"
-                        style={{
-                          width: '44%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 4 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 Medium (65%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  1.2
-                </td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 DRC border watch
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Monitor
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Huye
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Typhoid</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-epi-amber w-8">
-                      34%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-epi-amber"
-                        style={{
-                          width: '34%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 4 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 Medium (68%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                  1.1
-                </td>
-                <td className="p-4 text-[13px] font-bold text-epi-amber">
-                  🟡 Watch
-                </td>
-                <td className="p-4 text-[13px] text-epi font-medium text-right hover:underline cursor-pointer">
-                  Monitor
-                </td>
-              </tr>
-
-              {/* LOW PROBABILITY */}
-              <tr className="bg-[#00A550]/5">
-                <td
-                  colSpan={8}
-                  className="p-2 text-[11px] font-bold text-[#00A550] uppercase tracking-wider pl-4">
-                  
-                  LOW PROBABILITY
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Musanze
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Any disease</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-[#00A550] w-8">
-                      12%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#00A550]"
-                        style={{
-                          width: '12%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 4 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 High (91%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  0.7
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Low risk
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted text-right">
-                  Routine
-                </td>
-              </tr>
-              <tr className="hover:bg-epi-bg/50">
-                <td className="p-4 text-[14px] font-bold text-epi-text">
-                  Gasabo
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Any disease</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-[#00A550] w-8">
-                      8%
-                    </span>
-                    <div className="w-24 h-2 bg-epi-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#00A550]"
-                        style={{
-                          width: '8%'
-                        }}>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 text-[13px] text-epi-text">Next 4 weeks</td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 High (94%)
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  0.5
-                </td>
-                <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                  🟢 Very low
-                </td>
-                <td className="p-4 text-[13px] text-epi-muted text-right">
-                  Routine
-                </td>
-              </tr>
+              })}
             </tbody>
           </table>
         </div>

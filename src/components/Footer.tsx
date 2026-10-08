@@ -1,4 +1,3 @@
-import React from 'react';
 import { Activity, Linkedin, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 export function Footer() {
@@ -96,28 +95,25 @@ export function Footer() {
             <h4 className="text-white font-bold mb-6">Security & Trust</h4>
             <ul className="space-y-4">
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/legal#data-protection"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
-                  
                   Data Protection
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/legal#privacy"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
-                  
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/legal#terms"
                   className="text-[#9CA3AF] hover:text-white transition-colors text-[15px]">
-                  
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -1,40 +1,144 @@
-import React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
+import { SeverityBadge } from '../../components/shared/Badges';
+import { severityForSignal, sortAlerts, useApp } from '../../store/AppStore';
+import { downloadFile, fmtDate, isOpenStatus, nowISO } from '../../lib/format';
+
+const DISEASE_TABS = [
+['Malaria', '🦟 Malaria'],
+['Cholera', '💧 Cholera'],
+['Measles', '💉 Measles'],
+['COVID-19', '🦠 COVID-19'],
+['Typhoid', '🌡️ Typhoid'],
+['VHF', '🩸 VHF'],
+['Mpox', '🐒 Mpox'],
+['Malnutrition', '🍽️ Malnutrition']] as
+const;
+
+/** Store-driven prediction summary for diseases without a detailed briefing. */
+function DiseaseSummary({ disease }: {disease: string;}) {
+  const { state } = useApp();
+  const risk = state.districtRisk.filter((r) => r.disease === disease).sort((a, b) => b.score - a.score);
+  const alerts = sortAlerts(state.alerts.filter((a) => a.disease === disease && isOpenStatus(a.status)), 'severity');
+  const signals = state.predictionRuns.flatMap((r) => r.signals.map((sg) => ({ ...sg, run: r.id }))).filter((sg) => sg.disease === disease);
+  const peak = risk[0];
+  const tone = peak && peak.score >= 80 ? 'bg-epi-red' : peak && peak.score >= 60 ? 'bg-[#F97316]' : peak && peak.score >= 40 ? 'bg-epi-amber' : 'bg-[#00A550]';
+  return (
+    <>
+      <div className={`${tone} text-white p-4 rounded-lg shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+        <div className="font-bold text-[15px]">{disease.toUpperCase()} — {peak ? `highest district risk ${peak.score}/100 (${peak.district})` : 'no district currently lists this as its top risk'}</div>
+        <div className="text-[13px] font-medium opacity-90">{alerts.length} open alert{alerts.length === 1 ? '' : 's'} · {risk.length} district{risk.length === 1 ? '' : 's'} with {disease} as top risk</div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow-card border border-border p-6">
+          <h2 className="text-[16px] font-bold text-epi-text mb-4">District risk scores — {disease}</h2>
+          {risk.length === 0 && <p className="text-[13px] text-epi-muted">No district currently has {disease} as its highest-risk disease.</p>}
+          <div className="space-y-3">
+            {risk.map((r) =>
+            <div key={r.district} className="flex items-center gap-3 text-[13px]">
+                <span className="w-28 font-bold text-epi-text">{r.district}</span>
+                <div className="flex-1 h-2 bg-epi-bg rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${r.score}%`, background: r.score >= 80 ? '#D32F2F' : r.score >= 60 ? '#F97316' : r.score >= 40 ? '#EAB308' : '#00A550' }} />
+                </div>
+                <span className="w-16 text-right font-bold">{r.score}/100</span>
+                <span className="w-6 text-center">{r.trend === 'up' ? '↑' : r.trend === 'down' ? '↓' : '→'}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow-card border border-border p-6">
+            <h2 className="text-[16px] font-bold text-epi-text mb-4">Open alerts</h2>
+            {alerts.length === 0 && <p className="text-[13px] text-epi-muted">No open {disease} alerts.</p>}
+            <ul className="divide-y divide-border">
+              {alerts.map((a) =>
+              <li key={a.id} className="py-2 flex items-center justify-between gap-3 text-[13px]">
+                  <Link to={`/warning/detail?id=${a.id}`} className="font-bold text-epi hover:underline">{a.id} — {a.district}</Link>
+                  <SeverityBadge severity={a.severity} />
+                </li>
+              )}
+            </ul>
+          </div>
+          <div className="bg-white rounded-lg shadow-card border border-border p-6">
+            <h2 className="text-[16px] font-bold text-epi-text mb-4">Signals from prediction runs</h2>
+            {signals.length === 0 ?
+            <p className="text-[13px] text-epi-muted">No {disease} signals in recent runs. <Link to="/prediction" className="text-epi font-bold hover:underline">Run a prediction →</Link></p> :
+            <ul className="space-y-2 text-[13px]">
+                {signals.map((sg) =>
+              <li key={`${sg.run}-${sg.district}`} className="flex items-center justify-between gap-3">
+                    <span>{sg.sector ? `${sg.sector}, ` : ''}{sg.district} · {sg.probability}% <span className="text-epi-muted">({sg.run})</span></span>
+                    <SeverityBadge severity={severityForSignal(sg, state.thresholds, state.rules)} />
+                  </li>
+              )}
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+    </>);
+
+}
+
 export function PredictionDisease() {
+  const { state, actions } = useApp();
+  const [disease, setDisease] = useState('Cholera');
+  const [sent, setSent] = useState(false);
+  const choleraAlerts = state.alerts.filter((a) => a.disease === 'Cholera' && isOpenStatus(a.status));
+
+  const generateBrief = () => {
+    const rows = choleraAlerts.map((a) => `<li>${a.id} — ${a.sector ? a.sector + ', ' : ''}${a.district}: ${a.cases} cases, ${a.probability}% probability (${a.status})</li>`).join('');
+    downloadFile(
+      'cholera-brief.html',
+      `<!doctype html><html><head><meta charset="utf-8"><title>Cholera Brief</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:40px auto;color:#1A1A2E}h1{color:#104E49}</style></head><body><h1>National Cholera Brief</h1><p>${fmtDate(nowISO())} · AI Vital prediction engine (simulated model)</p><h2>Open cholera alerts</h2><ul>${rows}</ul><h2>Recommended actions</h2><ul><li>Set up oral rehydration points at Bugarama and Kamembe markets</li><li>Brief all CHWs in affected sectors</li><li>Request WHO rapid response team if cases exceed 150</li></ul></body></html>`,
+      'text/html'
+    );
+    actions.logAdminEvent('Prediction', 'Generated national cholera brief');
+  };
+
+  const sendToDhos = () => {
+    const districts = Array.from(new Set(choleraAlerts.map((a) => a.district)));
+    districts.forEach((d) => {
+      const a = choleraAlerts.find((x) => x.district === d)!;
+      actions.sendNotification(
+        {
+          title: `Cholera prediction brief — ${d}`,
+          body: `AI Vital forecasts continued cholera risk in ${d} (${a.probability}% probability). Review recommended actions.`,
+          severity: a.severity,
+          alertId: a.id,
+          link: `/dho/alerts/${a.id}`,
+          roles: ['dho'],
+          district: d
+        },
+        { module: 'Prediction', action: `Sent cholera brief to ${d} DHO` }
+      );
+    });
+    setSent(true);
+    actions.toast(`Cholera brief sent to ${districts.length} District Health Officer${districts.length === 1 ? '' : 's'}: ${districts.join(', ')}.`);
+  };
+
   return (
     <PredictionLayout
-      title="Disease Predictions — Cholera"
-      subtitle="AI-generated national cholera risk assessment | June 5, 2026"
+      title={`Disease Predictions — ${disease}`}
+      subtitle={`AI-generated national ${disease.toLowerCase()} risk assessment | ${fmtDate(nowISO())}`}
       breadcrumb="Disease Predictions">
       
       {/* Disease Selector Tabs */}
-      <div className="flex overflow-x-auto gap-2 mb-6 pb-2 no-scrollbar">
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🦟 Malaria
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-epi text-white whitespace-nowrap shadow-sm">
-          💧 Cholera ✓
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          💉 Measles
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🦠 COVID-19
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🌡️ Typhoid
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🩸 VHF
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🐒 Mpox
-        </button>
-        <button className="px-4 py-2 rounded-full text-[14px] font-bold bg-white border border-border text-epi-muted hover:bg-epi-bg transition-colors whitespace-nowrap shadow-sm">
-          🍽️ Malnutrition
-        </button>
+      <div className="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar">
+        {DISEASE_TABS.map(([d, label]) =>
+        <button
+          key={d}
+          onClick={() => setDisease(d)}
+          className={`px-4 py-2 rounded-full text-[14px] font-bold whitespace-nowrap shadow-sm transition-colors ${disease === d ? 'bg-epi text-white' : 'bg-white border border-border text-epi-muted hover:bg-epi-bg'}`}>
+
+            {label}{disease === d ? ' ✓' : ''}
+          </button>
+        )}
       </div>
 
+      {disease !== 'Cholera' ?
+      <DiseaseSummary disease={disease} /> :
+      <>
       {/* Top Status Banner */}
       <div className="bg-epi-red text-white p-4 rounded-lg shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="font-bold text-[15px]">
@@ -560,16 +664,18 @@ export function PredictionDisease() {
             </div>
 
             <div className="flex gap-3">
-              <button className="flex-1 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
+              <button onClick={generateBrief} className="flex-1 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark transition-colors">
                 Generate Cholera Brief
               </button>
-              <button className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg transition-colors">
-                Send to DHOs
+              <button onClick={sendToDhos} disabled={sent} className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg disabled:opacity-60 transition-colors">
+                {sent ? '✓ Sent to DHOs' : 'Send to DHOs'}
               </button>
             </div>
           </div>
         </div>
       </div>
+      </>
+      }
     </PredictionLayout>);
 
 }
