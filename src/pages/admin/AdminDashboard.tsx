@@ -4,7 +4,6 @@ import {
   Bell,
   Plug,
   ShieldCheck,
-  FileText,
   ArrowUpRight,
   ArrowRight } from
 'lucide-react';
@@ -42,9 +41,6 @@ export function AdminDashboard() {
   const attention = state.sources.filter((s) => s.status !== 'active' && s.status !== 'disabled').length;
   const enabled = state.sources.filter((s) => s.enabled);
   const health = enabled.length ? Math.round(enabled.reduce((a, s) => a + s.health, 0) / enabled.length) : 0;
-  const today = nowISO().slice(0, 10);
-  const reportsToday = state.reports.filter((r) => r.at.startsWith(today)).length;
-  const draftReports = state.reports.filter((r) => !r.ok).length;
   const roleData = [
   ...ROLE_BARS.map((r) => ({ ...r, count: users.filter((u) => u.role === r.role && u.status !== 'Pending Approval').length })),
   { name: 'Pending', role: '', color: '#F59E0B', count: pending }];
@@ -58,69 +54,87 @@ export function AdminDashboard() {
         <p className="text-[14px] text-admin-muted">Rwanda — National Health Surveillance Platform | Last refreshed: Today, {fmtTime(nowISO())}</p>
       </div>
 
-      {/* Row 1: KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-        <Link to="/admin/users" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col relative overflow-hidden hover:shadow-md">
-          <Users className="w-5 h-5 text-admin mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{users.length}</div>
-          <div className="text-[13px] text-admin-muted font-medium">Registered Users</div>
-          {pending > 0 &&
-          <div className="mt-auto pt-2 flex items-center gap-1 text-[12px] font-bold text-admin-amber">
-              <ArrowUpRight className="w-3 h-3" /> {pending} awaiting approval
+      {/* Row 1: Top 4 KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-admin-muted font-medium">System Health</span>
+              <ShieldCheck className="w-5 h-5 text-admin-accent" />
             </div>
-          }
-        </Link>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col">
-          <div className="w-5 h-5 rounded-full bg-admin-accent/20 flex items-center justify-center mb-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-admin-accent animate-pulse" />
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-2">{health}%</div>
           </div>
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{activeToday}</div>
-          <div className="text-[13px] text-admin-muted font-medium">Users Active Today</div>
-          <div className="text-[12px] text-admin-muted mt-auto pt-2">Signed in since midnight</div>
-        </div>
-        <Link to="/warning/alerts" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col hover:shadow-md">
-          <Bell className="w-5 h-5 text-admin-red mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{open.length}</div>
-          <div className="text-[13px] text-admin-muted font-medium">Active Risk Alerts</div>
-          <div className="text-[12px] font-medium mt-auto pt-2 flex items-center gap-3">
-            <span className="inline-flex items-center gap-1 text-admin-red">
-              <span className="w-2 h-2 rounded-full bg-admin-red" />
-              {bySev('red')} Red
-            </span>
-            <span className="inline-flex items-center gap-1 text-admin-amber">
-              <span className="w-2 h-2 rounded-full bg-[#F97316]" />
-              {bySev('orange')} Orange
-            </span>
-            <span className="inline-flex items-center gap-1 text-yellow-600">
-              <span className="w-2 h-2 rounded-full bg-yellow-500" />
-              {bySev('yellow')} Yellow
-            </span>
-          </div>
-        </Link>
-        <Link to="/admin/data-sources" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col hover:shadow-md">
-          <Plug className="w-5 h-5 text-admin-info mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            {online} <span className="text-[18px] text-admin-muted">of {state.sources.length}</span>
-          </div>
-          <div className="text-[13px] text-admin-muted font-medium">Data Sources Online</div>
-          <div className={`text-[12px] font-medium mt-auto pt-2 ${attention ? 'text-admin-amber' : 'text-admin-accent'}`}>
-            {attention ? `${attention} source${attention > 1 ? 's' : ''} need attention` : 'All sources healthy'}
-          </div>
-        </Link>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col">
-          <ShieldCheck className="w-5 h-5 text-admin-accent mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{health}%</div>
-          <div className="text-[13px] text-admin-muted font-medium">System Health Score</div>
-          <div className="w-full h-1.5 bg-border rounded-full mt-auto">
-            <div className="h-full bg-admin-accent rounded-full" style={{ width: `${health}%` }} />
+          <div>
+            <div className="w-full h-1.5 bg-border rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-admin-accent rounded-full transition-all" style={{ width: `${health}%` }} />
+            </div>
+            <div className="text-[12px] font-medium text-admin-muted">
+              {attention ? `${attention} source${attention > 1 ? 's' : ''} need review` : 'All services operational'}
+            </div>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col">
-          <FileText className="w-5 h-5 text-admin-muted mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{reportsToday}</div>
-          <div className="text-[13px] text-admin-muted font-medium">Reports Generated Today</div>
-          <div className="text-[12px] text-admin-muted mt-auto pt-2">{draftReports} not yet submitted</div>
-        </div>
+
+        <Link to="/admin/data-sources" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-admin-muted font-medium">Data Sources</span>
+              <Plug className="w-5 h-5 text-admin-info" />
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-2">
+              {online} <span className="text-[16px] font-normal text-admin-muted">/ {state.sources.length}</span>
+            </div>
+          </div>
+          <div className="text-[12px] font-medium pt-1">
+            {attention > 0 ? (
+              <span className="text-admin-amber font-semibold">{attention} needing attention</span>
+            ) : (
+              <span className="text-admin-accent font-semibold">All streams online</span>
+            )}
+          </div>
+        </Link>
+
+        <Link to="/warning/alerts" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-admin-muted font-medium">Active Alerts</span>
+              <Bell className="w-5 h-5 text-admin-red" />
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-2">{open.length}</div>
+          </div>
+          <div className="text-[12px] font-medium pt-1 flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-admin-text font-semibold" title="Critical alerts">
+              <span className="w-2 h-2 rounded-full bg-admin-red shrink-0" />
+              {bySev('red')}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-admin-text font-semibold" title="High alerts">
+              <span className="w-2 h-2 rounded-full bg-[#F97316] shrink-0" />
+              {bySev('orange')}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-admin-text font-semibold" title="Watch alerts">
+              <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
+              {bySev('yellow')}
+            </span>
+          </div>
+        </Link>
+
+        <Link to="/admin/users" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-admin-muted font-medium">Platform Users</span>
+              <Users className="w-5 h-5 text-admin" />
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-2">{users.length}</div>
+          </div>
+          <div className="text-[12px] font-medium pt-1">
+            {pending > 0 ? (
+              <span className="text-admin-amber font-semibold flex items-center gap-1">
+                <ArrowUpRight className="w-3.5 h-3.5 shrink-0" /> {pending} awaiting approval
+              </span>
+            ) : (
+              <span className="text-admin-muted">{activeToday} signed in today</span>
+            )}
+          </div>
+        </Link>
       </div>
 
       {/* Row 2 */}

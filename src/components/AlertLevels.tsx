@@ -60,11 +60,8 @@ export function AlertLevels() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${alert.colorDot}`} />
-                  <span className="font-mono text-xs font-bold text-text-secondary">
-                    {alert.level}
-                  </span>
                   <span className="text-sm font-bold text-text-primary">
-                    · {alert.label}
+                    {alert.label}
                   </span>
                 </div>
 
