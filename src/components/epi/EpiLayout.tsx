@@ -13,7 +13,7 @@ import {
 'lucide-react';
 import { IdentityBanner, ModuleShell, Sep } from '../shared/ModuleShell';
 import { NationalRiskChip } from '../shared/NationalRiskChip';
-import { useApp } from '../../store/AppStore';
+
 interface EpiLayoutProps {
   title: string;
   subtitle?: string;
@@ -26,8 +26,6 @@ export function EpiLayout({
   breadcrumb,
   children
 }: EpiLayoutProps) {
-  const { state } = useApp();
-  const openInv = state.investigations.filter((i) => i.status !== 'closed').length;
   return (
     <ModuleShell
       fallbackRole="epi"
@@ -43,7 +41,7 @@ export function EpiLayout({
       nav={[
       { path: '/epi', icon: Home, label: 'National Overview' },
       { path: '/epi/surveillance', icon: Activity, label: 'Disease Surveillance' },
-      { path: '/epi/investigations', icon: Microscope, label: 'Outbreak Investigations', badge: openInv },
+      { path: '/epi/investigations', icon: Microscope, label: 'Outbreak Investigations' },
       { path: '/epi/patterns', icon: BarChart2, label: 'Pattern Analysis' },
       { path: '/epi/thresholds', icon: AlertTriangle, label: 'Epidemic Thresholds' },
       { path: '/epi/lab', icon: TestTube, label: 'Laboratory Data' },
