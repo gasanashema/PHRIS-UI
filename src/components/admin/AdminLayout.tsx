@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   LayoutDashboard,
   Users,
   ShieldCheck,
   Database,
+  Plug,
   Settings,
   ClipboardList,
   Megaphone,
@@ -11,6 +12,8 @@ import {
 'lucide-react';
 import { ModuleShell } from '../shared/ModuleShell';
 import { useApp } from '../../store/AppStore';
+import { PERSONAS } from '../../data/seed';
+
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
@@ -18,6 +21,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { state } = useApp();
   const pending = state.users.filter((u) => u.status === 'Pending Approval').length;
   const flags = state.activity.filter((a) => a.flagged).length;
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        'phris_prev_user_before_integration',
+        JSON.stringify(state.user || PERSONAS.admin)
+      );
+    } catch {
+      // storage disabled
+    }
+  }, [state.user]);
+
   return (
     <ModuleShell
       logo="admin"
@@ -34,6 +49,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       { path: '/admin/users', icon: Users, label: 'User Management', badge: pending },
       { path: '/admin/roles', icon: ShieldCheck, label: 'Roles & Permissions' },
       { path: '/admin/data-sources', icon: Database, label: 'Data Sources' },
+      { path: '/integration', icon: Plug, label: 'Integration Dashboard' },
       { path: '/admin/system-config', icon: Settings, label: 'System Configuration' },
       { path: '/admin/audit', icon: ClipboardList, label: 'Audit Trail', badge: flags },
       { path: '/admin/announcements', icon: Megaphone, label: 'Announcements' },

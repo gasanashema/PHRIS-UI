@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
 import {
   Plug,
@@ -9,7 +9,9 @@ import {
   Clock,
   RefreshCw,
   Loader2,
-  TrendingDown } from
+  TrendingDown,
+  LogOut,
+  Users } from
 'lucide-react';
 import {
   BarChart,
@@ -28,7 +30,8 @@ import { useApp } from '../../store/AppStore';
 import { Modal } from '../../components/shared/Modal';
 import { STATUS_LABEL } from './IntegrationSources';
 import { demoNow, fmtDateTime, fmtNumber, timeAgo } from '../../lib/format';
-import type { DataSource } from '../../types';
+import { PERSONAS } from '../../data/seed';
+import type { DataSource, User } from '../../types';
 
 const dailyData = [
 { date: 'May 30', dhis2: 4100, emr: 2000, chw: 1200, pharmacy: 800, other: 500, avg: 8600 },
@@ -41,7 +44,38 @@ const dailyData = [
 
 export function IntegrationHome() {
   const { state, actions } = useApp();
+  const navigate = useNavigate();
   const [logFor, setLogFor] = useState<DataSource | null>(null);
+
+  const [rememberedUser] = useState<User>(() => {
+    try {
+      const stored = sessionStorage.getItem('phris_last_integration_user');
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // storage disabled
+    }
+    return PERSONAS.integration;
+  });
+
+  const handleLeaveIntegration = () => {
+    try {
+      sessionStorage.setItem('phris_last_integration_user', JSON.stringify(rememberedUser));
+    } catch {
+      // storage disabled
+    }
+
+    let prevUser = PERSONAS.admin;
+    try {
+      const prevStored = sessionStorage.getItem('phris_prev_user_before_integration');
+      if (prevStored) prevUser = JSON.parse(prevStored);
+    } catch {
+      // storage disabled
+    }
+
+    actions.login(prevUser.role);
+    actions.toast(`Left integration dashboard. Restored account: ${prevUser.name}`);
+    navigate('/admin');
+  };
   const src = state.sources;
   const enabled = src.filter((s) => s.enabled);
   const count = (st: string) => src.filter((s) => s.status === st).length;
@@ -79,6 +113,31 @@ export function IntegrationHome() {
       title="Health Data Integration — Overview"
       subtitle={`All Rwanda health data sources | ${enabled.length} of ${src.length} enabled`}
       breadcrumb="Integration Home">
+
+      {/* Leave Integration Dashboard Notice / Quick Action */}
+      <div className="mb-6 bg-white border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-admin/10 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 text-admin" />
+          </div>
+          <div>
+            <div className="text-[14px] font-bold text-admin-text">
+              Integration Dashboard Access
+            </div>
+            <div className="text-[12px] text-admin-muted">
+              Remembered previous user: <strong className="text-admin-text font-semibold">{rememberedUser.name}</strong> ({rememberedUser.roleLabel})
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={handleLeaveIntegration}
+          id="leave-integration-home-btn"
+          className="inline-flex items-center justify-center gap-2 bg-admin hover:bg-admin-hover text-white px-4 py-2 rounded-md text-[13px] font-bold shadow-xs transition-colors shrink-0"
+        >
+          <LogOut className="w-4 h-4" />
+          Leave Integration Dashboard
+        </button>
+      </div>
 
       {/* Row 1: KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
