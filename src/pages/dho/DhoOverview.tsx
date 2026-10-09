@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import {
   Bell,
-  Plus,
+  ShieldAlert,
+  TrendingUp,
   Hospital,
   Users,
-  Clock,
   ArrowUpRight,
   CheckCircle2,
-  FileSearch,
-  Target,
   Check } from
 'lucide-react';
 import {
@@ -21,7 +19,7 @@ import {
 'recharts';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
-import { StatusBadge } from '../../components/shared/Badges';
+import { SeverityBadge, StatusBadge } from '../../components/shared/Badges';
 import {
   districtLevel,
   notificationsFor,
@@ -40,11 +38,11 @@ import {
   timeAgo } from
 '../../lib/format';
 
-const riskFill: Record<string, string> = {
-  red: 'bg-admin-red text-white',
-  orange: 'bg-admin-amber text-white',
-  yellow: 'bg-yellow-400 text-admin-text',
-  green: 'bg-admin-accent text-white'
+const sectorTone: Record<string, { bg: string; dot: string; label: string }> = {
+  red: { bg: 'bg-white hover:bg-red-50/40', dot: 'bg-admin-red', label: 'Critical' },
+  orange: { bg: 'bg-white hover:bg-amber-50/40', dot: 'bg-[#F97316]', label: 'High' },
+  yellow: { bg: 'bg-white hover:bg-yellow-50/40', dot: 'bg-yellow-500', label: 'Watch' },
+  green: { bg: 'bg-white hover:bg-emerald-50/40', dot: 'bg-[#00A550]', label: 'Normal' }
 };
 const diseaseData = [
 {
@@ -93,7 +91,6 @@ export function DhoOverview() {
   const unack = open.filter((a) => a.status === 'active');
   const bySev = (s: string) => open.filter((a) => a.severity === s).length;
   const level = districtLevel(state, district);
-  const levelMeta = SEVERITY_META[level];
   const elevatedSince = open.
   filter((a) => a.severity === level).
   map((a) => a.triggeredAt).
@@ -104,10 +101,6 @@ export function DhoOverview() {
   const activity = state.activity.
   filter((a) => a.district === district || a.actorEmail === user.email).
   slice(0, 6);
-  const activeInv = state.investigations.filter((i) => i.district === district && i.status !== 'closed');
-  const liveInterventions = state.interventions.filter(
-    (i) => i.district === district && (i.status === 'Ongoing' || i.status === 'Planned')
-  );
   const lastRun = state.pipeline.lastRunAt;
 
   return (
@@ -117,125 +110,125 @@ export function DhoOverview() {
       breadcrumb="District Overview">
 
       {/* Action needed banner */}
-      {unack.length > 0 &&
-      <div className="bg-admin-red/10 border border-admin-red/30 rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="text-[14px] text-admin-text">
-            <span className="font-bold text-admin-red">
-              {unack.length} alert{unack.length > 1 ? 's' : ''} awaiting acknowledgement.
-            </span>{' '}
-            {unack[0].disease} in {unack[0].sector ?? district} — {unack[0].probability}% outbreak probability.
+      {unack.length > 0 && (
+        <div className="bg-white border border-border rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="text-[14px] text-admin-text flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-admin-red shrink-0" />
+            <div>
+              <span className="font-bold text-admin-text">
+                {unack.length} alert{unack.length > 1 ? 's' : ''} awaiting DHO acknowledgement.
+              </span>{' '}
+              <span className="text-admin-muted">
+                {unack[0].disease} in {unack[0].sector ?? district} — {unack[0].probability}% outbreak probability.
+              </span>
+            </div>
           </div>
           <Link
-          to={`/dho/alerts/${unack[0].id}`}
-          className="h-9 px-4 bg-admin-red hover:bg-red-700 text-white text-[13px] font-semibold rounded-md inline-flex items-center shrink-0">
-
+            to={`/dho/alerts/${unack[0].id}`}
+            className="h-8 px-4 bg-admin hover:bg-admin-hover text-white text-[12px] font-bold rounded-md inline-flex items-center shrink-0 transition-colors"
+          >
             Review {unack[0].id} →
           </Link>
         </div>
-      }
+      )}
 
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-        <div className={`${riskFill[level]} rounded-lg shadow-sm p-5 flex flex-col`}>
-          <div className="text-[12px] font-semibold uppercase tracking-wider opacity-90 mb-2">
-            District Risk Level
+      {/* Row 1: Minimal Top 4 KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Link
+          to="/dho/risk-map"
+          className="bg-white p-5 rounded-lg shadow-xs border border-border flex flex-col justify-between hover:shadow-sm transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-admin-muted font-medium">District Threat Level</span>
+              <div className="w-8 h-8 rounded-full bg-admin-bg flex items-center justify-center text-admin">
+                <ShieldAlert className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-[22px] font-bold text-admin-text leading-none mb-1 flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${
+                level === 'red' ? 'bg-admin-red' : level === 'orange' ? 'bg-[#F97316]' : level === 'yellow' ? 'bg-yellow-500' : 'bg-[#00A550]'
+              }`} />
+              <span>{level === 'red' ? 'Critical Emergency' : level === 'orange' ? 'High Risk' : level === 'yellow' ? 'Watch Phase' : 'Normal Baseline'}</span>
+            </div>
           </div>
-          <div className="text-[24px] font-bold leading-none mb-1">
-            {levelMeta.emoji} {levelMeta.label}
+          <div className="text-[12px] text-admin-muted pt-2 border-t border-border/60">
+            {elevatedSince ? `Elevated since ${fmtDate(elevatedSince).replace(', 2026', '')}` : 'Routine district surveillance'}
           </div>
-          <div className="text-[13px] opacity-90">
-            {level === 'green' ? 'No open alerts' : level === 'yellow' ? 'Watch — monitor closely' : 'Alert — action required'}
-          </div>
-          <div className="text-[11px] opacity-75 mt-auto pt-2">
-            {elevatedSince ? `Elevated since ${fmtDate(elevatedSince).replace(', 2026', '')}` : 'Routine surveillance'}
-          </div>
-        </div>
+        </Link>
 
-        <div className="bg-white rounded-lg shadow-sm border border-border p-5 flex flex-col">
-          <Bell className="w-5 h-5 text-admin-red mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            {open.length}
+        <Link
+          to="/dho/alerts"
+          className="bg-white p-5 rounded-lg shadow-xs border border-border flex flex-col justify-between hover:shadow-sm transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-admin-muted font-medium">Active District Alerts</span>
+              <div className="w-8 h-8 rounded-full bg-admin-bg flex items-center justify-center text-admin">
+                <Bell className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
+              {open.length}
+            </div>
           </div>
-          <div className="text-[13px] text-admin-muted font-medium">Open Alerts</div>
-          <div className="text-[11px] font-medium mt-2 flex gap-1.5">
-            <span className="text-admin-red">{bySev('red')}●</span>
-            <span className="text-admin-amber">{bySev('orange')}●</span>
-            <span className="text-yellow-500">{bySev('yellow')}●</span>
+          <div className="text-[12px] text-admin-muted pt-2 border-t border-border/60 flex items-center justify-between">
+            {unack.length > 0 ? (
+              <span className="text-admin-red font-semibold">{unack.length} awaiting review</span>
+            ) : (
+              <span>All alerts acknowledged</span>
+            )}
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-admin-red" title={`${bySev('red')} critical`} />
+              <span className="w-2 h-2 rounded-full bg-[#F97316]" title={`${bySev('orange')} high`} />
+              <span className="w-2 h-2 rounded-full bg-yellow-500" title={`${bySev('yellow')} watch`} />
+            </span>
           </div>
-          <Link
-            to="/dho/alerts"
-            className="text-[12px] font-bold text-admin hover:underline mt-auto pt-2">
+        </Link>
 
-            View all alerts →
-          </Link>
-        </div>
+        <Link
+          to="/dho/trends"
+          className="bg-white p-5 rounded-lg shadow-xs border border-border flex flex-col justify-between hover:shadow-sm transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-admin-muted font-medium">Weekly Incident Cases</span>
+              <div className="w-8 h-8 rounded-full bg-admin-bg flex items-center justify-center text-admin">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
+              {diseaseData.reduce((s, d) => s + d.cases, 0)}
+            </div>
+          </div>
+          <div className="text-[12px] text-admin-muted pt-2 border-t border-border/60 flex items-center justify-between">
+            <span className="text-[#F97316] font-semibold flex items-center gap-1">
+              <ArrowUpRight className="w-3.5 h-3.5" /> +18% vs last week
+            </span>
+            <span>Malaria leading</span>
+          </div>
+        </Link>
 
-        <div className="bg-white rounded-lg shadow-sm border border-border p-5 flex flex-col">
-          <Plus className="w-5 h-5 text-admin mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            {diseaseData.reduce((s, d) => s + d.cases, 0)}
+        <Link
+          to="/dho/facilities"
+          className="bg-white p-5 rounded-lg shadow-xs border border-border flex flex-col justify-between hover:shadow-sm transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-admin-muted font-medium">Facility Reporting</span>
+              <div className="w-8 h-8 rounded-full bg-admin-bg flex items-center justify-center text-admin">
+                <Hospital className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
+              12 <span className="text-[16px] text-admin-muted font-normal">/ 15</span>
+            </div>
           </div>
-          <div className="text-[13px] text-admin-muted font-medium">
-            Cases This Week
+          <div className="text-[12px] text-admin-muted pt-2 border-t border-border/60 flex items-center justify-between">
+            <span>80% submitted</span>
+            <span className="font-medium text-admin-amber">{reminded ? 'Reminders sent' : '3 pending'}</span>
           </div>
-          <div className="flex items-center gap-1 text-[12px] font-bold text-admin-red mt-2">
-            <ArrowUpRight className="w-3 h-3" /> +18% vs last week
-          </div>
-          <Link to="/dho/trends" className="text-[12px] font-bold text-admin hover:underline mt-auto pt-1">
-            View trends →
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-border p-5 flex flex-col">
-          <Hospital className="w-5 h-5 text-admin-info mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            12 <span className="text-[16px] text-admin-muted">/ 15</span>
-          </div>
-          <div className="text-[13px] text-admin-muted font-medium">
-            Facilities Reporting
-          </div>
-          <div className="w-full h-1.5 bg-admin-bg rounded-full mt-2">
-            <div className="w-[80%] h-full bg-admin-amber rounded-full" />
-          </div>
-          <div className="text-[11px] text-admin-amber font-medium mt-auto pt-1">
-            {reminded ? 'Reminders sent to 3 facilities' : '3 not yet submitted'}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-border p-5 flex flex-col">
-          <FileSearch className="w-5 h-5 text-admin mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            {activeInv.length}
-          </div>
-          <div className="text-[13px] text-admin-muted font-medium">
-            Open Investigations
-          </div>
-          <div className="text-[11px] text-admin-muted mt-2 flex items-center gap-1">
-            <Target className="w-3 h-3" /> {liveInterventions.length} interventions in progress
-          </div>
-          <Link
-            to="/dho/investigations"
-            className="text-[12px] font-bold text-admin hover:underline mt-auto pt-1">
-
-            View investigations →
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-border p-5 flex flex-col">
-          <Clock className="w-5 h-5 text-admin-muted mb-3" />
-          <div className="text-[28px] font-bold text-admin-text leading-none mb-1">
-            {timeAgo(lastRun).replace(' ago', '')}
-          </div>
-          <div className="text-[13px] text-admin-muted font-medium">
-            Since Last Data Update
-          </div>
-          <div className="text-[11px] text-admin-muted mt-2">
-            {state.pipeline.lastBatchId}
-          </div>
-          <div className="text-[11px] text-admin-accent font-medium mt-auto pt-1">
-            ● DHIS2 + CHW data flowing
-          </div>
-        </div>
+        </Link>
       </div>
 
       {/* Row 2 */}
@@ -250,30 +243,34 @@ export function DhoOverview() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {HUYE_SECTORS.map((s) => {
                 const risk = sectorRisk(state, s.name);
+                const tone = sectorTone[risk] || sectorTone.green;
                 return (
                   <Link
                     key={s.name}
                     to={`/dho/risk-map?sector=${s.name}`}
                     title={`Open ${s.name} on the risk map`}
-                    className={`rounded-md p-4 flex flex-col items-center justify-center aspect-[4/3] font-bold hover:ring-2 hover:ring-admin-text/30 transition ${riskFill[risk]}`}>
-
-                    <span className="text-[14px]">{s.name}</span>
-                    <span className="text-[10px] font-semibold opacity-80 uppercase">{SEVERITY_META[risk].word}</span>
-                  </Link>);
-
+                    className={`rounded-lg p-3.5 flex flex-col items-center justify-center aspect-[4/3] border border-border hover:shadow-xs transition ${tone.bg}`}
+                  >
+                    <span className="text-[13px] font-bold text-admin-text mb-1">{s.name}</span>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-admin-muted">
+                      <span className={`w-2 h-2 rounded-full ${tone.dot}`} />
+                      <span>{tone.label}</span>
+                    </span>
+                  </Link>
+                );
               })}
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 mt-5">
               <div className="flex flex-wrap items-center gap-4 text-[12px] text-admin-muted">
-                <span>● High Risk</span>
-                <span>● Alert</span>
-                <span>● Watch</span>
-                <span>● Normal</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-admin-red" /> Critical</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F97316]" /> High</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500" /> Watch</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00A550]" /> Normal Baseline</span>
               </div>
               <Link
                 to="/dho/risk-map"
-                className="text-[13px] font-bold text-admin hover:underline">
-
+                className="text-[13px] font-bold text-admin hover:underline"
+              >
                 View Full Map →
               </Link>
             </div>
@@ -290,48 +287,49 @@ export function DhoOverview() {
             </Link>
           </div>
           <div className="p-5 space-y-3">
-            {open.length === 0 &&
-            <div className="text-center py-6 text-[13px] text-admin-muted">
+            {open.length === 0 && (
+              <div className="text-center py-6 text-[13px] text-admin-muted">
                 <CheckCircle2 className="w-6 h-6 text-admin-accent mx-auto mb-2" />
                 No open alerts in {district}.
               </div>
-            }
-            {open.slice(0, 3).map((a) => {
-              const m = SEVERITY_META[a.severity];
-              return (
-                <div
-                  key={a.id}
-                  className={`border-l-4 ${m.border} bg-admin-bg/50 rounded-r-md p-3`}>
-
-                  <div className="text-[13px] font-bold text-admin-text mb-1 flex flex-wrap items-center gap-2">
-                    <span>
-                      {m.emoji} {m.label} | {a.disease}
-                    </span>
-                    <StatusBadge status={a.status} />
+            )}
+            {open.slice(0, 3).map((a) => (
+              <div
+                key={a.id}
+                className="border border-border bg-admin-bg/30 rounded-lg p-3.5"
+              >
+                <div className="text-[13px] font-bold text-admin-text mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <SeverityBadge severity={a.severity} />
+                    <span>{a.disease}</span>
+                    <span className="text-[12px] font-mono text-admin-muted">{a.id}</span>
                   </div>
-                  <div className="text-[12px] text-admin-muted mb-1">
-                    Sector: {a.sector ?? '—'} | Since: {fmtDate(a.triggeredAt).replace(', 2026', '')} ({timeAgo(a.triggeredAt)})
-                  </div>
-                  <div className="text-[12px] text-admin-text mb-3">{a.reasons[0]}. Probability: {a.probability}%.</div>
-                  <div className="flex gap-2">
-                    {a.status === 'active' &&
+                  <StatusBadge status={a.status} />
+                </div>
+                <div className="text-[12px] text-admin-muted mb-1.5">
+                  Sector: <span className="font-semibold text-admin-text">{a.sector ?? '—'}</span> · {timeAgo(a.triggeredAt)}
+                </div>
+                <div className="text-[12px] text-admin-text mb-3">
+                  {a.reasons[0]} ({a.probability}% probability)
+                </div>
+                <div className="flex gap-2">
+                  {a.status === 'active' && (
                     <button
                       onClick={() => dialogs.open('ack', a)}
-                      className="h-8 px-3 bg-admin hover:bg-admin-hover text-white text-[12px] font-semibold rounded">
-
-                        Acknowledge
-                      </button>
-                    }
-                    <Link
-                      to={`/dho/alerts/${a.id}`}
-                      className="h-8 px-3 bg-white border border-border text-admin-text text-[12px] font-semibold rounded inline-flex items-center hover:bg-admin-bg">
-
-                      Details
-                    </Link>
-                  </div>
-                </div>);
-
-            })}
+                      className="h-8 px-3.5 bg-admin hover:bg-admin-hover text-white text-[12px] font-semibold rounded-md transition-colors"
+                    >
+                      Acknowledge
+                    </button>
+                  )}
+                  <Link
+                    to={`/dho/alerts/${a.id}`}
+                    className="h-8 px-3.5 bg-white border border-border text-admin-text hover:bg-admin-bg text-[12px] font-semibold rounded-md inline-flex items-center transition-colors"
+                  >
+                    Details →
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -468,7 +466,14 @@ export function DhoOverview() {
               onClick={() => actions.markNotificationRead(n.id)}
               className="flex gap-3 px-5 py-3 hover:bg-admin-bg/50">
 
-                <span>{n.severity === 'info' ? '' : SEVERITY_META[n.severity].emoji}</span>
+                <span className="pt-1.5 shrink-0">
+                  <span className={`inline-block w-2 h-2 rounded-full ${
+                    n.severity === 'red' ? 'bg-admin-red' :
+                    n.severity === 'orange' ? 'bg-[#F97316]' :
+                    n.severity === 'yellow' ? 'bg-yellow-500' :
+                    n.severity === 'green' ? 'bg-[#00A550]' : 'bg-admin-accent'
+                  }`} />
+                </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[13px] font-bold text-admin-text">{n.title}</span>
                   <span className="block text-[12px] text-admin-muted truncate">{n.body}</span>
