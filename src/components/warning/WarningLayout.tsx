@@ -43,57 +43,65 @@ export function WarningLayout({
       searchPlaceholder="Search alerts by disease, district or ID..."
       searchTarget="/warning/history"
       chip={
-      red.length > 0 ?
-      <Link
-        to="/warning/alerts"
-        className="inline-flex bg-epi-red px-3 py-1.5 rounded-full text-[12px] font-bold text-white items-center gap-1.5 whitespace-nowrap">
-
-            <AlertTriangle className="w-3.5 h-3.5" /> {red.length} Red Alert{red.length > 1 ? 's' : ''} Active
-          </Link> :
-
-      <span className="inline-flex items-center gap-1.5 bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-            <span className="w-2 h-2 rounded-full bg-[#00A550]" /> No red alerts
+        red.length > 0 ? (
+          <Link
+            to="/warning/alerts"
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors"
+          >
+            <span className="w-2 h-2 rounded-full bg-red-400" />
+            <span>{red.length} Active High-Risk Alert{red.length > 1 ? 's' : ''}</span>
+          </Link>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 bg-white/10 text-white/90 border border-white/20 px-3 py-1 rounded-full text-[12px] font-medium whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>Routine Monitoring</span>
           </span>
-
+        )
       }
       nav={[
-      { path: '/warning', icon: Home, label: 'Warning Overview', exact: true },
-      { path: '/warning/alerts', icon: AlertTriangle, label: 'Active Alerts', badge: open.length },
-      { path: '/warning/detail', icon: Search, label: 'Alert Detail' },
-      { path: '/warning/config', icon: Settings, label: 'Alert Configuration' },
-      { path: '/warning/escalation', icon: ArrowUpCircle, label: 'Escalation Manager', badge: unack },
-      { path: '/warning/delivery', icon: Radio, label: 'Notification Delivery' },
-      { path: '/warning/history', icon: ClipboardList, label: 'Alert History & Response' },
-      { path: '/warning/effectiveness', icon: BarChart2, label: 'Alert Effectiveness' },
-      { path: '/warning/cross-border', icon: Globe, label: 'Cross-Border Alerts' }]
-      }
+        { path: '/warning', icon: Home, label: 'Warning Overview', exact: true },
+        { path: '/warning/alerts', icon: AlertTriangle, label: 'Active Alerts', badge: open.length },
+        { path: '/warning/detail', icon: Search, label: 'Alert Detail' },
+        { path: '/warning/config', icon: Settings, label: 'Alert Configuration' },
+        { path: '/warning/escalation', icon: ArrowUpCircle, label: 'Escalation Manager', badge: unack },
+        { path: '/warning/delivery', icon: Radio, label: 'Notification Delivery' },
+        { path: '/warning/history', icon: ClipboardList, label: 'Alert History & Response' },
+        { path: '/warning/effectiveness', icon: BarChart2, label: 'Alert Effectiveness' },
+        { path: '/warning/cross-border', icon: Globe, label: 'Cross-Border Alerts' }
+      ]}
       banner={
-      <IdentityBanner tone={red.length > 0 ? 'danger' : 'calm'}>
-          {red.length > 0 ?
-        <>
-              <span className="inline-flex items-center gap-1.5 font-bold"><AlertTriangle className="w-3.5 h-3.5" /> ACTIVE EMERGENCY</span>
+        <IdentityBanner tone="calm">
+          {red.length > 0 ? (
+            <>
+              <span className="inline-flex items-center gap-1.5 font-bold">
+                <span className="w-2 h-2 rounded-full bg-red-400" />
+                <span>Active Alert Surveillance</span>
+              </span>
               <Sep />
               <span>
-                {red.length} Red Alert{red.length > 1 ? 's' : ''} Open
+                {red.length} High-Risk Alert{red.length > 1 ? 's' : ''} Open
               </span>
-              {red.map((a) =>
-          <span key={a.id} className="contents">
+              {red.map((a) => (
+                <span key={a.id} className="contents">
                   <Sep />
                   <Link to={`/warning/detail?id=${a.id}`} className="font-bold hover:underline">
                     {a.district} — {a.disease}
                   </Link>
                 </span>
+              ))}
+            </>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>No critical alerts open — routine surveillance</span>
+            </span>
           )}
-            </> :
-
-        <span className="inline-flex items-center gap-1.5 font-bold"><span className="w-2 h-2 rounded-full bg-emerald-400" /> No red alerts open — routine monitoring</span>
-        }
-          {latest &&
-        <>
+          {latest && (
+            <>
               <Sep />
               <span>Last alert generated: {fmtTime(latest.triggeredAt)} ({latest.id})</span>
             </>
-        }
+          )}
         </IdentityBanner>
       }>
 

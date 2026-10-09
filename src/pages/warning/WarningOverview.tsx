@@ -68,7 +68,7 @@ export function WarningOverview() {
                   <span className="w-2 h-2 rounded-full bg-epi-red" />
                   <span>Critical Threats</span>
                 </span>
-                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-epi-red">
+                <div className="w-8 h-8 rounded-full bg-epi/10 flex items-center justify-center text-epi">
                   <Bell className="w-4 h-4" />
                 </div>
               </div>
@@ -78,7 +78,7 @@ export function WarningOverview() {
             </div>
             <div className="text-[12px] text-epi-muted pt-2 border-t border-border/60">
               {red.length > 0 ? (
-                <span className="text-epi-red font-semibold">{red.map((a) => a.district).join(', ')} active</span>
+                <span className="font-semibold text-epi-text">{red.map((a) => a.district).join(', ')} active</span>
               ) : (
                 <span>No critical threats active</span>
               )}

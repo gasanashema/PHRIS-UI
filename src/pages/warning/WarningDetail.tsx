@@ -96,21 +96,21 @@ export function WarningDetail() {
       </div>
 
       {/* Status Banner */}
-      <div className={`${m.bg} p-4 rounded-lg shadow-sm mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
-        <div className="font-bold text-[14px] leading-relaxed flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-white inline-block" /> {m.label} ALERT — {alert.id} | {alert.disease} | {alert.district} District
-          {alert.sector ? `, ${alert.sector} Sector` : ''}
+      <div className="bg-white border border-border p-4 rounded-lg shadow-sm mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="font-bold text-[14px] leading-relaxed flex items-center gap-2 text-epi-text">
+          <SeverityBadge severity={alert.severity} />
+          <span>{alert.id} · {alert.disease} · {alert.district} District{alert.sector ? `, ${alert.sector} Sector` : ''}</span>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium opacity-90">
+        <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium text-epi-muted">
           <span>Triggered: {fmtDateTime(alert.triggeredAt)}</span>
           <span className="hidden md:inline">|</span>
-          <span>Status: {alert.status}</span>
+          <span className="capitalize">Status: {alert.status}</span>
           <span className="hidden md:inline">|</span>
           <span className="flex items-center gap-1">
             Acknowledged: {alert.acknowledgedBy ? (
-              <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> {alert.acknowledgedBy}</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-epi-text"><Check className="w-3.5 h-3.5 text-[#00A550]" /> {alert.acknowledgedBy}</span>
             ) : (
-              <span className="inline-flex items-center gap-1"><X className="w-3.5 h-3.5" /> Not yet</span>
+              <span className="inline-flex items-center gap-1 text-epi-muted"><X className="w-3.5 h-3.5" /> Not yet</span>
             )}
           </span>
           {alert.escalatedTo &&
@@ -133,7 +133,7 @@ export function WarningDetail() {
           <button onClick={() => dialogs.open('note', alert)} className="px-4 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded hover:bg-epi-bg">
             Add Note
           </button>
-          <button onClick={() => dialogs.open('escalate', alert)} className="px-4 py-2 bg-white border border-epi-red text-epi-red text-[13px] font-bold rounded hover:bg-epi-red/10">
+          <button onClick={() => dialogs.open('escalate', alert)} className="px-4 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded hover:bg-epi-bg">
             Escalate
           </button>
           {!alert.investigationId &&
