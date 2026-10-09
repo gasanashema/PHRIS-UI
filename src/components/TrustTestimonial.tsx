@@ -9,7 +9,7 @@ export function TrustTestimonial() {
             src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
             alt="Public health professionals reviewing data dashboards"
             className="absolute inset-0 w-full h-full object-cover" />
-          
+
           <div className="absolute inset-0 bg-primary-dark/20 mix-blend-multiply" />
         </div>
 
@@ -29,7 +29,7 @@ export function TrustTestimonial() {
             transition={{
               duration: 0.6
             }}>
-            
+
             <span className="text-[13px] font-medium text-primary uppercase tracking-wider mb-6 block">
               Built for Rwanda
             </span>

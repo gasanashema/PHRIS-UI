@@ -48,7 +48,7 @@ export function ProblemSection() {
             transition={{
               duration: 0.5
             }}>
-            
+
             <p className="text-[16px] text-text-secondary leading-relaxed mb-10">
               Rwanda collects health data daily from hospitals, clinics, and
               45,000 community health workers — but that data sits in separate
@@ -66,10 +66,10 @@ export function ProblemSection() {
                 </div>
               </div>
               {rows.map((row, i) =>
-              <div
-                key={i}
-                className={`grid grid-cols-2 divide-x divide-border ${i < rows.length - 1 ? 'border-b border-border' : ''}`}>
-                
+                <div
+                  key={i}
+                  className={`grid grid-cols-2 divide-x divide-border ${i < rows.length - 1 ? 'border-b border-border' : ''}`}>
+
                   <div className="p-4 flex items-start gap-3">
                     <XCircle className="w-5 h-5 text-alert-red shrink-0 mt-0.5" />
                     <span className="text-sm text-text-secondary">
@@ -104,13 +104,13 @@ export function ProblemSection() {
               delay: 0.2
             }}
             className="relative">
-            
+
             <div className="absolute -inset-4 border-2 border-primary/20 rounded-2xl transform translate-x-4 translate-y-4" />
             <img
               src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
               alt="Community health worker visiting a rural household in Rwanda"
               className="w-full h-auto rounded-xl relative z-10 shadow-lg object-cover aspect-[4/3]" />
-            
+
           </motion.div>
         </div>
       </div>
