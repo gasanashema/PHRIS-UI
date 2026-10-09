@@ -16,7 +16,9 @@ import {
   BrainCircuit,
   Clock,
   Play,
-  Loader2 } from
+  Loader2,
+  Check,
+  X } from
 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { PIPELINE_STAGES } from '../../data/seed';
@@ -85,7 +87,7 @@ export function ProcessingHome() {
           </p>
           <div className="mt-auto">
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${running ? 'bg-epi-amber/10 text-epi-amber' : 'bg-[#00A550]/10 text-[#00A550]'}`}>
-              {running ? '🟡 Processing' : '🟢 Healthy'}
+              {running ? '● Processing' : '● Healthy'}
             </span>
           </div>
         </div>
@@ -146,7 +148,7 @@ export function ProcessingHome() {
           <p className="text-[11px] text-epi-muted mb-2">{failed.map((j) => j.name).join(' · ') || 'None'}</p>
           {failed.length > 0 &&
           <div className="mt-auto">
-              <span className="text-[11px] font-bold text-epi-red">🔴 Needs attention</span>
+              <span className="text-[11px] font-bold text-epi-red">● Needs attention</span>
             </div>
           }
         </div>
@@ -210,12 +212,12 @@ export function ProcessingHome() {
                 }
                 {st === 'done' &&
                 <div className="text-[11px] font-bold text-[#00A550]">
-                    {i === PIPELINE_STAGES.length - 1 ? `🟢 Published ${p.lastBatchId}` : '🟢 Complete'}
+                    {i === PIPELINE_STAGES.length - 1 ? `● Published ${p.lastBatchId}` : '● Complete'}
                   </div>
                 }
                 {st === 'waiting' &&
                 <div className="text-[11px] font-bold text-epi-muted flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> ⏳ Waiting
+                    <Clock className="w-3 h-3" /> ⏱ Waiting
                   </div>
                 }
                 {i < PIPELINE_STAGES.length - 1 &&
@@ -227,7 +229,7 @@ export function ProcessingHome() {
         </div>
         {!running && !p.staleSources &&
         <div className="mt-5 text-[13px] text-epi-text flex flex-wrap items-center gap-2">
-            ✅ Latest batch <span className="font-mono font-bold">{p.lastBatchId}</span> is ready for the AI model.
+            <span className="text-[#00A550] flex items-center gap-1"><Check className="w-4 h-4" /> Latest batch</span> <span className="font-mono font-bold">{p.lastBatchId}</span> is ready for the AI model.
             <Link to="/prediction" className="font-bold text-epi hover:underline">Run a prediction →</Link>
           </div>
         }
@@ -244,9 +246,9 @@ export function ProcessingHome() {
                 setQ('');
                 setParams({});
               }}
-              className="text-[12px] font-bold text-epi hover:underline">
+              className="text-[12px] font-bold text-epi hover:underline flex items-center gap-1">
 
-                Clear filter “{q}” ✕
+                Clear filter “{q}” <X className="w-3 h-3" />
               </button>
             }
           </div>
@@ -274,7 +276,13 @@ export function ProcessingHome() {
                     <td className="p-3 text-[13px] text-epi-text">{j.duration}</td>
                     <td className="p-3 text-[13px] text-epi-text">{fmtNumber(j.records)} records</td>
                     <td className={`p-3 text-[13px] font-bold ${j.status === 'failed' ? 'text-epi-red' : j.status === 'running' ? 'text-epi-amber' : 'text-[#00A550]'}`}>
-                      {j.status === 'failed' ? '🔴 Failed' : j.status === 'running' ? '⏳ Retrying…' : '✅ Success'}
+                      {j.status === 'failed' ? (
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-epi-red inline-block" /> Failed</span>
+                      ) : j.status === 'running' ? (
+                        <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Retrying…</span>
+                      ) : (
+                        <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" /> Success</span>
+                      )}
                     </td>
                     <td className="p-3 text-[13px] text-right">
                       {j.status === 'failed' ?
@@ -293,17 +301,17 @@ export function ProcessingHome() {
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <h2 className="text-[16px] font-bold text-epi-text flex items-center gap-2">⚠️ Jobs Requiring Attention</h2>
+          <h2 className="text-[16px] font-bold text-epi-text flex items-center gap-2">Jobs Requiring Attention</h2>
           {!metFailed && !chwFailed &&
-          <div className="bg-white rounded-lg p-5 shadow-card border border-border text-[13px] text-epi-muted">
-              ✅ No failed jobs — everything is running normally.
+          <div className="bg-white rounded-lg p-5 shadow-card border border-border text-[13px] text-[#00A550] flex items-center gap-2">
+              <Check className="w-4 h-4 text-[#00A550]" /> No failed jobs — everything is running normally.
             </div>
           }
 
           {metFailed &&
           <div className="bg-white rounded-lg p-5 shadow-card border-2 border-epi-red flex flex-col">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-[12px] font-bold bg-epi-red text-white px-2 py-0.5 rounded">🔴 FAILED JOB</span>
+                <span className="text-[12px] font-bold bg-epi-red text-white px-2 py-0.5 rounded">● FAILED JOB</span>
                 <h3 className="text-[14px] font-bold text-epi-text">Rwanda Met Agency Import</h3>
               </div>
               <div className="text-[12px] text-epi-muted mb-3">Failed at: {fmtDateTime(metFailed.at)}</div>
@@ -344,7 +352,7 @@ export function ProcessingHome() {
           {chwFailed &&
           <div className="bg-white rounded-lg p-5 shadow-card border-2 border-epi-amber flex flex-col">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-[12px] font-bold bg-epi-amber text-white px-2 py-0.5 rounded">🟠 PARTIAL FAILURE</span>
+                <span className="text-[12px] font-bold bg-epi-amber text-white px-2 py-0.5 rounded">● PARTIAL FAILURE</span>
                 <h3 className="text-[14px] font-bold text-epi-text">Nyamagabe CHW Batch Processing</h3>
               </div>
               <div className="text-[12px] text-epi-muted mb-3">Failed at: {fmtDateTime(chwFailed.at)}</div>

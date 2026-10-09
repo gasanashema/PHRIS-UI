@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { X, Check, Mail, Phone, Package } from 'lucide-react';
 import { GeoLayout } from '../../components/geo/GeoLayout';
 import { useApp } from '../../store/AppStore';
 import { DISTRICT_XY } from '../../data/geo';
@@ -43,7 +44,7 @@ const FACILITIES: Facility[] = [
 { name: 'Nyagatare District Hospital', type: 'District Hospital', district: 'Nyagatare', sector: 'Nyagatare', dx: 0, dy: 3, catchment: 250000, cases: 27, reportedAt: '08:45', stock: { ORS: 'Good', RDT: 'Low', ACT: 'Good', Chlorine: 'Good' }, incharge: 'Dr. Rutayisire', phone: '+250 788 700 100' }];
 
 const NATIONAL = { total: 924, hospitals: 44, centers: 501, posts: 379, notReported: 77 };
-const STOCK_ICON: Record<Stock, string> = { Good: '🟢', Low: '🟠', Out: '🔴' };
+const STOCK_ICON: Record<Stock, string> = { Good: '●', Low: '●', Out: '●' };
 const worstStock = (f: Facility): Stock => Object.values(f.stock).includes('Out') ? 'Out' : Object.values(f.stock).includes('Low') ? 'Low' : 'Good';
 const selectCls = 'text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-white shadow-sm';
 
@@ -113,9 +114,9 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
           </select>
           <select aria-label="Stock status" value={stock} onChange={(e) => setStock(e.target.value)} className={selectCls}>
             <option value="All">Stock status: All</option>
-            <option value="Out">🔴 Stock-out</option>
-            <option value="Low">🟠 Low stock</option>
-            <option value="Good">🟢 Good</option>
+            <option value="Out">● Stock-out</option>
+            <option value="Low">● Low stock</option>
+            <option value="Good">● Good</option>
           </select>
           <select aria-label="District" value={district} onChange={(e) => setDistrict(e.target.value)} className={selectCls}>
             <option value="All">District: All Districts</option>
@@ -125,8 +126,7 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
 
         <div className="text-[12px] font-medium text-epi-text bg-epi-bg px-4 py-1.5 rounded-md border border-border">
           Showing <span className="font-bold">{list.length}</span> of {FACILITIES.length} key facilities | national:{' '}
-          <span className="font-bold">{NATIONAL.total}</span> mapped, <span className="font-bold text-epi-red">{NATIONAL.notReported}</span> not yet reported ⚠️
-        </div>
+          <span className="font-bold">{NATIONAL.total}</span> mapped, <span className="font-bold text-epi-red">{NATIONAL.notReported}</span> not yet reported </div>
       </div>
 
       <div className="absolute inset-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
@@ -170,15 +170,15 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
             <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#1D72B8] border-2 border-[#00A550]" /> Hospital</div>
             <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-white border-2 border-[#00A550]" /> Health center</div>
             <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-gray-300 border border-[#00A550]" /> Health post</div>
-            <div>Ring: 🟢 OK · 🟠 low stock · 🔴 stock-out / not reported</div>
+            <div>Ring: ● OK · ● low stock · ● stock-out / not reported</div>
           </div>
 
           {/* Facility popup */}
           {sel &&
           <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-xl border border-border p-4 w-72 max-w-[calc(100%-32px)] max-h-[70%] overflow-y-auto z-30">
               <div className="flex justify-between">
-                <h3 className="text-[14px] font-bold text-epi-text flex items-center gap-2">🏥 {sel.name}</h3>
-                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted text-[12px]">✕</button>
+                <h3 className="text-[14px] font-bold text-epi-text flex items-center gap-2">{sel.name}</h3>
+                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted hover:text-epi-text"><X className="w-4 h-4" /></button>
               </div>
               <div className="text-[11px] text-epi-muted mb-3">
                 Type: {sel.type}
@@ -188,21 +188,21 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
                 Catchment: {sel.catchment.toLocaleString()} people
               </div>
               <div className="bg-epi-bg/50 p-2 rounded border border-border mb-3">
-                <div className="text-[11px] font-bold text-epi-muted uppercase tracking-wider mb-1">📊 Today:</div>
+                <div className="text-[11px] font-bold text-epi-muted uppercase tracking-wider mb-1">Today:</div>
                 <div className="text-[12px] flex justify-between"><span className="text-epi-text">Cases reported:</span> <span className="font-bold">{reported(sel) ? sel.cases : '—'}</span></div>
                 <div className="text-[12px] flex justify-between">
                   <span className="text-epi-text">Reporting status:</span>{' '}
                   {reported(sel) ?
-                <span className="font-bold text-[#00A550]">✅ Reported {sel.reportedAt}</span> :
+                <span className="font-bold text-[#00A550] inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Reported {sel.reportedAt}</span> :
                 state.remindersSent.includes(sel.name) ?
-                <span className="font-bold text-epi-amber">📨 Reminder sent</span> :
+                <span className="font-bold text-epi-amber inline-flex items-center gap-1"><Mail className="w-3.5 h-3.5" /> Reminder sent</span> :
 
-                <span className="font-bold text-epi-red">❌ Not reported{sel.daysLate ? ` (${sel.daysLate}d)` : ''}</span>
+                <span className="font-bold text-epi-red">Not reported{sel.daysLate ? ` (${sel.daysLate}d)` : ''}</span>
                 }
                 </div>
               </div>
               <div className="bg-epi-bg/50 p-2 rounded border border-border mb-3">
-                <div className="text-[11px] font-bold text-epi-muted uppercase tracking-wider mb-1">📦 Stock Status:</div>
+                <div className="text-[11px] font-bold text-epi-muted uppercase tracking-wider mb-1 flex items-center gap-1.5"><Package className="w-3.5 h-3.5" /> Stock Status:</div>
                 {Object.entries(sel.stock).map(([k, v]) =>
               <div key={k} className="text-[12px] flex justify-between">
                     <span className="text-epi-text">{k}:</span>
@@ -211,9 +211,9 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
               )}
               </div>
               <div className="text-[11px] text-epi-text mb-3">
-                👤 In Charge: {sel.incharge}
+                In Charge: {sel.incharge}
                 <br />
-                📞 <a href={`tel:${sel.phone.replace(/\s/g, '')}`} className="hover:underline">{sel.phone}</a>
+                <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 text-epi-muted" /> <a href={`tel:${sel.phone.replace(/\s/g, '')}`} className="hover:underline">{sel.phone}</a></span>
               </div>
               <div className="flex flex-col gap-2">
                 {sel.district === 'Huye' ?
@@ -222,7 +222,7 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
               <button onClick={() => facilityReport(sel)} className="w-full py-1.5 bg-epi text-white text-[11px] font-bold rounded">View Full Facility Report →</button>
               }
                 {flagged.includes(sel.name) ?
-              <span className="w-full py-1.5 bg-epi-accent/10 text-epi-accent text-[11px] font-bold rounded text-center">✓ Stock issue flagged</span> :
+              <span className="w-full py-1.5 bg-epi-accent/10 text-epi-accent text-[11px] font-bold rounded text-center inline-flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Stock issue flagged</span> :
 
               <button onClick={() => flagStock(sel)} className="w-full py-1.5 bg-white border border-border text-epi-text text-[11px] font-bold rounded">
                     Flag Stock Issue →
@@ -251,8 +251,8 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
             <div className="mb-8">
               <div className="text-[12px] font-bold text-epi-muted uppercase tracking-wider mb-3">Today's reporting</div>
               <div className="flex justify-between text-[13px] mb-1">
-                <span className="font-bold text-[#00A550]">✅ Reported: {NATIONAL.total - NATIONAL.notReported} (92%)</span>
-                <span className="font-bold text-epi-red">❌ Not reported: {NATIONAL.notReported} (8%)</span>
+                <span className="font-bold text-[#00A550] inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Reported: {NATIONAL.total - NATIONAL.notReported} (92%)</span>
+                <span className="font-bold text-epi-red">Not reported: {NATIONAL.notReported} (8%)</span>
               </div>
               <div className="w-full h-2 bg-epi-red/20 rounded-full overflow-hidden mb-4">
                 <div className="h-full bg-[#00A550]" style={{ width: '92%' }}></div>
@@ -262,9 +262,9 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
                 <ul className="space-y-2 text-[13px] text-epi-text mb-4">
                   {missing.map((f) =>
                   <li key={f.name} className="flex justify-between gap-2">
-                      <button onClick={() => setSelected(f.name)} className="text-left hover:underline">⚠️ {f.name}, {f.district}</button>
+                      <button onClick={() => setSelected(f.name)} className="text-left hover:underline">{f.name}, {f.district}</button>
                       <span className={`font-bold whitespace-nowrap ${state.remindersSent.includes(f.name) ? 'text-epi-amber' : f.daysLate && f.daysLate >= 2 ? 'text-epi-red' : f.daysLate ? 'text-[#F97316]' : 'text-epi-muted'}`}>
-                        {state.remindersSent.includes(f.name) ? '📨 reminded' : f.daysLate ? `${f.daysLate} day${f.daysLate > 1 ? 's' : ''}` : 'today'}
+                        {state.remindersSent.includes(f.name) ? <span className="inline-flex items-center gap-1"><Mail className="w-3 h-3" /> reminded</span> : f.daysLate ? `${f.daysLate} day${f.daysLate > 1 ? 's' : ''}` : 'today'}
                       </span>
                     </li>
                   )}
@@ -275,8 +275,15 @@ ${Object.entries(f.stock).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
                     actions.sendFacilityReminder(missing.map((f) => f.name));
                     actions.toast(`Reminder sent to ${NATIONAL.notReported} non-reporting facilities (simulated SMS).`);
                   }}
-                  className="w-full py-2 bg-epi-amber text-epi-text text-[13px] font-bold rounded hover:bg-epi-amber/90 transition-colors disabled:opacity-60">
-                  {allReminded ? '✓ Reminders sent' : `Send bulk reminder to ${NATIONAL.notReported} facilities`}
+                  className="w-full py-2 bg-epi-amber text-epi-text text-[13px] font-bold rounded hover:bg-epi-amber/90 transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-1.5">
+                  {allReminded ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Reminders sent</span>
+                    </>
+                  ) : (
+                    `Send bulk reminder to ${NATIONAL.notReported} facilities`
+                  )}
                 </button>
               </div>
             </div>

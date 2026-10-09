@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2, Check } from 'lucide-react';
 import { useApp, useCurrentUser } from '../../store/AppStore';
 import { fmtDate, fmtNumber } from '../../lib/format';
 
 const SEED_HISTORY = [
-{ date: 'June 2, 2026', by: 'Jean Paul Habimana', source: 'NISR Census', file: 'census_2022_final.xlsx', records: '10,920 rows', status: '✅ Imported successfully' },
-{ date: 'May 15, 2026', by: 'Aline Uwimana', source: 'MINAGRI', file: 'food_security_Q1.csv', records: '847 rows', status: '✅ Imported successfully' },
-{ date: 'April 30, 2026', by: 'Jean Paul Habimana', source: 'WASAC', file: 'wash_coverage_apr.xlsx', records: '1,204 rows', status: '⚠️ Imported with 34 warnings' }];
+{ date: 'June 2, 2026', by: 'Jean Paul Habimana', source: 'NISR Census', file: 'census_2022_final.xlsx', records: '10,920 rows', status: 'Imported successfully' },
+{ date: 'May 15, 2026', by: 'Aline Uwimana', source: 'MINAGRI', file: 'food_security_Q1.csv', records: '847 rows', status: 'Imported successfully' },
+{ date: 'April 30, 2026', by: 'Jean Paul Habimana', source: 'WASAC', file: 'wash_coverage_apr.xlsx', records: '1,204 rows', status: 'Imported with 34 warnings' }];
 
 
 const TARGET_FIELDS = ['District', 'Sector', 'Date', 'Disease', 'Cases', 'Population', 'Indicator', 'Value', '— Ignore —'];
@@ -142,9 +142,9 @@ export function IntegrationUpload() {
             <div key={s} className="flex items-center gap-2">
                 <div className={`flex items-center gap-2 ${i <= step ? 'text-epi' : 'text-epi-muted'}`}>
                   <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center ${i < step || done && i === 4 ? 'bg-[#00A550] text-white' : i === step ? 'bg-epi text-white' : 'border-2 border-border'}`}>
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${i < step || (done && i === 4) ? 'bg-[#00A550] text-white' : i === step ? 'bg-epi text-white' : 'border-2 border-border'}`}>
 
-                    {i < step || done && i === 4 ? '✓' : i + 1}
+                    {i < step || (done && i === 4) ? <Check className="w-3.5 h-3.5" /> : i + 1}
                   </span>
                   {s}
                 </div>
@@ -220,7 +220,7 @@ export function IntegrationUpload() {
               </div>
               {!mapping.includes('District') &&
             <div className="mt-3 text-[12px] text-epi-amber font-medium">
-                  ⚠️ No column is mapped to District — rows cannot be placed on the map and more will be rejected.
+                  No column is mapped to District — rows cannot be placed on the map and more will be rejected.
                 </div>
             }
             </div>
@@ -379,9 +379,11 @@ export function IntegrationUpload() {
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">{fmtNumber(u.records)} rows</td>
                   <td className="p-4 text-[13px] font-bold">
-                    {u.status === 'partial' ?
-                  <span className="text-epi-amber flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> With rejected rows</span> :
-                  '✅ Imported successfully'}
+                    {u.status === 'partial' ? (
+                      <span className="text-epi-amber flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> With rejected rows</span>
+                    ) : (
+                      <span className="text-[#00A550] flex items-center gap-1"><Check className="w-4 h-4" /> Imported successfully</span>
+                    )}
                   </td>
                 </tr>
               )}
@@ -397,7 +399,13 @@ export function IntegrationUpload() {
                     </span>
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">{h.records}</td>
-                  <td className="p-4 text-[13px] font-bold">{h.status}</td>
+                  <td className="p-4 text-[13px] font-bold">
+                    {h.status.includes('successfully') ? (
+                      <span className="text-[#00A550] flex items-center gap-1"><Check className="w-4 h-4" /> {h.status}</span>
+                    ) : (
+                      <span className="text-epi-amber flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> {h.status}</span>
+                    )}
+                  </td>
                 </tr>
               )}
             </tbody>

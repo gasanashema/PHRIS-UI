@@ -155,7 +155,19 @@ export function AdminAuditTrail() {
                     <td className="px-4 py-3 font-bold text-admin-text">{r.action}</td>
                     <td className="px-4 py-3 text-admin-muted">{r.module}</td>
                     <td className="px-4 py-3 text-admin-muted">{r.ip}</td>
-                    <td className="px-4 py-3 font-bold whitespace-nowrap">{r.flagged ? '🔴 Security Flag' : '✅ Success'}</td>
+                    <td className="px-4 py-3 font-bold whitespace-nowrap">
+                      {r.flagged ? (
+                        <span className="inline-flex items-center gap-1.5 text-admin-red">
+                          <span className="w-2 h-2 rounded-full bg-admin-red" />
+                          Security Flag
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-admin-accent">
+                          <span className="w-2 h-2 rounded-full bg-admin-accent" />
+                          Success
+                        </span>
+                      )}
+                    </td>
                   </tr>
                   {expanded === r.id &&
                 <tr className="bg-admin-bg/80 border-b border-border">

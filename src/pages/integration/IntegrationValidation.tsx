@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check, GitMerge, MapPin, X } from 'lucide-react';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
 import { useApp } from '../../store/AppStore';
 const rules = [
@@ -7,65 +8,65 @@ const rules = [
   rule: 'Missing required values',
   type: 'Completeness',
   desc: 'Empty fields that must have data (e.g. district, disease, date)',
-  severity: '🟠 Error',
+  severity: '● Error',
   failures: 23,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Impossible values',
   type: 'Range check',
   desc: 'Values outside biological limits (e.g. Age = 200, cases = -5)',
-  severity: '🔴 Critical',
+  severity: '● Critical',
   failures: 4,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Duplicate records',
   type: 'Deduplication',
   desc: 'Same patient ID + same date reported twice',
-  severity: '🟠 Error',
+  severity: '● Error',
   failures: 11,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Wrong data format',
   type: 'Format check',
   desc: 'Dates written as text, numbers stored as strings',
-  severity: '🟡 Warning',
+  severity: '● Warning',
   failures: 67,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Out-of-range outbreak values',
   type: 'Statistical outlier',
   desc: 'Cases far above district historical average (e.g. 500 malaria cases from one small health post)',
-  severity: '🟡 Warning',
+  severity: '● Warning',
   failures: 8,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Facility code mismatch',
   type: 'Reference check',
   desc: "Data tagged to a facility code that doesn't exist in the system (e.g. Musanze data labeled Huye)",
-  severity: '🟠 Error',
+  severity: '● Error',
   failures: 9,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'Kinyarwanda field mapping',
   type: 'Language normalization',
   desc: 'Kinyarwanda disease or symptom terms not yet mapped to system codes',
-  severity: '🟡 Warning',
+  severity: '● Warning',
   failures: 82,
-  status: '🟢 Active'
+  status: '● Active'
 },
 {
   rule: 'CHW district mismatch',
   type: 'Geographic validation',
   desc: 'CHW reports a district outside their registered zone',
-  severity: '🟠 Error',
+  severity: '● Error',
   failures: 4,
-  status: '🟢 Active'
+  status: '● Active'
 }];
 
 const flagged = [
@@ -74,7 +75,7 @@ const flagged = [
   source: 'CHW App',
   district: 'Bugesera',
   issue: 'Age field empty for malaria case report',
-  severity: '🟠 Error',
+  severity: '● Error',
   time: 'June 5, 07:12',
   actions: 'Review · Correct · Reject'
 },
@@ -84,7 +85,7 @@ const flagged = [
   district: 'Musanze',
   issue:
   '500 malaria cases from Ruhengeri Health Post — exceeds monthly average by 840%',
-  severity: '🟡 Warning (possible outbreak?)',
+  severity: '● Warning (possible outbreak?)',
   time: 'June 5, 11:00',
   actions: 'Investigate · Accept · Reject'
 },
@@ -93,7 +94,7 @@ const flagged = [
   source: 'EMR Systems',
   district: 'Huye',
   issue: 'Facility code RW-HY-099 not found in facility registry',
-  severity: '🟠 Error',
+  severity: '● Error',
   time: 'June 5, 09:30',
   actions: 'Review · Map Facility · Reject'
 },
@@ -102,7 +103,7 @@ const flagged = [
   source: 'CHW App',
   district: 'Ngoma',
   issue: 'Disease field contains "Impiswi" — not yet mapped to system code',
-  severity: '🟡 Warning',
+  severity: '● Warning',
   time: 'June 5, 07:12',
   actions: 'Map Term · Accept · Reject'
 },
@@ -111,18 +112,18 @@ const flagged = [
   source: 'RBC Lab',
   district: 'Kicukiro',
   issue: 'Duplicate record — same patient ID + date as RW-LAB-20260604-0891',
-  severity: '🔴 Critical',
+  severity: '● Critical',
   time: 'June 5, 12:45',
   actions: 'Compare · Merge · Reject'
 }];
 
 const TABS = ['All Sources', 'DHIS2', 'RBC Lab', 'CHW App', 'EMR Systems', 'Pharmacy', 'WASAC'];
-const OUTCOME: Record<string, {label: string;cls: string;}> = {
-  Accept: { label: '✅ Accepted', cls: 'text-[#00A550]' },
-  Correct: { label: '✏️ Corrected & accepted', cls: 'text-[#00A550]' },
-  Merge: { label: '🔗 Merged with original', cls: 'text-[#00A550]' },
-  'Map Facility': { label: '📍 Facility mapped & accepted', cls: 'text-[#00A550]' },
-  Reject: { label: '❌ Rejected — source notified', cls: 'text-epi-red' }
+const OUTCOME: Record<string, { label: string; cls: string; icon: 'check' | 'merge' | 'map' | 'reject' }> = {
+  Accept: { label: 'Accepted', cls: 'text-[#00A550]', icon: 'check' },
+  Correct: { label: 'Corrected & accepted', cls: 'text-[#00A550]', icon: 'check' },
+  Merge: { label: 'Merged with original', cls: 'text-[#00A550]', icon: 'merge' },
+  'Map Facility': { label: 'Facility mapped & accepted', cls: 'text-[#00A550]', icon: 'map' },
+  Reject: { label: 'Rejected — source notified', cls: 'text-epi-red', icon: 'reject' }
 };
 
 export function IntegrationValidation() {
@@ -164,13 +165,13 @@ export function IntegrationValidation() {
       breadcrumb="Data Validation">
 
       <div className="flex flex-wrap items-center gap-4 text-[14px] font-bold bg-white px-4 py-3 rounded-lg shadow-sm border border-border mb-6 w-fit max-w-full">
-        <span className="text-[#00A550]">🟢 {(8795 + accepted).toLocaleString('en-US')} Records Passed</span>
+        <span className="text-[#00A550]">● {(8795 + accepted).toLocaleString('en-US')} Records Passed</span>
         <span className="text-border">|</span>
-        <span className="text-epi-amber">🟡 {184 + pendingWarn} Records Flagged (Warning)</span>
+        <span className="text-epi-amber">● {184 + pendingWarn} Records Flagged (Warning)</span>
         <span className="text-border">|</span>
-        <span className="text-[#F97316]">🟠 {45 + pendingErr} Records Held (Error)</span>
+        <span className="text-[#F97316]">● {45 + pendingErr} Records Held (Error)</span>
         <span className="text-border">|</span>
-        <span className="text-epi-red">🔴 {9 + rejected} Records Rejected</span>
+        <span className="text-epi-red">● {9 + rejected} Records Rejected</span>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -225,9 +226,9 @@ export function IntegrationValidation() {
           <div className="flex flex-wrap items-center gap-3">
             <select value={severity} onChange={(e) => setSeverity(e.target.value)} aria-label="Severity" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white">
               <option value="all">All Severity</option>
-              <option value="critical">🔴 Critical</option>
-              <option value="error">🟠 Error</option>
-              <option value="warning">🟡 Warning</option>
+              <option value="critical">Critical</option>
+              <option value="error">Error</option>
+              <option value="warning">Warning</option>
             </select>
             <input
               type="text"
@@ -263,8 +264,15 @@ export function IntegrationValidation() {
                     <td className="p-4 text-[13px] font-bold">{f.severity}</td>
                     <td className="p-4 text-[13px] text-epi-muted whitespace-nowrap">{f.time}</td>
                     <td className="p-4 text-[13px] text-epi font-medium whitespace-nowrap">
-                      {resolved[f.id] ?
-                    <span className={`font-bold ${OUTCOME[resolved[f.id]]?.cls}`}>{OUTCOME[resolved[f.id]]?.label}</span> :
+                      {resolved[f.id] ? (
+                        <span className={`font-bold flex items-center gap-1.5 ${OUTCOME[resolved[f.id]]?.cls}`}>
+                          {OUTCOME[resolved[f.id]]?.icon === 'check' && <Check className="w-3.5 h-3.5" />}
+                          {OUTCOME[resolved[f.id]]?.icon === 'merge' && <GitMerge className="w-3.5 h-3.5" />}
+                          {OUTCOME[resolved[f.id]]?.icon === 'map' && <MapPin className="w-3.5 h-3.5" />}
+                          {OUTCOME[resolved[f.id]]?.icon === 'reject' && <X className="w-3.5 h-3.5" />}
+                          {OUTCOME[resolved[f.id]]?.label}
+                        </span>
+                      ) : (
                     f.actions.split(' · ').map((action, i, arr) =>
                     <Fragment key={action}>
                             {action === 'Map Term' ?
@@ -276,7 +284,7 @@ export function IntegrationValidation() {
                       }
                             {i < arr.length - 1 && <span className="text-epi-muted mx-1">·</span>}
                           </Fragment>
-                    )}
+                    ))}
                     </td>
                   </tr>
                   {open === f.id &&
@@ -305,9 +313,9 @@ export function IntegrationValidation() {
         <div className="p-4 border-t border-border bg-epi-bg/50">
           <div className="flex flex-wrap items-center gap-4 text-[12px]">
             <span className="font-bold text-epi-muted uppercase tracking-wider">Severity Legend:</span>
-            <span>🟡 Warning: accepted but flagged</span>
-            <span>🟠 Error: held pending correction</span>
-            <span>🔴 Critical: rejected, source notified</span>
+            <span>● Warning: accepted but flagged</span>
+            <span>● Error: held pending correction</span>
+            <span>● Critical: rejected, source notified</span>
           </div>
         </div>
       </div>

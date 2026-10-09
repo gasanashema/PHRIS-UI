@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Legend } from
 'recharts';
+import { MapPin } from 'lucide-react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
 const ageData = [
 {
@@ -225,8 +226,11 @@ export function EpiPatterns() {
               )}
               </div>
             )}
-            <div className="text-[11px] font-bold text-epi mt-2">
-              {cholera ? '📍 June — Post-rains period. Western lakeshore districts remain at elevated risk.' : '📍 June — End of peak season. Cases declining but remain elevated.'}
+            <div className="text-[11px] font-bold text-epi mt-2 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>
+                {cholera ? 'June — Post-rains period. Western lakeshore districts remain at elevated risk.' : 'June — End of peak season. Cases declining but remain elevated.'}
+              </span>
             </div>
           </div>
           <div className="mt-auto bg-epi/10 border border-epi/20 p-3 rounded-md text-[12px] text-epi-text font-medium">

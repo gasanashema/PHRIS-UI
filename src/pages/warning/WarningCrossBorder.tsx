@@ -9,7 +9,7 @@ export function WarningCrossBorder() {
       {/* Top Banner */}
       <div className="bg-epi-red text-white p-4 rounded-lg shadow-sm mb-6">
         <div className="font-bold text-[14px] mb-2">
-          🌍 ACTIVE CROSS-BORDER THREATS:
+          ACTIVE CROSS-BORDER THREATS:
         </div>
         <div className="flex flex-col md:flex-row gap-4 text-[13px]">
           <div className="flex-1 bg-black/20 p-3 rounded">
@@ -18,14 +18,14 @@ export function WarningCrossBorder() {
             </div>
             <div>
               Risk to Rusizi District:{' '}
-              <span className="font-bold">🔴 VERY HIGH</span>
+              <span className="font-bold">● VERY HIGH</span>
             </div>
           </div>
           <div className="flex-1 bg-black/20 p-3 rounded">
             <div className="font-bold mb-1">DRC North Kivu — Mpox ACTIVE</div>
             <div>
               Risk to Rubavu District:{' '}
-              <span className="font-bold text-[#F97316]">🟠 HIGH</span>
+              <span className="font-bold text-[#F97316]">● HIGH</span>
             </div>
           </div>
         </div>
@@ -154,10 +154,10 @@ export function WarningCrossBorder() {
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">Cholera</td>
                   <td className="p-4 text-[13px] font-bold text-epi-red">
-                    🔴 Active outbreak
+                    ● Active outbreak
                   </td>
                   <td className="p-4 text-[13px] font-bold text-epi-red">
-                    🔴 Very High
+                    ● Very High
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">
                     Rusizi, Nyamasheke
@@ -177,10 +177,10 @@ export function WarningCrossBorder() {
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">Mpox</td>
                   <td className="p-4 text-[13px] font-bold text-epi-red">
-                    🔴 Active outbreak
+                    ● Active outbreak
                   </td>
                   <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                    🟠 High
+                    ● High
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">
                     Rubavu, Nyabihu
@@ -200,10 +200,10 @@ export function WarningCrossBorder() {
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">Ebola</td>
                   <td className="p-4 text-[13px] font-bold text-epi-amber">
-                    🟡 Watch — 2 suspected
+                    ● Watch — 2 suspected
                   </td>
                   <td className="p-4 text-[13px] font-bold text-epi-amber">
-                    🟡 Moderate
+                    ● Moderate
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">
                     Musanze, Burera, Gakenke
@@ -223,10 +223,10 @@ export function WarningCrossBorder() {
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">Malaria</td>
                   <td className="p-4 text-[13px] font-bold text-[#F97316]">
-                    🟠 Elevated
+                    ● Elevated
                   </td>
                   <td className="p-4 text-[13px] font-bold text-epi-amber">
-                    🟡 Moderate
+                    ● Moderate
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">
                     Kirehe, Ngoma
@@ -248,10 +248,10 @@ export function WarningCrossBorder() {
                     No active threats
                   </td>
                   <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                    🟢 Normal
+                    ● Normal
                   </td>
                   <td className="p-4 text-[13px] font-bold text-[#00A550]">
-                    🟢 Low
+                    ● Low
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">
                     Ngara border
@@ -272,7 +272,7 @@ export function WarningCrossBorder() {
         <div className="lg:col-span-4">
           <div className="bg-epi/10 border border-epi/20 p-6 rounded-lg">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-[20px]">💡</span>
+              <span className="text-[20px]"></span>
               <h3 className="text-[14px] font-bold text-epi-text">
                 Cross-Border Threshold Logic
               </h3>

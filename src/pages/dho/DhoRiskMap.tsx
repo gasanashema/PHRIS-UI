@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 import { InterventionDrawer } from '../../components/dho/InterventionDrawer';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
@@ -103,10 +104,10 @@ export function DhoRiskMap() {
             key={l}
             onClick={() => toggleLayer(l)}
             aria-pressed={on(l)}
-            className={`px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors ${on(l) ? 'bg-admin text-white' : 'bg-white border border-border text-admin-muted hover:text-admin-text'}`}>
+            className={`px-3 py-1.5 rounded-full text-[13px] font-semibold transition-colors inline-flex items-center gap-1 ${on(l) ? 'bg-admin text-white' : 'bg-white border border-border text-admin-muted hover:text-admin-text'}`}>
 
-              {on(l) ? '✓ ' : ''}
-              {l}
+              {on(l) && <Check className="w-3.5 h-3.5" />}
+              <span>{l}</span>
             </button>
           )}
         </div>
@@ -185,7 +186,7 @@ export function DhoRiskMap() {
                     fontSize="13"
                     fontWeight="bold">
 
-                    {r === 'red' && on('Disease Risk') ? `🔴 ${s.name}` : s.name}
+                    {r === 'red' && on('Disease Risk') ? `● ${s.name}` : s.name}
                   </text>
                   {on('CHW Coverage') &&
                   <text
@@ -210,9 +211,15 @@ export function DhoRiskMap() {
                     </text>
                   }
                   {on('Health Facilities') &&
-                  <text x={g.x + 10} y={g.y + 20} fontSize="14">
-                      ⚕{s.facilities.length > 1 ? '×' + s.facilities.length : ''}
-                    </text>
+                    <g transform={`translate(${g.x + 10}, ${g.y + 10})`}>
+                      <rect width="14" height="14" rx="2" fill="#0D9488" opacity="0.85" />
+                      <path d="M7 3v8M3 7h8" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+                      {s.facilities.length > 1 && (
+                        <text x="16" y="11" fontSize="10" fontWeight="bold" fill="#0D9488">
+                          ×{s.facilities.length}
+                        </text>
+                      )}
+                    </g>
                   }
                   {hotspot &&
                   <circle
@@ -231,13 +238,17 @@ export function DhoRiskMap() {
           </svg>
           <div className="mt-4 bg-white/90 border border-border rounded-md px-3 py-2 text-[12px] flex flex-col gap-1 shadow-sm">
             <div className="flex flex-wrap gap-3">
-              <span>🔴 Critical</span>
-              <span>🟠 Alert</span>
-              <span>🟡 Watch</span>
-              <span>🟢 Normal</span>
+              <span>● Critical</span>
+              <span>● Alert</span>
+              <span>● Watch</span>
+              <span>● Normal</span>
             </div>
             <div className="flex flex-wrap gap-3 text-admin-muted">
-              {on('Health Facilities') && <span>⚕ Health Facility</span>}
+              {on('Health Facilities') && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 bg-[#0D9488] rounded-sm inline-block" /> Health Facility
+                </span>
+              )}
               {on('Case Hotspots') && <span>● Case hotspot (size = cases)</span>}
               {on('Population Density') && <span>▬ Population density</span>}
               {on('CHW Coverage') && <span>┅ CHW coverage below 80%</span>}

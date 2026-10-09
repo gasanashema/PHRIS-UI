@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GeoLayout } from '../../components/geo/GeoLayout';
-import { X, ArrowRight, Search } from 'lucide-react';
+import { X, ArrowRight, Search, Play, Download, Tent } from 'lucide-react';
 import { useApp, districtLevel, severityCounts } from '../../store/AppStore';
 import { DISTRICT_PROVINCE } from '../../data/seed';
 import { DISTRICT_XY, DISTRICT_POP_K, BORDER_DISTRICTS, rainfallFor, facilitiesFor } from '../../data/geo';
@@ -9,18 +9,18 @@ import { SEVERITY_META, isOpenStatus, fmtDateTime, nowISO, downloadFile, toCSV }
 
 type Layer = 'risk' | 'cases' | 'alerts' | 'facilities' | 'population' | 'environment' | 'border';
 const LAYERS: [Layer, string][] = [
-['risk', '🔥 Risk Scores'],
-['cases', '🦠 Disease Cases'],
-['alerts', '⚠️ Active Alerts'],
-['facilities', '🏥 Facilities'],
-['population', '👥 Population'],
-['environment', '🌧️ Environment'],
-['border', '🌍 Cross-Border']];
+['risk', 'Risk Scores'],
+['cases', 'Disease Cases'],
+['alerts', 'Active Alerts'],
+['facilities', 'Facilities'],
+['population', 'Population'],
+['environment', 'Environment'],
+['border', 'Cross-Border']];
 
 const PROVINCE_OPTIONS = ['All Rwanda', 'Western', 'Northern', 'Kigali', 'Southern', 'Eastern'];
 const PERIODS: Record<string, number> = { Current: 1, 'Last week': 0.9, 'Last month': 0.78 };
 const riskColor = (s: number) => s >= 80 ? '#D32F2F' : s >= 60 ? '#F57C00' : s >= 40 ? '#F59E0B' : '#00A550';
-const riskLabel = (s: number) => s >= 80 ? '🔴' : s >= 60 ? '🟠' : s >= 40 ? '🟡' : '🟢';
+const riskLabel = (s: number) => s >= 80 ? '●' : s >= 60 ? '●' : s >= 40 ? '●' : '●';
 
 export function GeoOverview() {
   const { state } = useApp();
@@ -66,7 +66,7 @@ export function GeoOverview() {
         }
       case 'border':
         return BORDER_DISTRICTS.includes(r.district) ?
-        { color: '#F57C00', size: 24, label: '⚠️' } :
+        { color: '#F57C00', size: 24, label: '' } :
         { color: '#4B5563', size: 10, label: '' };
       default:
         return { color: riskColor(r.score), size: 16 + r.score / 3, label: String(r.score) };
@@ -107,12 +107,12 @@ export function GeoOverview() {
             {/* DRC border */}
             <div className="absolute left-[3%] top-[18%] bottom-[2%] border-l-4 border-dashed border-[#F57C00]/80" />
             <div className="absolute left-[4%] top-[48%] bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded border border-white/20 backdrop-blur-sm">
-              ⚠️ DRC border
+              DRC border
             </div>
             {/* Refugee camps */}
             {[['Mahama', 84, 76], ['Nyabiheke', 72, 20], ['Kigeme', 30, 70], ['Kiziba', 22, 54]].map(([n, x, y]) =>
-            <div key={n as string} title={`${n} refugee camp`} className="absolute text-[11px] bg-black/50 px-1 rounded border border-white/20" style={{ left: `${x}%`, top: `${y}%` }}>
-                🏕️
+            <div key={n as string} title={`${n} refugee camp`} className="absolute text-[11px] bg-black/60 px-1 py-0.5 rounded border border-white/20 text-white flex items-center justify-center" style={{ left: `${x}%`, top: `${y}%` }}>
+                <Tent className="w-3 h-3 text-amber-300" />
               </div>
             )}
             {rows.map((r) => {
@@ -145,7 +145,7 @@ export function GeoOverview() {
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 lg:right-[360px] bg-white rounded-lg shadow-xl border border-border p-4 w-[300px] max-w-[calc(100%-32px)] z-30">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-[14px] font-bold text-epi-text">📍 {sel.district} District</h3>
+                <h3 className="text-[14px] font-bold text-epi-text">{sel.district} District</h3>
                 <div className="text-[11px] text-epi-muted mb-3">{sel.province === 'Kigali' ? 'Kigali City' : `${sel.province} Province`}</div>
               </div>
               <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted hover:text-epi-text">
@@ -170,7 +170,7 @@ export function GeoOverview() {
 
             {BORDER_DISTRICTS.includes(sel.district) &&
           <div className="bg-epi-amber/10 border border-epi-amber/30 p-2 rounded text-[11px] font-bold text-[#F57C00] mb-3">
-                ⚠️ Border district — monitored for cross-border transmission
+                Border district — monitored for cross-border transmission
               </div>
           }
 
@@ -201,7 +201,7 @@ export function GeoOverview() {
       <div className="absolute top-12 left-4 right-4 sm:left-6 sm:right-6 bg-white rounded-lg shadow-lg border border-border p-2 flex flex-col xl:flex-row items-center justify-between gap-3 z-20">
         <div className="flex flex-wrap items-center gap-2">
           <select value={region} onChange={(e) => setRegion(e.target.value)} className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg">
-            {PROVINCE_OPTIONS.map((p) => <option key={p} value={p}>📍 {p === 'All Rwanda' || p === 'Kigali' ? p : `${p} Province`}</option>)}
+            {PROVINCE_OPTIONS.map((p) => <option key={p} value={p}>{p === 'All Rwanda' || p === 'Kigali' ? p : `${p} Province`}</option>)}
           </select>
           <form
             onSubmit={(e) => {
@@ -243,13 +243,13 @@ export function GeoOverview() {
 
         <div className="flex items-center gap-2">
           <select value={period} onChange={(e) => setPeriod(e.target.value)} className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-white">
-            {Object.keys(PERIODS).map((p) => <option key={p} value={p}>📅 {p}</option>)}
+            {Object.keys(PERIODS).map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <button onClick={() => navigate('/geo/animation')} className="px-4 py-1.5 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark">
-            🎬 Animate
+          <button onClick={() => navigate('/geo/animation')} className="px-4 py-1.5 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark inline-flex items-center gap-1.5">
+            <Play className="w-3.5 h-3.5" /> Animate
           </button>
-          <button onClick={exportMap} title="Download the current map layer data as CSV" className="px-4 py-1.5 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg">
-            📤 Export Map
+          <button onClick={exportMap} title="Download the current map layer data as CSV" className="px-4 py-1.5 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg inline-flex items-center gap-1.5">
+            <Download className="w-3.5 h-3.5" /> Export Map
           </button>
         </div>
       </div>
@@ -278,9 +278,9 @@ export function GeoOverview() {
             <div>
               <div className="text-[11px] font-bold text-epi-muted uppercase tracking-wider mb-2">Active alerts summary</div>
               <Link to="/warning/alerts" className="flex flex-wrap gap-2">
-                <span className="bg-epi-red/10 text-epi-red text-[12px] font-bold px-2 py-1 rounded border border-epi-red/20">🔴 {counts.red} Red</span>
-                <span className="bg-[#F57C00]/10 text-[#F57C00] text-[12px] font-bold px-2 py-1 rounded border border-[#F57C00]/20">🟠 {counts.orange} Orange</span>
-                <span className="bg-[#F59E0B]/10 text-[#F59E0B] text-[12px] font-bold px-2 py-1 rounded border border-[#F59E0B]/20">🟡 {counts.yellow} Yellow</span>
+                <span className="bg-epi-red/10 text-epi-red text-[12px] font-bold px-2 py-1 rounded border border-epi-red/20">● {counts.red} Red</span>
+                <span className="bg-[#F57C00]/10 text-[#F57C00] text-[12px] font-bold px-2 py-1 rounded border border-[#F57C00]/20">● {counts.orange} Orange</span>
+                <span className="bg-[#F59E0B]/10 text-[#F59E0B] text-[12px] font-bold px-2 py-1 rounded border border-[#F59E0B]/20">● {counts.yellow} Yellow</span>
               </Link>
             </div>
 
@@ -333,10 +333,10 @@ export function GeoOverview() {
               <div className="flex-1 h-2 bg-[#D32F2F] rounded-r"></div>
             </div>
             <div className="flex justify-between text-[9px] font-bold mb-3">
-              <span className="text-[#00A550]">🟢 Low</span>
-              <span className="text-[#F59E0B]">🟡 Mod</span>
-              <span className="text-[#F57C00]">🟠 High</span>
-              <span className="text-[#D32F2F]">🔴 Crit</span>
+              <span className="text-[#00A550]">● Low</span>
+              <span className="text-[#F59E0B]">● Mod</span>
+              <span className="text-[#F57C00]">● High</span>
+              <span className="text-[#D32F2F]">● Crit</span>
             </div>
             <div className="text-[10px] text-epi-muted">{layer === 'risk' ? 'Circle size and label = AI risk score (0–100)' : 'Relative weekly case load'}</div>
           </> :
@@ -350,7 +350,7 @@ export function GeoOverview() {
           </div>
         }
         <div className="mt-3 pt-2 border-t border-border grid grid-cols-2 gap-1 text-[10px] text-epi-muted">
-          <span>🏕️ Refugee camp</span>
+          <span className="inline-flex items-center gap-1"><Tent className="w-3 h-3 text-amber-600" /> Refugee camp</span>
           <span className="flex items-center gap-1"><span className="inline-block w-3 border-t-2 border-dashed border-[#F57C00]" /> DRC border</span>
         </div>
         <div className="text-[9px] text-epi-muted mt-2">Click a district for details. Positions are schematic.</div>

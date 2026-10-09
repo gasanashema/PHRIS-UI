@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 import { FieldLabel, inputCls } from '../../components/shared/Modal';
 import { useApp } from '../../store/AppStore';
@@ -66,7 +66,7 @@ export function AnalystReports() {
           {findings.length === 0 ?
           <div className="flex flex-col items-center justify-center text-center py-12">
               <div className="w-16 h-16 bg-epi/10 rounded-full flex items-center justify-center mb-4">
-                <span className="text-[24px]">📄</span>
+                <FileText className="w-8 h-8 text-epi" />
               </div>
               <p className="text-[14px] text-epi-muted max-w-md mb-4">No findings collected yet.</p>
               <div className="flex flex-wrap gap-2 justify-center">

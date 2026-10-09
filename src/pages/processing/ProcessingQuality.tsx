@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check, ArrowUp, Flag, TrendingUp, TrendingDown } from 'lucide-react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 import { useApp } from '../../store/AppStore';
 
@@ -20,13 +21,13 @@ const ROWS: Row[] = [
 { district: 'Musanze', province: 'Northern', completeness: 95, accuracy: 94, consistency: 96, trend: 'up', notified: '—', group: 'Top Performers', issues: ['Minor date-format corrections'] },
 { district: 'Kicukiro', province: 'Kigali', completeness: 94, accuracy: 93, consistency: 95, trend: 'stable', notified: '—', group: 'Top Performers', issues: ['EMR/DHIS2 mismatch on 14 records'] },
 { district: 'Huye', province: 'Southern', completeness: 89, accuracy: 91, consistency: 87, trend: 'up', notified: '—', group: 'Mid Performers', issues: ['3 facilities not yet reported today', 'Facility code RW-HY-099 unmapped'] },
-{ district: 'Rusizi', province: 'Western', completeness: 72, accuracy: 78, consistency: 70, trend: 'down', notified: '✅ Sent', group: 'Mid Performers', issues: ['Outbreak surge overwhelming data entry', 'Missing age on 36 cholera cases'] },
-{ district: 'Nyamagabe', province: 'Southern', completeness: 61, accuracy: 65, consistency: 58, trend: 'down', notified: '✅ Sent June 3', group: 'Poor Performers', issues: ['CHW batch rejected — 3 unmapped Kinyarwanda terms', '47 records excluded today'] },
-{ district: 'Ngororero', province: 'Western', completeness: 58, accuracy: 62, consistency: 54, trend: 'down', notified: '✅ Sent June 4', group: 'Poor Performers', issues: ['2 health posts offline for 5 days', 'Duplicate lab records'] }];
+{ district: 'Rusizi', province: 'Western', completeness: 72, accuracy: 78, consistency: 70, trend: 'down', notified: 'Sent', group: 'Mid Performers', issues: ['Outbreak surge overwhelming data entry', 'Missing age on 36 cholera cases'] },
+{ district: 'Nyamagabe', province: 'Southern', completeness: 61, accuracy: 65, consistency: 58, trend: 'down', notified: 'Sent June 3', group: 'Poor Performers', issues: ['CHW batch rejected — 3 unmapped Kinyarwanda terms', '47 records excluded today'] },
+{ district: 'Ngororero', province: 'Western', completeness: 58, accuracy: 62, consistency: 54, trend: 'down', notified: 'Sent June 4', group: 'Poor Performers', issues: ['2 health posts offline for 5 days', 'Duplicate lab records'] }];
 
 
 const overall = (r: Row) => Math.round((r.completeness + r.accuracy + r.consistency) / 3);
-const tone = (s: number) => s >= 80 ? ['🟢', 'text-[#00A550]'] : s >= 60 ? ['🟠', 'text-[#F97316]'] : ['🔴', 'text-epi-red'];
+const tone = (s: number) => s >= 80 ? 'text-[#00A550]' : s >= 60 ? 'text-[#F97316]' : 'text-epi-red';
 
 export function ProcessingQuality() {
   const { actions } = useApp();
@@ -53,7 +54,7 @@ export function ProcessingQuality() {
       },
       { module: 'Processing', action: `${escalate ? 'Escalated' : 'Flagged'} data quality — ${r.district}` }
     );
-    setNotified({ ...notified, [r.district]: escalate ? '⬆️ Escalated today' : '🚩 Flagged today' });
+    setNotified({ ...notified, [r.district]: escalate ? 'Escalated today' : 'Flagged today' });
     actions.toast(escalate ? `${r.district} escalated to the national data team.` : `${r.district} DHO notified about data quality.`, 'warning');
   };
 
@@ -66,13 +67,13 @@ export function ProcessingQuality() {
       breadcrumb="Data Quality Scores">
 
       <div className="flex flex-wrap items-center gap-4 text-[14px] font-bold bg-white px-4 py-3 rounded-lg shadow-sm border border-border mb-6 w-fit max-w-full">
-        <span className="text-[#00A550]">🟢 19 Districts: Good (≥80%)</span>
+        <span className="text-[#00A550]">● 19 Districts: Good (≥80%)</span>
         <span className="text-border">|</span>
-        <span className="text-epi-amber">🟡 7 Districts: Fair (60–79%)</span>
+        <span className="text-epi-amber">● 7 Districts: Fair (60–79%)</span>
         <span className="text-border">|</span>
-        <span className="text-[#F97316]">🟠 3 Districts: Poor (40–59%)</span>
+        <span className="text-[#F97316]">● 3 Districts: Poor (40–59%)</span>
         <span className="text-border">|</span>
-        <span className="text-epi-red">🔴 1 District: Critical (&lt;40%)</span>
+        <span className="text-epi-red">● 1 District: Critical (&lt;40%)</span>
       </div>
 
       <div className="bg-white rounded-lg shadow-card border border-border overflow-hidden mb-8">
@@ -93,7 +94,8 @@ export function ProcessingQuality() {
                   </tr>
                   {ROWS.filter((r) => r.group === g).map((r) => {
                   const s = overall(r);
-                  const [emoji, cls] = tone(s);
+                  const cls = tone(s);
+                  const notifiedVal = notified[r.district] ?? r.notified;
                   return (
                     <Fragment key={r.district}>
                         <tr className={g === 'Poor Performers' ? 'bg-epi-red/5 hover:bg-epi-red/10' : 'hover:bg-epi-bg/50'}>
@@ -102,11 +104,32 @@ export function ProcessingQuality() {
                           <td className="p-4 text-[13px] text-epi-text text-right">{r.completeness}%</td>
                           <td className="p-4 text-[13px] text-epi-text text-right">{r.accuracy}%</td>
                           <td className="p-4 text-[13px] text-epi-text text-right">{r.consistency}%</td>
-                          <td className={`p-4 text-[14px] font-bold text-right ${cls}`}>{emoji} {s}%</td>
-                          <td className={`p-4 text-[14px] font-bold text-center ${r.trend === 'up' ? 'text-[#00A550]' : r.trend === 'down' ? 'text-epi-red' : 'text-epi-muted'}`}>
-                            {r.trend === 'up' ? '↑' : r.trend === 'down' ? '↓' : '→ Stable'}
+                          <td className={`p-4 text-[14px] font-bold text-right ${cls}`}>
+                            <span className="w-2 h-2 rounded-full inline-block mr-1.5 bg-current" />
+                            {s}%
                           </td>
-                          <td className="p-4 text-[13px] font-bold text-epi-text whitespace-nowrap">{notified[r.district] ?? r.notified}</td>
+                          <td className={`p-4 text-[14px] font-bold text-center ${r.trend === 'up' ? 'text-[#00A550]' : r.trend === 'down' ? 'text-epi-red' : 'text-epi-muted'}`}>
+                            {r.trend === 'up' ? (
+                              <span className="inline-flex items-center gap-0.5"><TrendingUp className="w-4 h-4" /></span>
+                            ) : r.trend === 'down' ? (
+                              <span className="inline-flex items-center gap-0.5"><TrendingDown className="w-4 h-4" /></span>
+                            ) : (
+                              <span className="text-[12px] font-normal">Stable</span>
+                            )}
+                          </td>
+                          <td className="p-4 text-[13px] font-bold text-epi-text whitespace-nowrap">
+                            {notifiedVal === '—' ? (
+                              '—'
+                            ) : notifiedVal.includes('Escalated') ? (
+                              <span className="flex items-center gap-1 text-[#F97316]"><ArrowUp className="w-3.5 h-3.5" /> {notifiedVal}</span>
+                            ) : notifiedVal.includes('Flagged') ? (
+                              <span className="flex items-center gap-1 text-epi-red"><Flag className="w-3.5 h-3.5" /> {notifiedVal}</span>
+                            ) : notifiedVal.includes('Sent') ? (
+                              <span className="flex items-center gap-1 text-[#00A550]"><Check className="w-3.5 h-3.5" /> {notifiedVal}</span>
+                            ) : (
+                              notifiedVal
+                            )}
+                          </td>
                           <td className="p-4 text-[13px] text-epi font-medium text-right whitespace-nowrap">
                             <button onClick={() => setOpen(open === r.district ? null : r.district)} className="hover:underline">
                               {open === r.district ? 'Hide' : 'View'}

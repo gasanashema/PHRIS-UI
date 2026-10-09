@@ -110,9 +110,24 @@ export function AdminSystemConfig() {
                   <thead className="bg-admin-bg/50 text-admin-muted font-medium border-b border-border">
                     <tr>
                       <th className="px-4 py-3">Disease</th>
-                      <th className="px-4 py-3">🟡 Yellow</th>
-                      <th className="px-4 py-3">🟠 Orange</th>
-                      <th className="px-4 py-3">🔴 Red</th>
+                      <th className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                          Yellow
+                        </span>
+                      </th>
+                      <th className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-[#F97316]" />
+                          Orange
+                        </span>
+                      </th>
+                      <th className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-admin-red" />
+                          Red
+                        </span>
+                      </th>
                       <th className="px-4 py-3">Unit</th>
                     </tr>
                   </thead>

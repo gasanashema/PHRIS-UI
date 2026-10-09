@@ -5,7 +5,8 @@ import {
   ClipboardCheck,
   Gauge,
   Lightbulb,
-  FileClock } from
+  FileClock,
+  TrendingUp } from
 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 const INDICATORS = [
@@ -14,7 +15,7 @@ const INDICATORS = [
   current: '35/1,000',
   target: '25/1,000',
   gap: '-10',
-  status: '🟠 Below Target',
+  status: '● Below Target',
   trend: '↓ Improving',
   pct: 67
 },
@@ -23,7 +24,7 @@ const INDICATORS = [
   current: '203/100,000',
   target: '140/100,000',
   gap: '-63',
-  status: '🟠 Below Target',
+  status: '● Below Target',
   trend: '↓ Improving',
   pct: 59
 },
@@ -32,7 +33,7 @@ const INDICATORS = [
   current: '45/1,000',
   target: '30/1,000',
   gap: '-15',
-  status: '🟠 Below Target',
+  status: '● Below Target',
   trend: '↑ Worsening',
   pct: 50
 },
@@ -41,7 +42,7 @@ const INDICATORS = [
   current: '92%',
   target: '95%',
   gap: '-3%',
-  status: '🟡 Close',
+  status: '● Close',
   trend: '↑ Improving',
   pct: 92
 },
@@ -50,7 +51,7 @@ const INDICATORS = [
   current: '87%',
   target: '95%',
   gap: '-8%',
-  status: '🟡 Close',
+  status: '● Close',
   trend: '→ Stable',
   pct: 87
 },
@@ -59,7 +60,7 @@ const INDICATORS = [
   current: '33%',
   target: '19%',
   gap: '-14%',
-  status: '🔴 Far from target',
+  status: '● Far from target',
   trend: '→ Stable',
   pct: 42
 }];
@@ -90,7 +91,7 @@ export function AnalystOverview() {
             2 sources delayed — Met Agency, MINAGRI
           </div>
           <div className="text-[11px] font-bold text-epi-amber mt-auto">
-            🟡 Partial
+            ● Partial
           </div>
         </div>
 
@@ -103,7 +104,7 @@ export function AnalystOverview() {
             Next scheduled: 12:00 PM today
           </div>
           <div className="text-[11px] font-bold text-epi-accent mt-auto">
-            🟢 Up to date
+            ● Up to date
           </div>
         </div>
 
@@ -251,7 +252,7 @@ export function AnalystOverview() {
             {/* Insight 1 */}
             <div className="border-l-4 border-l-epi border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-epi mb-1">
-                💡 CORRELATION DETECTED
+                CORRELATION DETECTED
               </div>
               <div className="text-[13px] text-epi-text leading-relaxed mb-3">
                 Strong link found between low sanitation coverage and rising
@@ -274,7 +275,7 @@ export function AnalystOverview() {
             {/* Insight 2 */}
             <div className="border-l-4 border-l-epi-amber border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-epi-amber mb-1">
-                ⚠️ TARGET AT RISK
+                TARGET AT RISK
               </div>
               <div className="text-[13px] text-epi-text leading-relaxed mb-3">
                 At current malaria trajectory, Rwanda will miss the 2026 malaria
@@ -296,8 +297,9 @@ export function AnalystOverview() {
 
             {/* Insight 3 */}
             <div className="border-l-4 border-l-epi-info border border-border rounded-r-lg p-4 bg-white">
-              <div className="text-[11px] font-bold text-epi-info mb-1">
-                📈 POSITIVE TREND
+              <div className="text-[11px] font-bold text-epi-info mb-1 flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>POSITIVE TREND</span>
               </div>
               <div className="text-[13px] text-epi-text leading-relaxed mb-3">
                 HIV treatment coverage in Northern Province improved from 81% to

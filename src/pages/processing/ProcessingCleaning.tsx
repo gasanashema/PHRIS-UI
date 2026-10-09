@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 import { useApp } from '../../store/AppStore';
 import { downloadFile, toCSV } from '../../lib/format';
+import { Check, X } from 'lucide-react';
 const cleaningSummary = [
 {
   type: 'Missing age/gender',
@@ -11,7 +12,7 @@ const cleaningSummary = [
   flagged: 36,
   excluded: 0,
   rule: '"Estimated from household data"',
-  status: '🟢 Rule active'
+  status: '● Rule active'
 },
 {
   type: 'Duplicate patient records',
@@ -20,7 +21,7 @@ const cleaningSummary = [
   flagged: 0,
   excluded: 0,
   rule: '"Keep latest, merge history"',
-  status: '🟢 Rule active'
+  status: '● Rule active'
 },
 {
   type: 'Wrong district codes',
@@ -29,7 +30,7 @@ const cleaningSummary = [
   flagged: 0,
   excluded: 0,
   rule: '"Corrected using facility GPS"',
-  status: '🟢 Rule active'
+  status: '● Rule active'
 },
 {
   type: 'Impossible values (age >120, negative counts)',
@@ -38,7 +39,7 @@ const cleaningSummary = [
   flagged: 34,
   excluded: 33,
   rule: '"Flag if ambiguous, exclude if impossible"',
-  status: '🟡 Review needed'
+  status: '● Review needed'
 },
 {
   type: 'Inconsistent disease names (Kinyarwanda mapping)',
@@ -47,7 +48,7 @@ const cleaningSummary = [
   flagged: 47,
   excluded: 0,
   rule: '"Kinyarwanda → English standard mapping"',
-  status: '🟡 3 unmapped terms'
+  status: '● 3 unmapped terms'
 },
 {
   type: 'Wrong date formats',
@@ -56,7 +57,7 @@ const cleaningSummary = [
   flagged: 0,
   excluded: 0,
   rule: '"Auto-converted to ISO 8601 (YYYY-MM-DD)"',
-  status: '🟢 Rule active'
+  status: '● Rule active'
 },
 {
   type: 'Records with 5+ missing fields',
@@ -65,7 +66,7 @@ const cleaningSummary = [
   flagged: 0,
   excluded: 103,
   rule: '"Excluded — too incomplete"',
-  status: '🔴 Excluded'
+  status: '● Excluded'
 }];
 
 const flaggedRecords = [
@@ -137,13 +138,13 @@ export function ProcessingCleaning() {
       <div className="flex flex-wrap items-center gap-4 text-[14px] font-bold bg-white px-4 py-3 rounded-lg shadow-sm border border-border mb-6 w-fit max-w-full">
         <span className="text-epi-text">Total records today: 47,230</span>
         <span className="text-border">|</span>
-        <span className="text-[#00A550]">🟢 {(44891 + approved).toLocaleString('en-US')} Clean</span>
+        <span className="text-[#00A550]">● {(44891 + approved).toLocaleString('en-US')} Clean</span>
         <span className="text-border">|</span>
-        <span className="text-epi-amber">🟡 1,847 Auto-corrected</span>
+        <span className="text-epi-amber">● 1,847 Auto-corrected</span>
         <span className="text-border">|</span>
-        <span className="text-[#F97316]">🟠 {389 - approved - rejected} Flagged for review</span>
+        <span className="text-[#F97316]">● {389 - approved - rejected} Flagged for review</span>
         <span className="text-border">|</span>
-        <span className="text-epi-red">🔴 {103 + rejected} Excluded</span>
+        <span className="text-epi-red">● {103 + rejected} Excluded</span>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -238,8 +239,12 @@ export function ProcessingCleaning() {
             <div className="text-[13px] text-epi-red mt-1">Issue: {current.issue}</div>
             <div className="text-[13px] text-[#00A550] mt-1">Suggested fix: {current.fix}</div>
             <div className="flex gap-2 mt-3">
-              <button onClick={() => {decide(current.id, 'approved');setReviewIdx(pending.length > 1 ? 0 : null);}} className="px-3 py-1.5 bg-[#00A550] text-white text-[12px] font-bold rounded">✅ Approve</button>
-              <button onClick={() => {decide(current.id, 'rejected');setReviewIdx(pending.length > 1 ? 0 : null);}} className="px-3 py-1.5 bg-epi-red text-white text-[12px] font-bold rounded">❌ Reject</button>
+              <button onClick={() => {decide(current.id, 'approved');setReviewIdx(pending.length > 1 ? 0 : null);}} className="px-3 py-1.5 bg-[#00A550] text-white text-[12px] font-bold rounded flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5" /> Approve
+              </button>
+              <button onClick={() => {decide(current.id, 'rejected');setReviewIdx(pending.length > 1 ? 0 : null);}} className="px-3 py-1.5 bg-epi-red text-white text-[12px] font-bold rounded flex items-center gap-1.5">
+                <X className="w-3.5 h-3.5" /> Reject
+              </button>
               <button onClick={() => setReviewIdx(null)} className="px-3 py-1.5 text-epi-muted text-[12px] font-bold">Stop review</button>
             </div>
           </div>
@@ -268,21 +273,25 @@ export function ProcessingCleaning() {
                   <td className="p-4 text-[13px] text-epi-red font-medium">{r.issue}</td>
                   <td className="p-4 text-[13px] text-[#00A550] font-medium">{r.fix}</td>
                   <td className="p-4 whitespace-nowrap">
-                    {decisions[r.id] ?
-                  <span className={`text-[12px] font-bold ${decisions[r.id] === 'approved' ? 'text-[#00A550]' : 'text-epi-red'}`}>
-                        {decisions[r.id] === 'approved' ? '✅ Fix applied' : '❌ Excluded'}
+                    {decisions[r.id] ? (
+                      <span className={`text-[12px] font-bold flex items-center gap-1 ${decisions[r.id] === 'approved' ? 'text-[#00A550]' : 'text-epi-red'}`}>
+                        {decisions[r.id] === 'approved' ? (
+                          <><Check className="w-3.5 h-3.5" /> Fix applied</>
+                        ) : (
+                          <><X className="w-3.5 h-3.5" /> Excluded</>
+                        )}
                         <button onClick={() => setDecisions(({ [r.id]: _, ...rest }) => rest)} className="ml-2 text-epi-muted font-normal hover:underline">undo</button>
-                      </span> :
-
-                  <div className="flex gap-2">
-                        <button onClick={() => decide(r.id, 'approved')} className="px-3 py-1 bg-[#00A550]/10 text-[#00A550] text-[12px] font-bold rounded hover:bg-[#00A550]/20 transition-colors">
-                          ✅ Approve
+                      </span>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button onClick={() => decide(r.id, 'approved')} className="px-3 py-1 bg-[#00A550]/10 text-[#00A550] text-[12px] font-bold rounded hover:bg-[#00A550]/20 transition-colors flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Approve
                         </button>
-                        <button onClick={() => decide(r.id, 'rejected')} className="px-3 py-1 bg-epi-red/10 text-epi-red text-[12px] font-bold rounded hover:bg-epi-red/20 transition-colors">
-                          ❌ Reject
+                        <button onClick={() => decide(r.id, 'rejected')} className="px-3 py-1 bg-epi-red/10 text-epi-red text-[12px] font-bold rounded hover:bg-epi-red/20 transition-colors flex items-center gap-1">
+                          <X className="w-3 h-3" /> Reject
                         </button>
                       </div>
-                  }
+                    )}
                   </td>
                 </tr>
               )}

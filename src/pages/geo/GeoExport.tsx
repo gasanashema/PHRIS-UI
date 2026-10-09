@@ -7,7 +7,8 @@ import {
   Video,
   Link as LinkIcon,
   Database,
-  Loader2 } from
+  Loader2,
+  Check } from
 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { DISTRICT_XY } from '../../data/geo';
@@ -106,7 +107,7 @@ export function GeoExport() {
       return;
     }
     const legend = view === 'risk' ?
-    '🟢 Low (&lt;40) · 🟡 Moderate (40–59) · 🟠 High (60–79) · 🔴 Critical (80+)' :
+    '● Low (&lt;40) · ● Moderate (40–59) · ● High (60–79) · ● Critical (80+)' :
     'Circle size = number of open alerts in the district';
     win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Arial,sans-serif;margin:24px;color:#1A1A2E}h1{color:#104E49;font-size:20px}img{width:100%;border:1px solid #E5E7EB}.f{color:#6B7280;font-size:12px;margin-top:12px}</style></head><body><h1>${title}</h1><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(mapSvg(pts, view, 1600, 900, title))}"/><p>${legend}</p><p class="f">Generated ${new Date().toLocaleString()} · AI Vital — Rwanda Biomedical Centre (prototype, demonstration data)</p><script>window.onload=function(){setTimeout(function(){window.print()},300)}</script></body></html>`);
     win.document.close();
@@ -275,7 +276,7 @@ export function GeoExport() {
               <p className="text-[13px] text-epi-muted mb-3">Link to the live map in this deployment — colleagues with access can explore it</p>
               <div className="bg-epi-bg p-2 rounded border border-border text-[12px] font-mono text-epi-text mb-4 break-all">{shareUrl}</div>
               <div className="flex flex-wrap gap-3">
-                <button onClick={copyLink} className={btn}>{copied ? '✓ Copied' : 'Copy Link'}</button>
+                <button onClick={copyLink} className={btn}>{copied ? <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Copied</span> : 'Copy Link'}</button>
                 <a
                   href={`mailto:?subject=${encodeURIComponent(`AI Vital map — ${viewLabel}`)}&body=${encodeURIComponent(`Live map: ${shareUrl}`)}`}
                   className="px-6 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded hover:bg-epi-bg transition-colors">

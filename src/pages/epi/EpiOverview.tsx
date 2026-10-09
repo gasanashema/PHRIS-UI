@@ -21,7 +21,7 @@ const SURVEILLANCE = [
   vs: '+12%',
   trend: '↑ Rising',
   districts: '18 districts',
-  risk: '🟠 Orange',
+  risk: '● Orange',
   action: 'Investigate'
 },
 {
@@ -30,7 +30,7 @@ const SURVEILLANCE = [
   vs: '+45%',
   trend: '↑ Sharp Rise',
   districts: '3 districts',
-  risk: '🔴 Red',
+  risk: '● Red',
   action: 'Active Investigation →'
 },
 {
@@ -39,7 +39,7 @@ const SURVEILLANCE = [
   vs: '-5%',
   trend: '↓ Falling',
   districts: '4 districts',
-  risk: '🟡 Yellow',
+  risk: '● Yellow',
   action: 'Monitor'
 },
 {
@@ -48,7 +48,7 @@ const SURVEILLANCE = [
   vs: '+8%',
   trend: '↑ Rising',
   districts: '6 districts',
-  risk: '🟡 Yellow',
+  risk: '● Yellow',
   action: 'Monitor'
 },
 {
@@ -57,7 +57,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ Stable',
   districts: '2 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'Routine'
 },
 {
@@ -66,7 +66,7 @@ const SURVEILLANCE = [
   vs: '+3%',
   trend: '→ Stable',
   districts: '22 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'Routine'
 },
 {
@@ -75,7 +75,7 @@ const SURVEILLANCE = [
   vs: '+200%',
   trend: '↑ Alert',
   districts: '1 district (Rubavu — DRC border)',
-  risk: '🟠 Orange',
+  risk: '● Orange',
   action: 'Investigate'
 },
 {
@@ -84,7 +84,7 @@ const SURVEILLANCE = [
   vs: '-20%',
   trend: '↓ Falling',
   districts: '2 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'Routine'
 },
 {
@@ -93,7 +93,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ None',
   districts: '0 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'Cross-border watch'
 },
 {
@@ -102,7 +102,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ None',
   districts: '0 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'DRC border watch'
 },
 {
@@ -111,7 +111,7 @@ const SURVEILLANCE = [
   vs: '+1%',
   trend: '→ Stable',
   districts: '12 districts',
-  risk: '🟡 Yellow',
+  risk: '● Yellow',
   action: 'Monitor'
 },
 {
@@ -120,7 +120,7 @@ const SURVEILLANCE = [
   vs: '-8%',
   trend: '↓ Falling',
   districts: '15 districts',
-  risk: '🟢 Green',
+  risk: '● Green',
   action: 'Routine'
 }];
 
@@ -149,7 +149,7 @@ export function EpiOverview() {
         <div className={`rounded-lg p-4 flex flex-col justify-between border ${level === 'high' ? 'bg-epi-red/10 border-epi-red/30' : level === 'moderate' ? 'bg-epi-amber/10 border-epi-amber/30' : 'bg-[#00A550]/10 border-[#00A550]/30'}`}>
           <div className={`text-[13px] font-bold mb-2 ${levelCls}`}>National Risk Level</div>
           <div className={`text-[20px] font-bold mb-1 ${levelCls}`}>
-            {level === 'high' ? '🔴 HIGH RISK' : level === 'moderate' ? '🟠 MODERATE RISK' : '🟢 LOW RISK'}
+            {level === 'high' ? '● HIGH RISK' : level === 'moderate' ? '● MODERATE RISK' : '● LOW RISK'}
           </div>
           <div className="text-[11px] text-epi-text font-medium">
             {red.length} red alert{red.length === 1 ? '' : 's'} — {red.length ? 'immediate attention required' : 'no outbreaks at red level'}
@@ -164,7 +164,7 @@ export function EpiOverview() {
           <div className="text-[11px] text-epi-muted space-y-0.5 mb-2">
             {red.slice(0, 3).map((a) =>
             <Link key={a.id} to={`/warning/detail?id=${a.id}`} className="block font-medium text-epi-red hover:underline">
-                {a.disease} — {a.district} 🔴
+                {a.disease} — {a.district} ●
               </Link>
             )}
           </div>
@@ -274,7 +274,7 @@ export function EpiOverview() {
               return (
                 <div key={inv.id} className={`border-l-4 ${tone} border border-border rounded-r-lg p-4 bg-white`}>
                   <div className={`text-[11px] font-bold mb-1 ${label}`}>
-                    {inv.status === 'requested' ? '🟡 REQUESTED BY DISTRICT' : inv.priority === 'Critical' ? '🔴 ACTIVE OUTBREAK' : '🟠 UNDER INVESTIGATION'}
+                    {inv.status === 'requested' ? '● REQUESTED BY DISTRICT' : inv.priority === 'Critical' ? '● ACTIVE OUTBREAK' : '● UNDER INVESTIGATION'}
                   </div>
                   <div className="text-[14px] font-bold text-epi-text mb-2">
                     {inv.disease} — {inv.sector ? `${inv.sector}, ` : ''}{inv.district}

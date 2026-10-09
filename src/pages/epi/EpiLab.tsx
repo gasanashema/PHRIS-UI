@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
 const OTHER_LABS: [string, string][] = [
-['Rwamagana Hospital Lab', '🟢 Online | 4 pending'],
-['Gihundwe Hospital Lab (Rusizi)', '🟢 Online | 7 pending'],
-['Gisenyi Hospital Lab', '🟢 Online | 3 pending'],
-['Kabgayi Hospital Lab', '🟢 Online | 2 pending'],
-['Nyagatare Hospital Lab', '🟡 Delayed | 4 pending'],
-['Kibogora Hospital Lab', '🟢 Online | 1 pending'],
-['Byumba Hospital Lab', '🟢 Online | 2 pending'],
-['Kigeme Hospital Lab', '🟢 Online | 3 pending']];
+['Rwamagana Hospital Lab', '● Online | 4 pending'],
+['Gihundwe Hospital Lab (Rusizi)', '● Online | 7 pending'],
+['Gisenyi Hospital Lab', '● Online | 3 pending'],
+['Kabgayi Hospital Lab', '● Online | 2 pending'],
+['Nyagatare Hospital Lab', '● Delayed | 4 pending'],
+['Kibogora Hospital Lab', '● Online | 1 pending'],
+['Byumba Hospital Lab', '● Online | 2 pending'],
+['Kigeme Hospital Lab', '● Online | 3 pending']];
 
 const LABS = [
 {
@@ -18,7 +18,7 @@ const LABS = [
   neg: 18,
   pend: 5,
   rate: '75.5%',
-  turn: '1.8 days ✅',
+  turn: '1.8 days',
   warn: false
 },
 {
@@ -28,7 +28,7 @@ const LABS = [
   neg: 119,
   pend: 5,
   rate: '25.7%',
-  turn: '0.2 days ✅',
+  turn: '0.2 days',
   warn: false
 },
 {
@@ -38,7 +38,7 @@ const LABS = [
   neg: 15,
   pend: 4,
   rate: '32.1%',
-  turn: '4.1 days ⚠️',
+  turn: '4.1 days ',
   warn: false
 },
 {
@@ -48,7 +48,7 @@ const LABS = [
   neg: 22,
   pend: 6,
   rate: '12.5%',
-  turn: '3.8 days ⚠️',
+  turn: '3.8 days ',
   warn: false
 },
 {
@@ -58,7 +58,7 @@ const LABS = [
   neg: 1,
   pend: 3,
   rate: 'Pending',
-  turn: '5.0 days 🔴',
+  turn: '5.0 days ●',
   warn: true
 }];
 
@@ -99,8 +99,7 @@ export function EpiLab() {
             Average Turnaround
           </div>
           <div className="text-[20px] font-bold text-epi-amber">
-            3.2 days ⚠️
-          </div>
+            3.2 days </div>
           <div className="text-[10px] font-medium text-epi-text mt-1">
             (above 2-day target)
           </div>
@@ -173,7 +172,7 @@ export function EpiLab() {
           </div>
 
           <div className="bg-epi-amber/10 border border-epi-amber/30 rounded-lg p-4 flex gap-3">
-            <span className="text-[16px]">⚠️</span>
+            <span className="text-[16px]"></span>
             <div className="text-[13px] text-epi-text font-medium leading-relaxed">
               <span className="font-bold">
                 Average lab turnaround time is 3.2 days — above the 2-day
@@ -194,7 +193,7 @@ export function EpiLab() {
             <div className="space-y-3">
               <div className="border-l-4 border-l-epi-red border border-border rounded-r-lg p-3 bg-white">
                 <div className="text-[12px] font-bold text-epi-red mb-1">
-                  🔴 URGENT — 3 Mpox samples
+                  ● URGENT — 3 Mpox samples
                 </div>
                 <div className="text-[13px] font-bold text-epi-text mb-1">
                   Rubavu (DRC border)
@@ -205,7 +204,7 @@ export function EpiLab() {
               </div>
               <div className="border-l-4 border-l-epi-amber border border-border rounded-r-lg p-3 bg-white">
                 <div className="text-[12px] font-bold text-epi-amber mb-1">
-                  🟠 HIGH — 5 Cholera samples
+                  ● HIGH — 5 Cholera samples
                 </div>
                 <div className="text-[13px] font-bold text-epi-text mb-1">
                   Rusizi District
@@ -216,7 +215,7 @@ export function EpiLab() {
               </div>
               <div className="border-l-4 border-l-border border border-border rounded-r-lg p-3 bg-white">
                 <div className="text-[12px] font-bold text-epi-muted mb-1">
-                  🟡 NORMAL — 37 other samples
+                  ● NORMAL — 37 other samples
                 </div>
                 <div className="text-[13px] font-bold text-epi-text mb-1">
                   Various districts
@@ -237,27 +236,27 @@ export function EpiLab() {
                 <span className="font-medium text-epi-text">
                   RBC National Lab — Kigali
                 </span>
-                <span className="text-epi-muted">🟢 Online | 12 pending</span>
+                <span className="text-epi-muted">● Online | 12 pending</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
                 <span className="font-medium text-epi-text">
                   Butare University Hospital Lab
                 </span>
-                <span className="text-epi-muted">🟢 Online | 8 pending</span>
+                <span className="text-epi-muted">● Online | 8 pending</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-border">
                 <span className="font-medium text-epi-text">
                   Ruhengeri Hospital Lab
                 </span>
                 <span className="text-epi-amber font-medium">
-                  🟡 Delayed | 6 pending
+                  ● Delayed | 6 pending
                 </span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="font-medium text-epi-text">
                   Kibungo Hospital Lab
                 </span>
-                <span className="text-epi-muted">🟢 Online | 5 pending</span>
+                <span className="text-epi-muted">● Online | 5 pending</span>
               </div>
               {allLabs && OTHER_LABS.map(([name, status]) =>
               <div key={name} className="flex justify-between items-center py-2 border-t border-border">

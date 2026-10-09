@@ -7,7 +7,7 @@ export function GeoCrossBorder() {
       {/* Top Header (Small) */}
       <div className="absolute top-0 left-0 right-0 h-10 bg-white/90 backdrop-blur-sm border-b border-border flex items-center px-6 z-20">
         <span className="text-[13px] font-bold text-epi-text">
-          🌍 Cross-Border Disease Surveillance | Rwanda + Neighboring Countries
+          Cross-Border Disease Surveillance | Rwanda + Neighboring Countries
           | Updated: June 4, 2026 (WHO AFRO)
         </span>
       </div>
@@ -44,10 +44,9 @@ export function GeoCrossBorder() {
           {/* DRC Threat Overlays */}
           {/* North Kivu (Mpox) */}
           <div className="absolute top-[30%] left-[10%] w-32 h-32 bg-[#F57C00]/30 rounded-full blur-xl animate-pulse mix-blend-screen pointer-events-none"></div>
-          <div className="absolute top-[35%] left-[15%] text-white text-[10px] font-bold bg-black/50 px-2 py-1 rounded border border-white/20">
-            🐒 Mpox — Active Outbreak
-            <br />
-            45 confirmed cases
+          <div className="absolute top-[35%] left-[15%] text-white text-[10px] font-bold bg-black/60 px-2.5 py-1.5 rounded border border-white/20">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F57C00]" /> Mpox — Active Outbreak</div>
+            <div className="text-white/80 font-normal">45 confirmed cases</div>
           </div>
 
           {/* South Kivu (Cholera) */}
@@ -56,26 +55,23 @@ export function GeoCrossBorder() {
             onMouseEnter={() => setShowPopup(true)}
             onMouseLeave={() => setShowPopup(false)}>
           </div>
-          <div className="absolute bottom-[35%] left-[12%] text-white text-[10px] font-bold bg-black/50 px-2 py-1 rounded border border-white/20 pointer-events-none">
-            💧 Cholera — Active Outbreak
-            <br />
-            234 cases this month
+          <div className="absolute bottom-[35%] left-[12%] text-white text-[10px] font-bold bg-black/60 px-2.5 py-1.5 rounded border border-white/20 pointer-events-none">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#D32F2F]" /> Cholera — Active Outbreak</div>
+            <div className="text-white/80 font-normal">234 cases this month</div>
           </div>
 
           {/* Uganda Threat Overlay */}
           <div className="absolute top-[10%] left-[40%] w-32 h-24 bg-[#F59E0B]/20 rounded-full blur-xl mix-blend-screen pointer-events-none"></div>
-          <div className="absolute top-[15%] left-[45%] text-white text-[10px] font-bold bg-black/50 px-2 py-1 rounded border border-white/20 pointer-events-none">
-            🩸 Ebola — 2 Suspected Cases
-            <br />
-            Under investigation
+          <div className="absolute top-[15%] left-[45%] text-white text-[10px] font-bold bg-black/60 px-2.5 py-1.5 rounded border border-white/20 pointer-events-none">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> Ebola — 2 Suspected Cases</div>
+            <div className="text-white/80 font-normal">Under investigation</div>
           </div>
 
           {/* Burundi Threat Overlay */}
           <div className="absolute bottom-[10%] left-[45%] w-40 h-24 bg-[#F59E0B]/10 rounded-full blur-xl mix-blend-screen pointer-events-none"></div>
-          <div className="absolute bottom-[12%] left-[50%] text-white text-[10px] font-bold bg-black/50 px-2 py-1 rounded border border-white/20 pointer-events-none">
-            🦟 Malaria — Elevated
-            <br />
-            +28% above baseline
+          <div className="absolute bottom-[12%] left-[50%] text-white text-[10px] font-bold bg-black/60 px-2.5 py-1.5 rounded border border-white/20 pointer-events-none">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> Malaria — Elevated</div>
+            <div className="text-white/80 font-normal">+28% above baseline</div>
           </div>
 
           {/* Border Crossing Markers */}
@@ -155,10 +151,11 @@ export function GeoCrossBorder() {
           {showPopup &&
           <div className="absolute bottom-[35%] left-[25%] bg-white rounded-lg shadow-xl border border-border p-4 w-72 z-30 pointer-events-none">
               <h3 className="text-[14px] font-bold text-epi-text mb-1">
-                🌍 DRC — South Kivu (Bukavu)
+                DRC — South Kivu (Bukavu)
               </h3>
-              <div className="text-[12px] font-bold text-epi-red mb-3">
-                💧 Cholera — ACTIVE OUTBREAK
+              <div className="text-[12px] font-bold text-epi-red mb-3 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-epi-red" />
+                <span>Cholera — ACTIVE OUTBREAK</span>
               </div>
 
               <div className="space-y-1.5 text-[12px] mb-3">
@@ -187,7 +184,7 @@ export function GeoCrossBorder() {
                   </span>
                   <br />
                   <span className="font-bold text-epi-text">
-                    Rusizi 🔴 | Nyamasheke 🟠
+                    Rusizi ● | Nyamasheke ●
                   </span>
                 </div>
                 <div className="text-[12px] mb-1">
@@ -215,7 +212,7 @@ export function GeoCrossBorder() {
         <div className="w-[35%] h-full bg-white border-l border-border flex flex-col overflow-y-auto">
           <div className="p-6">
             <h2 className="text-[18px] font-bold text-epi-text mb-6">
-              🌍 Regional Threat Assessment
+              Regional Threat Assessment
             </h2>
 
             <div className="mb-8">
@@ -247,10 +244,10 @@ export function GeoCrossBorder() {
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">Cholera</td>
                       <td className="p-3 text-[12px] font-bold text-epi-red">
-                        🔴 Active
+                        ● Active
                       </td>
                       <td className="p-3 text-[12px] font-bold text-epi-red">
-                        🔴 Very High
+                        ● Very High
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">
                         Rusizi, Nyamasheke
@@ -262,10 +259,10 @@ export function GeoCrossBorder() {
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">Mpox</td>
                       <td className="p-3 text-[12px] font-bold text-epi-red">
-                        🔴 Active
+                        ● Active
                       </td>
                       <td className="p-3 text-[12px] font-bold text-[#F97316]">
-                        🟠 High
+                        ● High
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">
                         Rubavu, Nyabihu
@@ -277,10 +274,10 @@ export function GeoCrossBorder() {
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">Ebola</td>
                       <td className="p-3 text-[12px] font-bold text-epi-amber">
-                        🟡 Watch
+                        ● Watch
                       </td>
                       <td className="p-3 text-[12px] font-bold text-epi-amber">
-                        🟡 Moderate
+                        ● Moderate
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">
                         Musanze, Burera, Gakenke
@@ -292,10 +289,10 @@ export function GeoCrossBorder() {
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">Malaria</td>
                       <td className="p-3 text-[12px] font-bold text-[#F97316]">
-                        🟠 Elevated
+                        ● Elevated
                       </td>
                       <td className="p-3 text-[12px] font-bold text-epi-amber">
-                        🟡 Moderate
+                        ● Moderate
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">
                         Kirehe, Ngoma
@@ -307,10 +304,10 @@ export function GeoCrossBorder() {
                       </td>
                       <td className="p-3 text-[12px] text-epi-text">None</td>
                       <td className="p-3 text-[12px] font-bold text-[#00A550]">
-                        🟢 Normal
+                        ● Normal
                       </td>
                       <td className="p-3 text-[12px] font-bold text-[#00A550]">
-                        🟢 Low
+                        ● Low
                       </td>
                       <td className="p-3 text-[12px] text-epi-muted">None</td>
                     </tr>
@@ -364,7 +361,7 @@ export function GeoCrossBorder() {
 
             <div className="bg-epi/10 border border-epi/20 p-5 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[16px]">💡</span>
+                <span className="text-[16px]"></span>
                 <h3 className="text-[13px] font-bold text-epi-text">
                   Cross-Border Threshold Logic:
                 </h3>

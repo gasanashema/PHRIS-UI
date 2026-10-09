@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
-import { ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ArrowRight, Check } from 'lucide-react';
 import { sortAlerts, useApp } from '../../store/AppStore';
 import { downloadFile, isOpenStatus, nowISO } from '../../lib/format';
 import type { Alert } from '../../types';
@@ -41,7 +41,11 @@ function TimelineActions({ alert }: {alert?: Alert;}) {
         }}
         className="px-6 py-3 bg-epi text-white text-[14px] font-bold rounded-md hover:bg-epi-dark disabled:opacity-60 transition-colors shadow-sm">
 
-        {done.includes('deploy') ? '✓ Intervention planned' : 'Deploy Intervention Now'}
+        {done.includes('deploy') ? (
+          <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> Intervention planned</span>
+        ) : (
+          'Deploy Intervention Now'
+        )}
       </button>
       <button
         disabled={done.includes('share')}
@@ -63,7 +67,11 @@ function TimelineActions({ alert }: {alert?: Alert;}) {
         }}
         className="px-6 py-3 bg-white border border-border text-epi-text text-[14px] font-bold rounded-md hover:bg-epi-bg disabled:opacity-60 transition-colors shadow-sm">
 
-        {done.includes('share') ? '✓ Shared with DHO' : 'Share Timeline with DHO'}
+        {done.includes('share') ? (
+          <span className="flex items-center gap-1.5 text-[#00A550]"><Check className="w-4 h-4" /> Shared with DHO</span>
+        ) : (
+          'Share Timeline with DHO'
+        )}
       </button>
       <button
         onClick={() => {
@@ -106,7 +114,7 @@ export function PredictionTimeline() {
           <p className="text-[13px] text-epi-muted mb-6">Starting from {alert.cases} cases this week, growth {alert.change} week-on-week (simulated model)</p>
           <div className="overflow-x-auto mb-6">
             <table className="w-full text-left text-[13px]">
-              <thead className="bg-epi-bg"><tr><th className="p-3">Week</th><th className="p-3">🔴 No action</th><th className="p-3">🟢 With intervention</th><th className="p-3">Cases averted</th></tr></thead>
+              <thead className="bg-epi-bg"><tr><th className="p-3">Week</th><th className="p-3">● No action</th><th className="p-3">● With intervention</th><th className="p-3">Cases averted</th></tr></thead>
               <tbody className="divide-y divide-border">
                 {forecast(alert).map((r) =>
               <tr key={r.week}>
@@ -140,10 +148,10 @@ export function PredictionTimeline() {
                     Week
                   </th>
                   <th className="p-4 text-[13px] font-bold text-epi-red uppercase tracking-wider bg-epi-red/5 border-b border-r border-border w-2/5">
-                    🔴 NO INTERVENTION
+                    ● NO INTERVENTION
                   </th>
                   <th className="p-4 text-[13px] font-bold text-[#00A550] uppercase tracking-wider bg-[#00A550]/5 border-b border-border w-2/5">
-                    🟢 IMMEDIATE RESPONSE
+                    ● IMMEDIATE RESPONSE
                   </th>
                 </tr>
               </thead>
@@ -381,10 +389,10 @@ export function PredictionTimeline() {
 
               {/* Annotation Labels */}
               <div className="absolute top-[60%] left-[50%] -translate-x-1/2 -translate-y-full bg-white border border-epi-red p-2 rounded shadow-sm text-[11px] font-bold text-epi-red whitespace-nowrap z-20">
-                ⚠️ Epidemic threshold crossed without action
+                Epidemic threshold crossed without action
               </div>
-              <div className="absolute bottom-[5%] right-0 -translate-y-full bg-white border border-[#00A550] p-2 rounded shadow-sm text-[11px] font-bold text-[#00A550] whitespace-nowrap z-20">
-                ✅ Controlled — intervention worked
+              <div className="absolute bottom-[5%] right-0 -translate-y-full bg-white border border-[#00A550] p-2 rounded shadow-sm text-[11px] font-bold text-[#00A550] whitespace-nowrap z-20 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Controlled — intervention worked
               </div>
             </div>
           </div>

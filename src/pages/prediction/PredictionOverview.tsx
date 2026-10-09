@@ -13,7 +13,9 @@ import {
   Play,
   Loader2,
   AlertTriangle,
-  CheckCircle2 } from
+  CheckCircle2,
+  Check,
+  Zap } from
 'lucide-react';
 import { SeverityBadge, SimulatedTag } from '../../components/shared/Badges';
 import { severityForSignal, useApp } from '../../store/AppStore';
@@ -33,7 +35,7 @@ const bandColor = (s: number) =>
 s >= 80 ? 'bg-epi-red' : s >= 60 ? 'bg-[#F97316]' : s >= 40 ? 'bg-epi-amber' : 'bg-[#00A550]';
 const textColor = (s: number) =>
 s >= 80 ? 'text-epi-red' : s >= 60 ? 'text-[#F97316]' : s >= 40 ? 'text-epi-amber' : 'text-[#00A550]';
-const emoji = (s: number) => s >= 80 ? '🔴' : s >= 60 ? '🟠' : s >= 40 ? '🟡' : '🟢';
+const emoji = (s: number) => s >= 80 ? '●' : s >= 60 ? '●' : s >= 40 ? '●' : '●';
 
 export function PredictionOverview() {
   const { state, actions } = useApp();
@@ -149,11 +151,11 @@ export function PredictionOverview() {
 
         <div className="mt-4 flex flex-wrap gap-2 text-[12px]">
           <span className={`px-2.5 py-1 rounded-full font-bold ${envOk ? 'bg-[#00A550]/10 text-[#00A550]' : 'bg-epi-red/10 text-epi-red'}`}>
-            {envOk ? '🟢 Weather features available' : '🔴 Weather data missing (Met Agency offline) — lower confidence'}
+            {envOk ? '● Weather features available' : '● Weather data missing (Met Agency offline) — lower confidence'}
           </span>
           {stale &&
           <Link to="/processing" className="px-2.5 py-1 rounded-full font-bold bg-epi-amber/15 text-epi-amber hover:underline">
-              🟡 New source data not yet processed — run the pipeline first for the freshest prediction →
+              ● New source data not yet processed — run the pipeline first for the freshest prediction →
             </Link>
           }
           {!envOk &&
@@ -209,8 +211,8 @@ export function PredictionOverview() {
                         </div>
                         <div className="text-[12px] mt-1">
                           {created ?
-                      <Link to={`/warning/detail?id=${created.id}`} className="font-bold text-epi-red hover:underline">
-                              ⚡ New alert {created.id} generated →
+                      <Link to={`/warning/detail?id=${created.id}`} className="font-bold text-epi-red hover:underline flex items-center gap-1">
+                              <Zap className="w-3.5 h-3.5" /> New alert {created.id} generated →
                             </Link> :
                       existing ?
                       <Link to={`/warning/detail?id=${existing.id}`} className="text-epi hover:underline">
@@ -245,7 +247,7 @@ export function PredictionOverview() {
             {high.slice(0, 5).map((r) => `${r.district} ${emoji(r.score)}`).join(' · ')}
           </p>
           <div className="mt-auto">
-            <span className="text-[11px] font-bold text-epi-red">🔴 Urgent attention needed</span>
+            <span className="text-[11px] font-bold text-epi-red">● Urgent attention needed</span>
           </div>
         </div>
 
@@ -260,7 +262,7 @@ export function PredictionOverview() {
           <p className="text-[11px] text-epi-muted mb-2">8 diseases × 30 districts</p>
           <div className="mt-auto">
             <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#00A550]/10 text-[#00A550]">
-              {running ? '⏳ Updating…' : '🟢 All running'}
+              {running ? '⏱ Updating…' : '● All running'}
             </span>
           </div>
         </div>
@@ -364,9 +366,16 @@ export function PredictionOverview() {
         <div className="lg:col-span-4 flex flex-col gap-6">
           <h2 className="text-[16px] font-bold text-epi-text">Prediction Engine Status</h2>
           <div className="bg-white rounded-lg p-5 shadow-card border-2 border-epi flex flex-col">
-            <h3 className="text-[14px] font-bold text-epi-text flex items-center gap-2 mb-3">🧠 AI Vital Prediction Model v3.2</h3>
+            <h3 className="text-[14px] font-bold text-epi-text flex items-center gap-2 mb-3">
+              <BrainCircuit className="w-4 h-4 text-epi" />
+              AI Vital Prediction Model v3.2
+            </h3>
             <div className={`text-[12px] font-bold mb-4 ${running ? 'text-epi-amber' : 'text-[#00A550]'}`}>
-              {running ? '⏳ Prediction run in progress' : '🟢 Active and ready'}
+              {running ? (
+                <span className="flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Prediction run in progress</span>
+              ) : (
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00A550] inline-block" /> Active and ready</span>
+              )}
             </div>
             <div className="space-y-3 text-[13px] mb-2">
               <div className="flex justify-between gap-3">
@@ -394,21 +403,33 @@ export function PredictionOverview() {
 
           <div className="bg-white rounded-lg p-5 shadow-card border border-border">
             <h3 className="text-[14px] font-bold text-epi-text mb-3">Alert rules applied to predictions:</h3>
-            <ul className="space-y-2 text-[13px] text-epi-text mb-4">
+            <ul className="space-y-2.5 text-[13px] text-epi-text mb-4">
               <li className="flex items-start gap-2">
-                <span>{state.rules.aiEnabled ? '✅' : '⬜'}</span>
+                {state.rules.aiEnabled ? (
+                  <Check className="w-4 h-4 text-[#00A550] shrink-0 mt-0.5" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded border border-border inline-block shrink-0 mt-1" />
+                )}
                 <span>AI probability ≥ {state.rules.aiPct}% → Orange, ≥ {state.rules.aiPct + 20}% → Red</span>
               </li>
               <li className="flex items-start gap-2">
-                <span>{state.rules.rainyEnabled ? '✅' : '⬜'}</span>
+                {state.rules.rainyEnabled ? (
+                  <Check className="w-4 h-4 text-[#00A550] shrink-0 mt-0.5" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded border border-border inline-block shrink-0 mt-1" />
+                )}
                 <span>Rainy season multipliers (Mar–May, Oct–Dec)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span>{state.rules.crossBorderEnabled ? '✅' : '⬜'}</span>
+                {state.rules.crossBorderEnabled ? (
+                  <Check className="w-4 h-4 text-[#00A550] shrink-0 mt-0.5" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded border border-border inline-block shrink-0 mt-1" />
+                )}
                 <span>DRC border risk signals (Rusizi, Rubavu, Nyamasheke)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span>✅</span>
+                <Check className="w-4 h-4 text-[#00A550] shrink-0 mt-0.5" />
                 <span>NISR census denominators</span>
               </li>
             </ul>

@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   Clock,
   RefreshCw,
-  Loader2 } from
+  Loader2,
+  TrendingDown } from
 'lucide-react';
 import {
   BarChart,
@@ -91,10 +92,10 @@ export function IntegrationHome() {
           <div className="text-2xl font-bold text-epi-text mb-1">{src.length}</div>
           <p className="text-[11px] text-epi-muted mb-2">Configured data sources</p>
           <div className="space-y-1 text-[11px] font-medium mt-auto">
-            <div className="text-epi-text">{count('active')} 🟢 Active</div>
-            <div className="text-epi-text">{count('delayed') + count('partial')} 🟡 Delayed / partial</div>
-            <div className="text-epi-text">{count('disconnected')} 🔴 Disconnected</div>
-            {count('disabled') > 0 && <div className="text-epi-muted">{count('disabled')} ⚪ Disabled</div>}
+            <div className="text-epi-text">{count('active')} ● Active</div>
+            <div className="text-epi-text">{count('delayed') + count('partial')} ● Delayed / partial</div>
+            <div className="text-epi-text">{count('disconnected')} ● Disconnected</div>
+            {count('disabled') > 0 && <div className="text-epi-muted">{count('disabled')} ● Disabled</div>}
           </div>
         </div>
 
@@ -142,7 +143,7 @@ export function IntegrationHome() {
           <div className="space-y-1 text-[11px] font-medium mt-auto mb-2">
             {failures.slice(0, 3).map((f) =>
             <div key={f.id} className="text-epi-text">
-                {f.status === 'failed' ? '🔴' : '🟡'} {f.sourceName}
+                {f.status === 'failed' ? '●' : '●'} {f.sourceName}
               </div>
             )}
           </div>
@@ -164,7 +165,7 @@ export function IntegrationHome() {
           <p className="text-[11px] text-epi-muted mb-3">Average data age across enabled sources</p>
           <div className="mt-auto">
             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold mb-1 ${avgAge <= 180 ? 'bg-epi-accent/10 text-epi-accent' : 'bg-epi-amber/10 text-epi-amber'}`}>
-              {avgAge <= 180 ? '🟢 Acceptable' : '🟡 Stale data'}
+              {avgAge <= 180 ? '● Acceptable' : '● Stale data'}
             </span>
             <p className="text-[11px] text-epi-muted">Target: under 3 hours</p>
           </div>
@@ -177,7 +178,7 @@ export function IntegrationHome() {
             <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-[14px] font-bold mb-1">
-                🔴 WARNING: Rwanda Meteorological Agency API disconnected since {fmtDateTime(met.lastSync)}.
+                ● WARNING: Rwanda Meteorological Agency API disconnected since {fmtDateTime(met.lastSync)}.
               </h3>
               <p className="text-[13px] opacity-90">
                 Weather and environmental data is missing from all dashboards and AI prediction models. Immediate
@@ -234,12 +235,12 @@ export function IntegrationHome() {
                     <td className="p-4 text-[13px] text-epi-muted">{s.description}</td>
                     <td className="p-4 text-[13px] text-epi-text">{s.connection}</td>
                     <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${STATUS_LABEL[s.status].cls}`}>
-                      {s.syncing ? '⏳ Syncing…' : STATUS_LABEL[s.status].label}
+                      {s.syncing ? '⏱ Syncing…' : STATUS_LABEL[s.status].label}
                     </td>
                     <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">{timeAgo(s.lastSync)}</td>
                     <td className="p-4 text-[13px] text-epi-text">{s.connection === 'Manual Upload' && !s.recordsToday ? 'Static data' : `${fmtNumber(s.recordsToday)} records`}</td>
                     <td className={`p-4 text-[13px] font-bold ${down ? 'text-epi-red' : s.quality < 90 ? 'text-[#F97316]' : 'text-epi-text'}`}>
-                      {down ? '🔴 N/A' : `${s.quality >= 95 ? '🟢' : s.quality >= 90 ? '🟡' : '🟠'} ${s.quality.toFixed(1)}%`}
+                      {down ? '● N/A' : `${s.quality >= 95 ? '●' : s.quality >= 90 ? '●' : '●'} ${s.quality.toFixed(1)}%`}
                     </td>
                     <td className="p-4 text-[13px] text-epi-text text-right whitespace-nowrap">
                       {down ?
@@ -298,7 +299,10 @@ export function IntegrationHome() {
               </ComposedChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[12px] text-epi-muted mt-2">📉 A CHW App delay on June 4 caused ~1,800 fewer records. Today's bar updates as sources sync.</p>
+          <p className="text-[12px] text-epi-muted mt-2 flex items-center gap-1.5">
+            <TrendingDown className="w-3.5 h-3.5 text-epi-muted shrink-0" />
+            <span>A CHW App delay on June 4 caused ~1,800 fewer records. Today's bar updates as sources sync.</span>
+          </p>
         </div>
 
         <div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-card border border-border">

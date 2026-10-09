@@ -322,7 +322,7 @@ export function AnalystExplore() {
 
           <div className="bg-epi/10 border border-epi/20 rounded-lg p-5 mb-6">
             <div className="text-[14px] text-epi-text leading-relaxed">
-              <span className="font-bold text-epi">💡 Analysis summary:</span> {insight}
+              <span className="font-bold text-epi">Analysis summary:</span> {insight}
             </div>
           </div>
 

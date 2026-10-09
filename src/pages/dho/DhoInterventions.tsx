@@ -10,12 +10,12 @@ import type { Intervention, InterventionStatus } from '../../types';
 
 const statusBadge = (s: InterventionStatus) => {
   if (s === 'Ongoing')
-  return <span className="text-admin-amber font-semibold">🟡 Ongoing</span>;
+    return <span className="inline-flex items-center gap-1.5 text-admin-amber font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-admin-amber" /> Ongoing</span>;
   if (s === 'Planned')
-  return <span className="text-admin-info font-semibold">🗓 Planned</span>;
+    return <span className="inline-flex items-center gap-1.5 text-admin-info font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-admin-info" /> Planned</span>;
   if (s === 'Completed')
-  return <span className="text-admin-accent font-semibold">✅ Completed</span>;
-  return <span className="text-admin-red font-semibold">⏰ Overdue</span>;
+    return <span className="inline-flex items-center gap-1.5 text-admin-accent font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-admin-accent" /> Completed</span>;
+  return <span className="inline-flex items-center gap-1.5 text-admin-red font-semibold"><span className="w-1.5 h-1.5 rounded-full bg-admin-red" /> Overdue</span>;
 };
 
 export function DhoInterventions() {
@@ -36,11 +36,11 @@ export function DhoInterventions() {
   const count = (s: InterventionStatus) => all.filter((i) => i.status === s).length;
 
   const chips: {id: 'all' | InterventionStatus;label: string;cls: string;}[] = [
-  { id: 'all', label: `🎯 ${all.length} Total Interventions`, cls: 'text-admin-text' },
-  { id: 'Planned', label: `🗓 ${count('Planned')} Planned`, cls: 'text-admin-info' },
-  { id: 'Ongoing', label: `🟡 ${count('Ongoing')} Ongoing`, cls: 'text-admin-amber' },
-  { id: 'Completed', label: `✅ ${count('Completed')} Completed`, cls: 'text-admin-accent' },
-  { id: 'Overdue', label: `⏰ ${count('Overdue')} Overdue`, cls: 'text-admin-red' }];
+  { id: 'all', label: `All (${all.length})`, cls: 'text-admin-text' },
+  { id: 'Planned', label: `Planned (${count('Planned')})`, cls: 'text-admin-info' },
+  { id: 'Ongoing', label: `Ongoing (${count('Ongoing')})`, cls: 'text-admin-amber' },
+  { id: 'Completed', label: `Completed (${count('Completed')})`, cls: 'text-admin-accent' },
+  { id: 'Overdue', label: `Overdue (${count('Overdue')})`, cls: 'text-admin-red' }];
 
 
   return (

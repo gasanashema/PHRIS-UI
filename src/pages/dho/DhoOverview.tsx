@@ -8,7 +8,8 @@ import {
   ArrowUpRight,
   CheckCircle2,
   FileSearch,
-  Target } from
+  Target,
+  Check } from
 'lucide-react';
 import {
   BarChart,
@@ -157,9 +158,9 @@ export function DhoOverview() {
           </div>
           <div className="text-[13px] text-admin-muted font-medium">Open Alerts</div>
           <div className="text-[11px] font-medium mt-2 flex gap-1.5">
-            <span className="text-admin-red">{bySev('red')}🔴</span>
-            <span className="text-admin-amber">{bySev('orange')}🟠</span>
-            <span className="text-yellow-500">{bySev('yellow')}🟡</span>
+            <span className="text-admin-red">{bySev('red')}●</span>
+            <span className="text-admin-amber">{bySev('orange')}●</span>
+            <span className="text-yellow-500">{bySev('yellow')}●</span>
           </div>
           <Link
             to="/dho/alerts"
@@ -232,7 +233,7 @@ export function DhoOverview() {
             {state.pipeline.lastBatchId}
           </div>
           <div className="text-[11px] text-admin-accent font-medium mt-auto pt-1">
-            🟢 DHIS2 + CHW data flowing
+            ● DHIS2 + CHW data flowing
           </div>
         </div>
       </div>
@@ -264,10 +265,10 @@ export function DhoOverview() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 mt-5">
               <div className="flex flex-wrap items-center gap-4 text-[12px] text-admin-muted">
-                <span>🔴 High Risk</span>
-                <span>🟠 Alert</span>
-                <span>🟡 Watch</span>
-                <span>🟢 Normal</span>
+                <span>● High Risk</span>
+                <span>● Alert</span>
+                <span>● Watch</span>
+                <span>● Normal</span>
               </div>
               <Link
                 to="/dho/risk-map"
@@ -408,8 +409,13 @@ export function DhoOverview() {
                     key={i}
                     className={`flex items-center justify-between px-3 py-2 rounded text-[13px] ${f.ok ? '' : 'bg-admin-amber/10'}`}>
 
-                    <span className="font-medium text-admin-text">
-                      {f.ok ? '✅' : '❌'} {f.name}
+                    <span className="font-medium text-admin-text inline-flex items-center gap-1.5">
+                      {f.ok ? (
+                        <Check className="w-3.5 h-3.5 text-admin-accent shrink-0" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-admin-amber shrink-0" />
+                      )}
+                      <span>{f.name}</span>
                     </span>
                     <span
                       className={
@@ -425,9 +431,15 @@ export function DhoOverview() {
             <button
               onClick={() => actions.sendFacilityReminder(missing)}
               disabled={reminded}
-              className="mt-4 h-10 border border-admin-amber text-admin-amber hover:bg-admin-amber/10 disabled:opacity-60 disabled:cursor-not-allowed text-[13px] font-semibold rounded-md transition-colors">
-
-              {reminded ? '✓ Reminder sent to 3 facilities' : 'Send reminder to 3 facilities'}
+              className="mt-4 h-10 border border-admin-amber text-admin-amber hover:bg-admin-amber/10 disabled:opacity-60 disabled:cursor-not-allowed text-[13px] font-semibold rounded-md transition-colors inline-flex items-center justify-center gap-1.5">
+              {reminded ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Reminder sent to 3 facilities</span>
+                </>
+              ) : (
+                'Send reminder to 3 facilities'
+              )}
             </button>
           </div>
         </div>
@@ -456,7 +468,7 @@ export function DhoOverview() {
               onClick={() => actions.markNotificationRead(n.id)}
               className="flex gap-3 px-5 py-3 hover:bg-admin-bg/50">
 
-                <span>{n.severity === 'info' ? 'ℹ️' : SEVERITY_META[n.severity].emoji}</span>
+                <span>{n.severity === 'info' ? '' : SEVERITY_META[n.severity].emoji}</span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[13px] font-bold text-admin-text">{n.title}</span>
                   <span className="block text-[12px] text-admin-muted truncate">{n.body}</span>

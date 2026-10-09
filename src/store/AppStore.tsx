@@ -1677,7 +1677,7 @@ export function AppProvider({ children }: {children: React.ReactNode;}) {
           notifications: scheduled ?
           s.notifications :
           notify(s.notifications, {
-            title: `📣 ${a.title}`,
+            title: `${a.title}`,
             body: a.body,
             severity: a.priority === 'urgent' ? 'red' : a.priority === 'important' ? 'orange' : 'info',
             roles,

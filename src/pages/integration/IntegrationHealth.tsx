@@ -23,7 +23,7 @@ const healthData = [
   uptime: 98,
   failures: 3,
   delay: '12 min',
-  score: '🟢 Excellent',
+  score: '● Excellent',
   trend: '↑'
 },
 {
@@ -31,7 +31,7 @@ const healthData = [
   uptime: 95,
   failures: 8,
   delay: '25 min',
-  score: '🟢 Good',
+  score: '● Good',
   trend: '→'
 },
 {
@@ -39,7 +39,7 @@ const healthData = [
   uptime: 100,
   failures: 0,
   delay: 'Manual',
-  score: '🟢 Excellent',
+  score: '● Excellent',
   trend: '→'
 },
 {
@@ -47,7 +47,7 @@ const healthData = [
   uptime: 95,
   failures: 7,
   delay: '38 min',
-  score: '🟢 Good',
+  score: '● Good',
   trend: '↑'
 },
 {
@@ -55,7 +55,7 @@ const healthData = [
   uptime: 93,
   failures: 10,
   delay: '45 min',
-  score: '🟢 Good',
+  score: '● Good',
   trend: '→'
 },
 {
@@ -63,7 +63,7 @@ const healthData = [
   uptime: 91,
   failures: 13,
   delay: '52 min',
-  score: '🟢 Good',
+  score: '● Good',
   trend: '→'
 },
 {
@@ -71,7 +71,7 @@ const healthData = [
   uptime: 84,
   failures: 22,
   delay: '1.8 hrs',
-  score: '🟠 Fair',
+  score: '● Fair',
   trend: '↓'
 },
 {
@@ -79,7 +79,7 @@ const healthData = [
   uptime: 78,
   failures: 34,
   delay: '3.2 hrs',
-  score: '🟠 Poor (below threshold ⚠️)',
+  score: '● Poor (below threshold )',
   trend: '↓',
   isWarning: true
 },
@@ -88,7 +88,7 @@ const healthData = [
   uptime: 45,
   failures: 67,
   delay: 'N/A',
-  score: '🔴 Critical (offline)',
+  score: '● Critical (offline)',
   trend: '↓ ↓',
   isError: true
 }];
@@ -216,7 +216,7 @@ export function IntegrationHealth() {
           </p>
           <div className="flex items-center justify-between">
             <span className="text-[12px] font-bold text-[#00A550]">
-              🟢 Within target
+              ● Within target
             </span>
             <span className="text-[11px] text-epi-muted">
               Target: &lt; 3 hours
@@ -230,7 +230,7 @@ export function IntegrationHealth() {
         <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5" />
         <div>
           <h3 className="text-[14px] font-bold mb-1">
-            🔴 ALERT: CHW Mobile App has dropped below the 80% uptime threshold
+            ● ALERT: CHW Mobile App has dropped below the 80% uptime threshold
             this month (78%).
           </h3>
           <p className="text-[13px] opacity-90">

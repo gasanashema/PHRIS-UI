@@ -6,7 +6,10 @@ import {
   FileSearch,
   Map as MapIcon,
   Plus,
-  Target } from
+  Target,
+  FileText,
+  ArrowUpRight,
+  CheckCircle2 } from
 'lucide-react';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 import { InterventionDrawer } from '../../components/dho/InterventionDrawer';
@@ -111,33 +114,29 @@ export function DhoAlertDetail() {
           {open &&
           <>
               <button
-              onClick={() => dialogs.open('note', alert)}
-              className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg">
-
-                📝 Add Response Note
+                onClick={() => dialogs.open('note', alert)}
+                className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg flex items-center gap-2">
+                <FileText className="w-4 h-4 text-admin-muted" /> Add Response Note
               </button>
               {alert.status !== 'escalated' &&
-            <button
-              onClick={() => dialogs.open('escalate', alert)}
-              className="h-10 px-4 bg-white border border-admin-red text-admin-red text-[13px] font-semibold rounded-md hover:bg-admin-red/10">
-
-                  ⬆️ Escalate
+                <button
+                  onClick={() => dialogs.open('escalate', alert)}
+                  className="h-10 px-4 bg-white border border-admin-red text-admin-red text-[13px] font-semibold rounded-md hover:bg-admin-red/10 flex items-center gap-2">
+                  <ArrowUpRight className="w-4 h-4" /> Escalate
                 </button>
-            }
+              }
               <button
-              onClick={() => setDrawer({ open: true, editing: null })}
-              className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg flex items-center gap-2">
-
+                onClick={() => setDrawer({ open: true, editing: null })}
+                className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg flex items-center gap-2">
                 <Target className="w-4 h-4" /> Log Intervention
               </button>
               {alert.status !== 'active' &&
-            <button
-              onClick={() => dialogs.open('resolve', alert)}
-              className="h-10 px-4 bg-white border border-admin-accent text-admin-accent text-[13px] font-semibold rounded-md hover:bg-admin-accent/10">
-
-                  ✔️ Mark Resolved
+                <button
+                  onClick={() => dialogs.open('resolve', alert)}
+                  className="h-10 px-4 bg-white border border-admin-accent text-admin-accent text-[13px] font-semibold rounded-md hover:bg-admin-accent/10 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> Mark Resolved
                 </button>
-            }
+              }
               <button
               onClick={() => dialogs.open('dismiss', alert)}
               className="h-10 px-4 text-admin-muted text-[13px] font-semibold rounded-md hover:text-admin-red">

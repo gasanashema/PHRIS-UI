@@ -6,27 +6,44 @@ export function SeverityBadge({
   severity,
   solid = false,
   className = ''
-
-
-
 }: {severity: Severity;solid?: boolean;className?: string;}) {
-  const m = SEVERITY_META[severity];
+  const m = SEVERITY_META[severity] || SEVERITY_META.green;
+  const dotColor =
+    severity === 'red'
+      ? 'bg-admin-red'
+      : severity === 'orange'
+      ? 'bg-[#F97316]'
+      : severity === 'yellow'
+      ? 'bg-yellow-500'
+      : 'bg-admin-accent';
+
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${solid ? m.bg : m.soft} ${className}`}>
-
-      {m.emoji} {m.label}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${solid ? m.bg : m.soft} ${className}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${solid ? 'bg-white' : dotColor}`} />
+      {m.label}
     </span>);
 
 }
 
 export function StatusBadge({ status }: {status: AlertStatus;}) {
   const m = STATUS_META[status];
+  const dotColor =
+    status === 'active'
+      ? 'bg-admin-red'
+      : status === 'acknowledged'
+      ? 'bg-admin-accent'
+      : status === 'escalated'
+      ? 'bg-[#F97316]'
+      : status === 'resolved'
+      ? 'bg-admin-info'
+      : 'bg-admin-muted';
+
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${m.cls}`}>
-
-      {m.emoji} {m.label}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${m.cls}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+      {m.label}
     </span>);
 
 }

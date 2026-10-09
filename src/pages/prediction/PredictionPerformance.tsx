@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
 import { ArrowUpRight, ArrowRight, ArrowDownRight } from 'lucide-react';
@@ -28,7 +28,7 @@ export function PredictionPerformance() {
             Overall Accuracy
           </h3>
           <div className="text-2xl font-bold text-epi-text mb-1">
-            84.7% <span className="text-[16px]">🟢</span>
+            84.7% <span className="text-[16px]">●</span>
           </div>
         </div>
         <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
@@ -48,7 +48,7 @@ export function PredictionPerformance() {
             Missed Outbreaks (false negatives)
           </h3>
           <div className="text-2xl font-bold text-epi-text mb-1">
-            11 <span className="text-[16px]">🔴</span>
+            11 <span className="text-[16px]">●</span>
           </div>
           <div className="text-[11px] font-bold text-epi-red mt-auto">
             11 missed outbreaks reviewed for model improvement
@@ -121,7 +121,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟢</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -157,7 +157,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟢</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -193,7 +193,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟡</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -229,7 +229,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟡</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -265,7 +265,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟡</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -301,7 +301,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟡</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center text-[11px] font-bold text-epi-muted">
@@ -337,7 +337,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟡</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center text-[11px] font-bold text-epi-muted">
@@ -373,7 +373,7 @@ export function PredictionPerformance() {
                           }}>
                         </div>
                       </div>
-                      <span className="text-[10px]">🟢</span>
+                      <span className="text-[10px]">●</span>
                     </div>
                   </td>
                   <td className="p-4 text-center">
@@ -499,7 +499,7 @@ export function PredictionPerformance() {
               <div className="flex gap-3">
                 <button onClick={startRetrain} disabled={retrain !== 'idle'} className="flex-1 py-2 bg-epi text-white text-[13px] font-bold rounded-md hover:bg-epi-dark disabled:opacity-70 transition-colors flex items-center justify-center gap-2">
                   {retrain === 'running' && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {retrain === 'idle' ? 'Trigger Model Retrain' : retrain === 'running' ? 'Retraining (simulated)…' : '✓ v3.3 trained — pending review'}
+                  {retrain === 'idle' ? 'Trigger Model Retrain' : retrain === 'running' ? 'Retraining (simulated)…' : <span className="flex items-center gap-1.5"><Check className="w-4 h-4" /> v3.3 trained — pending review</span>}
                 </button>
                 <Link to="/prediction/history" className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg transition-colors text-center">
                   View All Missed Predictions

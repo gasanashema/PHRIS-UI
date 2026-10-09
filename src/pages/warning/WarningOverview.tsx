@@ -8,7 +8,9 @@ import {
   Clock,
   BellOff,
   ArrowRight,
-  ArrowDownRight } from
+  ArrowDownRight,
+  Check,
+  ArrowUp } from
 'lucide-react';
 import { sortAlerts, useApp } from '../../store/AppStore';
 import { DISTRICT_PROVINCE } from '../../data/seed';
@@ -65,13 +67,13 @@ function AlertMini({ a }: {a: Alert;}) {
         {a.id.replace('ALT-2026-', 'ALT-')} | {a.disease} | {a.district}
       </div>
       <div className="text-epi-muted mb-1">{timeAgo(a.triggeredAt)}</div>
-      {a.status === 'active' ?
-      <div className="text-epi-amber font-bold">⚠️ PENDING</div> :
-      a.status === 'escalated' ?
-      <div className="text-[#F97316] font-bold">⬆️ Escalated</div> :
-
-      <div className="text-[#00A550] font-bold">Acknowledged ✅</div>
-      }
+      {a.status === 'active' ? (
+        <div className="text-epi-amber font-bold">PENDING</div>
+      ) : a.status === 'escalated' ? (
+        <div className="text-[#F97316] font-bold flex items-center gap-1"><ArrowUp className="w-3.5 h-3.5" /> Escalated</div>
+      ) : (
+        <div className="text-[#00A550] font-bold flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Acknowledged</div>
+      )}
     </Link>);
 
 }
@@ -122,7 +124,7 @@ export function WarningOverview() {
           {red.length > 0 &&
           <div className="mt-auto">
               <span className="text-[10px] font-bold bg-white text-epi-red px-2 py-0.5 rounded">
-                🔴 IMMEDIATE ACTION REQUIRED
+                ● IMMEDIATE ACTION REQUIRED
               </span>
             </div>
           }
@@ -184,7 +186,7 @@ export function WarningOverview() {
               <ArrowDownRight className="w-3 h-3 mr-0.5" /> 34% faster than last year
             </span>
             <span className={`text-[10px] font-bold ${avg <= 3 ? 'text-[#00A550]' : 'text-epi-amber'}`}>
-              {avg <= 3 ? '🟢 Within 3h target' : '🟡 Above 3h target'}
+              {avg <= 3 ? '● Within 3h target' : '● Above 3h target'}
             </span>
           </div>
         </div>
@@ -322,17 +324,17 @@ export function WarningOverview() {
               <div>
                 <h3 className="text-[12px] font-bold text-epi-muted uppercase tracking-wider mb-3">Best responding:</h3>
                 <ul className="space-y-2 text-[13px]">
-                  <li className="flex justify-between"><span className="text-epi-text">🥇 Musanze</span><span className="font-bold text-[#00A550]">avg 0.8h</span></li>
-                  <li className="flex justify-between"><span className="text-epi-text">🥈 Gasabo</span><span className="font-bold text-[#00A550]">avg 1.1h</span></li>
-                  <li className="flex justify-between"><span className="text-epi-text">🥉 Huye</span><span className="font-bold text-[#00A550]">avg 1.4h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">#1 Musanze</span><span className="font-bold text-[#00A550]">avg 0.8h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">#2 Gasabo</span><span className="font-bold text-[#00A550]">avg 1.1h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">#3 Huye</span><span className="font-bold text-[#00A550]">avg 1.4h</span></li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-[12px] font-bold text-epi-muted uppercase tracking-wider mb-3">Needs improvement:</h3>
                 <ul className="space-y-2 text-[13px]">
-                  <li className="flex justify-between"><span className="text-epi-text">⚠️ Gicumbi</span><span className="font-bold text-epi-red">avg 6.8h</span></li>
-                  <li className="flex justify-between"><span className="text-epi-text">⚠️ Ngororero</span><span className="font-bold text-[#F97316]">avg 5.4h</span></li>
-                  <li className="flex justify-between"><span className="text-epi-text">⚠️ Nyaruguru</span><span className="font-bold text-[#F97316]">avg 4.9h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">Gicumbi</span><span className="font-bold text-epi-red">avg 6.8h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">Ngororero</span><span className="font-bold text-[#F97316]">avg 5.4h</span></li>
+                  <li className="flex justify-between"><span className="text-epi-text">Nyaruguru</span><span className="font-bold text-[#F97316]">avg 4.9h</span></li>
                 </ul>
               </div>
             </div>

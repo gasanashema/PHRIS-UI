@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { GeoLayout } from '../../components/geo/GeoLayout';
-import { Play, Pause, ArrowRight } from 'lucide-react';
+import { Play, Pause, ArrowRight, Calendar } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { addDays, fmtDate, nowISO } from '../../lib/format';
 
 const DISEASE_OPTIONS = [
-['Cholera', '💧 Cholera'],
-['Malaria', '🦟 Malaria'],
-['Measles', '💉 Measles'],
-['Typhoid', '🌡️ Typhoid'],
-['Malnutrition', '🍽️ Malnutrition']] as
+['Cholera', 'Cholera'],
+['Malaria', 'Malaria'],
+['Measles', 'Measles'],
+['Typhoid', 'Typhoid'],
+['Malnutrition', 'Malnutrition']] as
 const;
 
 export function GeoHeatMap() {
@@ -134,21 +134,21 @@ export function GeoHeatMap() {
         <div className="absolute bottom-[16%] left-[16%] text-white text-[10px] font-bold drop-shadow-md pointer-events-none">
           Bugarama Sector
           <br />
-          38 cases 🔴
+          38 cases ●
         </div>
         <div className="absolute bottom-[12%] left-[18%] text-white text-[10px] font-bold drop-shadow-md pointer-events-none">
           Nzahaha Sector
           <br />
-          24 cases 🔴
+          24 cases ●
         </div>
         <div className="absolute bottom-[22%] left-[12%] text-white text-[10px] font-bold drop-shadow-md pointer-events-none">
           Kamembe Sector
           <br />
-          19 cases 🟠
+          19 cases ●
         </div>
         <div className="absolute bottom-[18%] left-[10%] text-white text-[10px] font-bold drop-shadow-md pointer-events-none">
           Gikundamvura Sector
-          <br />6 cases 🟡
+          <br />6 cases ●
         </div>
         </>
         }
@@ -159,8 +159,9 @@ export function GeoHeatMap() {
             <h3 className="text-[13px] font-bold text-epi-text mb-1">
               Bugarama Sector, Rusizi District
             </h3>
-            <div className="text-[14px] font-bold text-epi-red mb-3">
-              💧 Cholera Cases This Week: 38
+            <div className="text-[14px] font-bold text-epi-red mb-3 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-epi-red" />
+              <span>Cholera Cases This Week: 38</span>
             </div>
 
             <div className="space-y-1.5 text-[12px] mb-3">
@@ -178,7 +179,7 @@ export function GeoHeatMap() {
               </div>
               <div className="flex justify-between">
                 <span className="text-epi-muted">Water quality:</span>{' '}
-                <span className="font-bold text-epi-red">2/10 🔴</span>
+                <span className="font-bold text-epi-red">2/10 ●</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-epi-muted">Nearest facility:</span>{' '}
@@ -318,7 +319,7 @@ export function GeoHeatMap() {
             }
             <div className="flex justify-between pt-2 border-t border-border">
               <span className="text-epi-muted">Status:</span>{' '}
-              <span className="font-bold text-epi-red">🔴 CROSSED</span>
+              <span className="font-bold text-epi-red">● CROSSED</span>
             </div>
           </div>
 
@@ -461,10 +462,13 @@ export function GeoHeatMap() {
           <span>{fmtDate(nowISO())}</span>
         </div>
         <div className="flex justify-center items-center gap-2 text-[12px] font-bold text-epi">
-          <span>📅 Day {day} of 30</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Day {day} of 30</span>
+          </span>
           <span className="text-border">|</span>
           <button onClick={play} className="hover:underline flex items-center gap-1">
-            ⏩ Animate <ArrowRight className="w-3 h-3" />
+            <span>Animate</span> <ArrowRight className="w-3 h-3" />
           </button>
         </div>
       </div>

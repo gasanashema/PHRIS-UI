@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Send } from 'lucide-react';
+import { AlertTriangle, Send, Check, ClipboardList } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 const CHW = [
@@ -115,14 +115,14 @@ export function DhoCHWReports() {
       
       {/* Top strip */}
       <div className="flex flex-wrap gap-3 mb-6">
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm text-admin-accent">
-          ✅ 21 Active CHW sectors
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm text-admin-accent inline-flex items-center gap-1.5">
+          <Check className="w-4 h-4" /> 21 Active CHW sectors
         </div>
         <div className="bg-admin-amber/10 px-4 py-2 rounded-full border border-admin-amber/20 text-[13px] font-bold text-admin-amber shadow-sm">
-          ⚠️ 3 Inactive (no report &gt;3 days)
+          3 Inactive (no report &gt;3 days)
         </div>
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm">
-          📋 Total cases reported today: 67
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm inline-flex items-center gap-1.5 text-admin-text">
+          <ClipboardList className="w-4 h-4 text-admin-muted" /> Total cases reported today: 67
         </div>
       </div>
 
@@ -186,10 +186,9 @@ export function DhoCHWReports() {
                   </td>
                   <td className="px-4 py-3 font-medium">
                     {c.active ?
-                  <span className="text-admin-accent">✅ Active</span> :
-
-                  <span className="text-admin-amber">⚠️ Inactive</span>
-                  }
+                      <span className="text-admin-accent inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Active</span> :
+                      <span className="text-admin-amber">Inactive</span>
+                    }
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2 text-[12px] font-bold">

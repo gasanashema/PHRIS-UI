@@ -54,7 +54,7 @@ export function PredictionHistory() {
                     <td className="px-4 py-3 font-mono text-[12px]">{r.batchId}</td>
                     <td className="px-4 py-3">{r.horizon} · {r.diseaseScope}</td>
                     <td className="px-4 py-3 font-bold">{r.status === 'running' ? 'Running…' : `${r.confidence}%`}</td>
-                    <td className="px-4 py-3">{r.environmental ? '🟢 Included' : '🔴 Missing'}</td>
+                    <td className="px-4 py-3">{r.environmental ? '● Included' : '● Missing'}</td>
                     <td className="px-4 py-3">
                       {r.alertsGenerated.length === 0 ?
                     <span className="text-epi-muted">None</span> :

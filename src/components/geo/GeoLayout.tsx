@@ -40,7 +40,7 @@ export function GeoLayout({
       searchTarget="/warning/history"
       chip={
       <span className="inline-flex bg-epi/10 border border-epi/20 px-3 py-1.5 rounded-full text-[12px] font-bold text-epi items-center gap-1.5 whitespace-nowrap">
-          🗺️ 30 Districts Active
+          <MapIcon className="w-3.5 h-3.5 text-epi" /> 30 Districts Active
         </span>
       }
       nav={[

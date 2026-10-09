@@ -133,10 +133,10 @@ export function PredictionMap() {
             )}
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-4 text-[11px] font-bold">
-            <span className="text-[#00A550]">🟢 Low &lt;40</span>
-            <span className="text-epi-amber">🟡 Moderate 40–59</span>
-            <span className="text-[#F97316]">🟠 High 60–79</span>
-            <span className="text-epi-red">🔴 Critical 80+</span>
+            <span className="text-[#00A550]">● Low &lt;40</span>
+            <span className="text-epi-amber">● Moderate 40–59</span>
+            <span className="text-[#F97316]">● High 60–79</span>
+            <span className="text-epi-red">● Critical 80+</span>
             <span className="text-epi-muted">● open red alert</span>
           </div>
         </div>
@@ -154,7 +154,7 @@ export function PredictionMap() {
                 <div className="flex justify-between"><span className="text-epi-muted">Population at risk:</span><span className="font-bold">~{atRisk(sel).toLocaleString('en-US')}</span></div>
                 <div className="flex justify-between"><span className="text-epi-muted">Trend:</span><span className="font-bold flex items-center gap-1"><TrendIcon t={sel.trend} className="w-3 h-3" /> {sel.trend}</span></div>
                 <div className="flex justify-between"><span className="text-epi-muted">Model confidence:</span><span className="font-bold">{sel.confidence}%</span></div>
-                {BORDER.includes(sel.district) && <div className="text-[12px] font-bold text-[#F97316]">🌍 Cross-border watch district</div>}
+                {BORDER.includes(sel.district) && <div className="text-[12px] font-bold text-[#F97316]">Cross-border watch district</div>}
               </div>
               {selAlert ?
             <Link to={`/warning/detail?id=${selAlert.id}`} className="block w-full py-2 bg-epi text-white text-[12px] font-bold rounded hover:bg-epi-dark text-center">

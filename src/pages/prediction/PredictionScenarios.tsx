@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FlaskConical, Droplets, Users, AlertTriangle, Lock, Star } from 'lucide-react';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
 import { SimulatedTag } from '../../components/shared/Badges';
 import { useApp } from '../../store/AppStore';
@@ -106,11 +106,11 @@ export function PredictionScenarios() {
     if (!ran) return [];
     const b = ran.baseline;
     const list = [
-    { name: 'Your scenario', emoji: '🧪', params: ran.params },
-    { name: 'ORS + Water Treatment', emoji: '💧', params: { ...NONE, water: true, ors: 60, rainfall: ran.params.rainfall } },
-    { name: 'CHW Visits Only', emoji: '👥', params: { ...NONE, chw: true, rainfall: ran.params.rainfall } }];
+    { name: 'Your scenario', icon: 'flask', params: ran.params },
+    { name: 'ORS + Water Treatment', icon: 'droplet', params: { ...NONE, water: true, ors: 60, rainfall: ran.params.rainfall } },
+    { name: 'CHW Visits Only', icon: 'users', params: { ...NONE, chw: true, rainfall: ran.params.rainfall } }];
 
-    if (showNothing) list.push({ name: 'Do Nothing', emoji: '🔴', params: { ...NONE, rainfall: Math.max(ran.params.rainfall, 20) } });
+    if (showNothing) list.push({ name: 'Do Nothing', icon: 'alert', params: { ...NONE, rainfall: Math.max(ran.params.rainfall, 20) } });
     const results = list.map((s) => ({ ...s, result: simulate(b, s.params), cost: cost(s.params) }));
     const best = results.
     filter((r) => r.name !== 'Do Nothing').
@@ -208,7 +208,7 @@ export function PredictionScenarios() {
                     {alert ? `from alert ${alert.id}` : 'from latest district prediction'}
                   </span>
                 </span>
-                <span className="text-[16px] font-bold text-epi-red">{baseline}% 🔒</span>
+                <span className="text-[16px] font-bold text-epi-red flex items-center gap-1.5">{baseline}% <Lock className="w-4 h-4 text-epi-muted" /></span>
               </div>
             </div>
 
@@ -269,12 +269,18 @@ export function PredictionScenarios() {
                       className={`rounded-lg p-5 relative overflow-hidden ${s.recommended ? 'bg-epi-bg/50 border-2 border-[#00A550]' : s.name === 'Do Nothing' ? 'bg-epi-red/5 border border-epi-red/30' : 'bg-white border border-border'}`}>
 
                         {s.recommended &&
-                      <div className="absolute top-0 right-0 bg-[#00A550] text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">⭐ Recommended</div>
+                      <div className="absolute top-0 right-0 bg-[#00A550] text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg flex items-center gap-1"><Star className="w-3 h-3 fill-white" /> Recommended</div>
                       }
                         {s.name === 'Do Nothing' &&
-                      <div className="absolute top-0 right-0 bg-epi-red text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">⚠️ Not recommended</div>
+                      <div className="absolute top-0 right-0 bg-epi-red text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">Not recommended</div>
                       }
-                        <h3 className="text-[14px] font-bold text-epi-text mb-4">{s.emoji} {s.name}</h3>
+                        <h3 className="text-[14px] font-bold text-epi-text mb-4 flex items-center gap-2">
+                          {s.icon === 'flask' && <FlaskConical className="w-4 h-4 text-epi" />}
+                          {s.icon === 'droplet' && <Droplets className="w-4 h-4 text-blue-600" />}
+                          {s.icon === 'users' && <Users className="w-4 h-4 text-purple-600" />}
+                          {s.icon === 'alert' && <AlertTriangle className="w-4 h-4 text-epi-red" />}
+                          {s.name}
+                        </h3>
                         <div className="flex justify-between items-end mb-2">
                           <div className="text-[13px] text-epi-muted">
                             Baseline: {ran.baseline}% → <span className="font-bold text-epi-text">Result: {s.result}%</span>

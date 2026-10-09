@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Cell } from
 'recharts';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, CheckSquare, Square, User } from 'lucide-react';
 import type { Investigation, InvestigationStatus } from '../../types';
 import { useApp } from '../../store/AppStore';
 import { SeverityBadge, EmptyState } from './Badges';
@@ -20,9 +20,9 @@ import { inputCls, textareaCls } from './Modal';
 const LEADS = ['Dr. Jean Paul Habimana', 'Dr. Patrick Bizimana', 'Dr. Samuel Habyarimana'];
 
 const STATUS_STYLE: Record<InvestigationStatus, {label: string;cls: string;band: string;}> = {
-  requested: { label: '🟡 Requested', cls: 'bg-yellow-400/15 text-yellow-700', band: 'bg-admin-amber' },
-  active: { label: '🔴 Active', cls: 'bg-admin-red/10 text-admin-red', band: 'bg-admin-red' },
-  closed: { label: '✅ Closed', cls: 'bg-admin-accent/10 text-admin-accent', band: 'bg-admin-accent' }
+  requested: { label: 'Requested', cls: 'bg-yellow-400/15 text-yellow-700', band: 'bg-admin-amber' },
+  active: { label: 'Active', cls: 'bg-admin-red/10 text-admin-red', band: 'bg-admin-red' },
+  closed: { label: 'Closed', cls: 'bg-admin-accent/10 text-admin-accent', band: 'bg-admin-accent' }
 };
 
 const CHECKLIST = [
@@ -311,7 +311,9 @@ export function InvestigationWorkspace({ district, selectedId, onSelect, alertLi
                   <div className="space-y-2 text-[13px]">
                     {CHECKLIST.map((c, i) =>
                 <div key={c} className={`flex items-start gap-2 ${progress[i] ? 'text-admin-text' : 'text-admin-muted'}`}>
-                        <span>{progress[i] ? '✅' : '⬜'}</span> {c}
+                        <span className="shrink-0 mt-0.5">
+                          {progress[i] ? <CheckSquare className="w-4 h-4 text-admin-accent" /> : <Square className="w-4 h-4 text-admin-muted" />}
+                        </span> {c}
                       </div>
                 )}
                   </div>
@@ -323,9 +325,9 @@ export function InvestigationWorkspace({ district, selectedId, onSelect, alertLi
                 <div className="bg-white rounded-lg shadow-sm border border-border p-5">
                   <h3 className="text-[15px] font-bold text-admin-text mb-3">Field team</h3>
                   <div className="space-y-2 text-[13px] mb-3">
-                    <div>👤 <span className="font-bold">{inv.lead}</span> (Lead)</div>
+                    <div className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-admin-muted shrink-0" /> <span className="font-bold">{inv.lead}</span> (Lead)</div>
                     {inv.team.map((t) =>
-                <div key={t}>👤 {t}</div>
+                <div key={t} className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-admin-muted shrink-0" /> {t}</div>
                 )}
                   </div>
                   <div className="flex gap-2">

@@ -10,7 +10,7 @@ import {
   Legend } from
 'recharts';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
-import { ShieldCheck, Heart, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Heart, TrendingUp, Check } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { downloadFile, fmtDate, fmtDateTime, nowISO } from '../../lib/format';
 
@@ -314,8 +314,15 @@ export function AnalystScenarios() {
                 setShared(true);
                 actions.toast('Scenario shared with the Epidemiology and Analytics teams.');
               }}
-              className="h-10 px-6 bg-white border border-border hover:bg-epi-bg text-epi-text text-[13px] font-bold rounded-md disabled:opacity-60">
-              {shared ? '✓ Shared with team' : 'Share with team'}
+              className="h-10 px-6 bg-white border border-border hover:bg-epi-bg text-epi-text text-[13px] font-bold rounded-md disabled:opacity-60 inline-flex items-center gap-1.5 justify-center">
+              {shared ? (
+                <>
+                  <Check className="w-4 h-4 text-epi-accent" />
+                  <span>Shared with team</span>
+                </>
+              ) : (
+                'Share with team'
+              )}
             </button>
           </div>
         </div>

@@ -44,10 +44,10 @@ function statusOf(ind: Indicator, value: number): {status: Status;pct: number;} 
   return { status, pct };
 }
 const STATUS_STYLE: Record<Status, {label: string;pill: string;chip: string;}> = {
-  'On Track': { label: '🟢 On Track', pill: 'bg-epi-accent text-white', chip: 'bg-epi-accent/10 text-epi-accent border-epi-accent/20' },
-  'Close to Target': { label: '🟡 Close to Target', pill: 'bg-[#FEF08A] text-[#A16207]', chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]' },
-  'Off Track': { label: '🟠 Off Track', pill: 'bg-epi-amber text-white', chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20' },
-  Critical: { label: '🔴 Critical — Far from Target', pill: 'bg-epi-red text-white', chip: 'bg-epi-red/10 text-epi-red border-epi-red/20' }
+  'On Track': { label: 'On Track', pill: 'bg-epi-accent text-white', chip: 'bg-epi-accent/10 text-epi-accent border-epi-accent/20' },
+  'Close to Target': { label: 'Close to Target', pill: 'bg-[#FEF08A] text-[#A16207]', chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]' },
+  'Off Track': { label: 'Off Track', pill: 'bg-epi-amber text-white', chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20' },
+  Critical: { label: 'Critical — Far from Target', pill: 'bg-epi-red text-white', chip: 'bg-epi-red/10 text-epi-red border-epi-red/20' }
 };
 const fmtVal = (v: number, unit: string) => unit === '%' ? `${Math.round(v)}%` : `${Math.round(v)}${unit}`;
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { WarningLayout } from '../../components/warning/WarningLayout';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
 import { SeverityBadge, StatusBadge, EmptyState } from '../../components/shared/Badges';
@@ -98,9 +98,9 @@ export function WarningAlerts() {
         <div className="flex flex-wrap items-center gap-3">
           <select value={severity} onChange={(e) => setSeverity(e.target.value)} className={selectCls} aria-label="Severity">
             <option value="all">Severity: All</option>
-            <option value="red">🔴 Red ({count('red')})</option>
-            <option value="orange">🟠 Orange ({count('orange')})</option>
-            <option value="yellow">🟡 Yellow ({count('yellow')})</option>
+            <option value="red">● Red ({count('red')})</option>
+            <option value="orange">● Orange ({count('orange')})</option>
+            <option value="yellow">● Yellow ({count('yellow')})</option>
           </select>
           <select value={disease} onChange={(e) => setDisease(e.target.value)} className={selectCls} aria-label="Disease">
             <option value="all">Disease: All</option>
@@ -226,7 +226,7 @@ export function WarningAlerts() {
                   <ul className="space-y-1.5 text-[12px] text-epi-muted mb-3">
                     {a.reasons.map((r) =>
                     <li key={r} className="flex items-start gap-2">
-                        <span>✅</span> <span>{r}</span>
+                        <Check className="w-3.5 h-3.5 text-[#00A550] shrink-0 mt-0.5" /> <span>{r}</span>
                       </li>
                     )}
                   </ul>
@@ -239,7 +239,7 @@ export function WarningAlerts() {
                     {pending ?
                     <div className="bg-epi-amber/10 border border-epi-amber/30 rounded p-3">
                         <div className="font-bold text-epi-text mb-1">
-                          ⚠️ {a.district} DHO has not responded
+                          {a.district} DHO has not responded
                         </div>
                         <div className="text-[12px] text-epi-muted">
                           Auto-escalation: <strong className="font-mono"><Countdown alert={a} hours={state.rules.autoEscalateHours} /></strong>

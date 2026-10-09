@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { PredictionLayout } from '../../components/prediction/PredictionLayout';
 import { SeverityBadge } from '../../components/shared/Badges';
 import { severityForSignal, sortAlerts, useApp } from '../../store/AppStore';
 import { downloadFile, fmtDate, isOpenStatus, nowISO } from '../../lib/format';
 
 const DISEASE_TABS = [
-['Malaria', '🦟 Malaria'],
-['Cholera', '💧 Cholera'],
-['Measles', '💉 Measles'],
-['COVID-19', '🦠 COVID-19'],
-['Typhoid', '🌡️ Typhoid'],
-['VHF', '🩸 VHF'],
-['Mpox', '🐒 Mpox'],
-['Malnutrition', '🍽️ Malnutrition']] as
-const;
+  'Malaria',
+  'Cholera',
+  'Measles',
+  'COVID-19',
+  'Typhoid',
+  'VHF',
+  'Mpox',
+  'Malnutrition'] as const;
 
 /** Store-driven prediction summary for diseases without a detailed briefing. */
 function DiseaseSummary({ disease }: {disease: string;}) {
@@ -125,13 +125,13 @@ export function PredictionDisease() {
       
       {/* Disease Selector Tabs */}
       <div className="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar">
-        {DISEASE_TABS.map(([d, label]) =>
+        {DISEASE_TABS.map((d) =>
         <button
           key={d}
           onClick={() => setDisease(d)}
-          className={`px-4 py-2 rounded-full text-[14px] font-bold whitespace-nowrap shadow-sm transition-colors ${disease === d ? 'bg-epi text-white' : 'bg-white border border-border text-epi-muted hover:bg-epi-bg'}`}>
-
-            {label}{disease === d ? ' ✓' : ''}
+          className={`px-4 py-2 rounded-full text-[14px] font-bold whitespace-nowrap shadow-sm transition-colors flex items-center gap-1.5 ${disease === d ? 'bg-epi text-white' : 'bg-white border border-border text-epi-muted hover:bg-epi-bg'}`}>
+            {disease === d && <Check className="w-3.5 h-3.5" />}
+            {d}
           </button>
         )}
       </div>
@@ -141,8 +141,9 @@ export function PredictionDisease() {
       <>
       {/* Top Status Banner */}
       <div className="bg-epi-red text-white p-4 rounded-lg shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="font-bold text-[15px]">
-          🔴 CHOLERA — ACTIVE OUTBREAK RISK
+        <div className="font-bold text-[15px] flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-white inline-block animate-pulse" />
+          CHOLERA — ACTIVE OUTBREAK RISK
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[13px] font-medium opacity-90">
           <span>87 confirmed cases this week</span>
@@ -322,7 +323,7 @@ export function PredictionDisease() {
               </div>
             </div>
             <div className="mt-6 p-3 bg-epi-red/10 border border-epi-red/20 rounded text-[13px] font-bold text-epi-red text-center">
-              🚨 If no action taken, national epidemic threshold crossed by Week
+              ALERT: If no action taken, national epidemic threshold crossed by Week
               2
             </div>
           </div>
@@ -374,7 +375,7 @@ export function PredictionDisease() {
                       400–460 cases
                     </td>
                     <td className="p-4 text-[13px] font-bold text-epi-red text-right">
-                      🔴 Act Now
+                      ● Act Now
                     </td>
                   </tr>
                   <tr className="hover:bg-epi-bg/50">
@@ -392,7 +393,7 @@ export function PredictionDisease() {
                       28–35 cases
                     </td>
                     <td className="p-4 text-[13px] font-bold text-[#F97316] text-right">
-                      🟠 Watch
+                      ● Watch
                     </td>
                   </tr>
                   <tr className="hover:bg-epi-bg/50">
@@ -410,7 +411,7 @@ export function PredictionDisease() {
                       15–22 cases
                     </td>
                     <td className="p-4 text-[13px] font-bold text-epi-amber text-right">
-                      🟡 Monitor
+                      ● Monitor
                     </td>
                   </tr>
                 </tbody>
@@ -668,7 +669,11 @@ export function PredictionDisease() {
                 Generate Cholera Brief
               </button>
               <button onClick={sendToDhos} disabled={sent} className="flex-1 py-2 bg-white border border-border text-epi-text text-[13px] font-bold rounded-md hover:bg-epi-bg disabled:opacity-60 transition-colors">
-                {sent ? '✓ Sent to DHOs' : 'Send to DHOs'}
+                {sent ? (
+                  <span className="flex items-center justify-center gap-1.5 text-[#00A550]"><Check className="w-4 h-4" /> Sent to DHOs</span>
+                ) : (
+                  'Send to DHOs'
+                )}
               </button>
             </div>
           </div>

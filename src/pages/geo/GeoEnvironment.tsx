@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { GeoLayout } from '../../components/geo/GeoLayout';
 import { useApp } from '../../store/AppStore';
 import { DISTRICT_XY, rainfallFor } from '../../data/geo';
@@ -8,12 +9,12 @@ import { fmtDateTime } from '../../lib/format';
 type EnvKey = 'rainfall' | 'temperature' | 'water' | 'flood';
 type DiseaseKey = 'Cholera' | 'Malaria' | 'Diarrheal';
 const ENV: Record<EnvKey, {label: string;icon: string;unit: string;source: string;}> = {
-  rainfall: { label: 'Rainfall', icon: '🌧️', unit: 'mm', source: 'met' },
-  temperature: { label: 'Temperature', icon: '🌡️', unit: '°C', source: 'met' },
-  water: { label: 'Water quality (risk)', icon: '🚿', unit: '/10', source: 'wasac' },
-  flood: { label: 'Flood risk', icon: '🌊', unit: '/10', source: 'met' }
+  rainfall: { label: 'Rainfall', icon: '', unit: 'mm', source: 'met' },
+  temperature: { label: 'Temperature', icon: '', unit: '°C', source: 'met' },
+  water: { label: 'Water quality (risk)', icon: '', unit: '/10', source: 'wasac' },
+  flood: { label: 'Flood risk', icon: '', unit: '/10', source: 'met' }
 };
-const DISEASE_ICON: Record<DiseaseKey, string> = { Cholera: '💧', Malaria: '🦟', Diarrheal: '🚽' };
+const DISEASE_ICON: Record<DiseaseKey, string> = { Cholera: '', Malaria: '', Diarrheal: '' };
 const CHOLERA: Record<string, number> = { Rusizi: 87, Nyamasheke: 34, Rutsiro: 28, Karongi: 15, Ngororero: 12, Rubavu: 8, Huye: 23, Nyamagabe: 6, Nyabihu: 4 };
 const FLOOD: Record<string, number> = { Rusizi: 9, Nyamasheke: 7, Rubavu: 7, Nyabihu: 6, Karongi: 6, Rutsiro: 5, Ngororero: 6, Musanze: 5, Gakenke: 6, Nyarugenge: 4 };
 
@@ -119,7 +120,7 @@ export function GeoEnvironment() {
 
           {metDown && ENV[env].source === 'met' &&
           <div className="absolute top-[150px] md:top-24 left-6 z-20 bg-epi-amber text-white text-[11px] font-bold px-3 py-1.5 rounded shadow">
-              ⚠️ Rwanda Met Agency disconnected — showing last received values.{' '}
+              Rwanda Met Agency disconnected — showing last received values.{' '}
               <Link to="/integration/sources?q=Met" className="underline">Check source</Link>
             </div>
           }
@@ -183,8 +184,8 @@ export function GeoEnvironment() {
           {sel &&
           <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-xl border border-border p-4 w-64 z-30">
               <div className="flex justify-between">
-                <h3 className="text-[13px] font-bold text-epi-text mb-1">{e.icon} + {DISEASE_ICON[disease]} {sel.district}</h3>
-                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted text-[12px]">✕</button>
+                <h3 className="text-[13px] font-bold text-epi-text mb-1">{sel.district}</h3>
+                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted hover:text-epi-text"><X className="w-4 h-4" /></button>
               </div>
               <div className="space-y-1.5 text-[12px] my-2">
                 {(Object.keys(ENV) as EnvKey[]).map((k) =>
@@ -258,9 +259,9 @@ export function GeoEnvironment() {
               <h3 className="text-[14px] font-bold text-epi-text mb-4">Active Layers</h3>
               <div className="space-y-3">
                 {([
-                ['env', `${e.icon} ${e.label}`, '#1E3A8A'],
-                ['disease', `${DISEASE_ICON[disease]} ${disease} cases`, '#D32F2F'],
-                ['rivers', '🌊 Rivers & lakes', '#60A5FA']] as const).
+                ['env', e.label, '#1E3A8A'],
+                ['disease', `${disease} cases`, '#D32F2F'],
+                ['rivers', 'Rivers & lakes', '#60A5FA']] as const).
                 map(([k, label, color]) =>
                 <div key={k} className={`flex items-center justify-between ${layers[k] ? '' : 'opacity-50'}`}>
                     <div className="flex items-center gap-2 text-[13px] font-medium text-epi-text">
