@@ -1,227 +1,97 @@
-import {
-  Play,
-  MapPin,
-  AlertTriangle,
-  Activity,
-  CheckCircle2 } from
-'lucide-react';
-import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-const chartData = [
-{
-  name: 'Mon',
-  cases: 12
-},
-{
-  name: 'Tue',
-  cases: 19
-},
-{
-  name: 'Wed',
-  cases: 15
-},
-{
-  name: 'Thu',
-  cases: 25
-},
-{
-  name: 'Fri',
-  cases: 22
-},
-{
-  name: 'Sat',
-  cases: 30
-},
-{
-  name: 'Sun',
-  cases: 28
-}];
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-20 bg-gradient-to-b from-page to-section overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="relative max-w-[1280px] mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+    <section className="relative pt-32 pb-20 bg-white overflow-hidden">
+      <div className="max-w-[1280px] mx-auto px-6 grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        {/* Left Column: Clear, concise project explanation */}
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 20
-          }}
-          animate={{
-            opacity: 1,
-            y: 0
-          }}
-          transition={{
-            duration: 0.6
-          }}
-          className="max-w-2xl">
-          
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-[13px] font-medium text-primary uppercase tracking-wider">
-              AI-Powered Public Health Intelligence
-            </span>
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="lg:col-span-7 max-w-2xl"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1  text-xs font-semibold text-primary uppercase tracking-wider mb-6">
+            &nbsp;
           </div>
 
-          <h1 className="text-[56px] font-extrabold text-text-primary leading-[1.1] mb-6">
-            Detect Health Crises Before They Happen
+          <h1 className="text-[44px] sm:text-[54px] font-extrabold text-text-primary leading-[1.1] tracking-tight mb-6">
+            Detect Health Crises <br className="hidden sm:inline" />
+            Before They Happen
           </h1>
 
-          <p className="text-[20px] text-text-secondary leading-relaxed mb-10">
-            Rwanda's first AI-driven population health risk platform —
-            connecting hospital data, community health workers, and
-            environmental signals to protect 14 million Rwandans.
+          <p className="text-[18px] sm:text-[20px] text-text-secondary leading-relaxed mb-8">
+            Rwanda's national AI platform connecting hospital records, 45,000 community health workers, and environmental signals to predict disease outbreaks before symptoms spread.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 mb-10">
             <Link
               to="/register"
-              className="h-14 px-8 text-[16px] font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-all shadow-lg hover:shadow-primary/25 flex items-center justify-center transform hover:-translate-y-0.5">
-              
-              Request System Access
+              className="h-12 px-6 text-[15px] font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors flex items-center justify-center shadow-xs"
+            >
+              Request Access
             </Link>
             <a
-              href="#how"
-              className="h-14 px-8 text-[16px] font-medium text-primary border-2 border-primary/20 hover:border-primary rounded-lg hover:bg-primary/5 transition-all flex items-center justify-center gap-2">
-              
-              <Play className="w-4 h-4" />
-              Watch How It Works
+              href="#indicators"
+              className="h-12 px-6 text-[15px] font-semibold text-text-primary border border-border hover:bg-section rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              View AI Indicators
+              <ArrowRight className="w-4 h-4 text-primary" />
             </a>
           </div>
 
-          <div className="pt-8 border-t border-border">
-            <p className="text-[14px] font-medium text-text-secondary mb-4">
-              Designed for RBC · Ministry of Health · District Health Offices ·
-              WHO Rwanda
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-border text-[13px] font-medium text-text-primary">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                30 Districts Monitored
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-border text-[13px] font-medium text-text-primary">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                45,000+ CHW Data Points
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-border text-[13px] font-medium text-text-primary">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                Real-time AI Predictions
-              </div>
-            </div>
+          <div className="pt-6 border-t border-border flex flex-wrap items-center gap-6 text-xs text-text-secondary">
+            <span className="font-semibold text-text-primary">Operationalized for:</span>
+            <span>Rwanda Biomedical Centre (RBC)</span>
+            <span>·</span>
+            <span>Ministry of Health</span>
+            <span>·</span>
+            <span>WHO Rwanda</span>
           </div>
         </motion.div>
 
+        {/* Right Column: High quality photograph with minimal indicator overlays */}
         <motion.div
-          initial={{
-            opacity: 0,
-            x: 20
-          }}
-          animate={{
-            opacity: 1,
-            x: 0
-          }}
-          transition={{
-            duration: 0.6,
-            delay: 0.2
-          }}
-          className="relative">
-          
-          <div className="absolute inset-0 bg-primary/10 rounded-[40px] blur-3xl transform rotate-3 scale-105" />
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="lg:col-span-5 relative"
+        >
+          <div className="relative rounded-2xl overflow-hidden border border-border shadow-sm">
+            <img
+              src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+              alt="Public health professional analyzing digital surveillance data"
+              className="w-full h-[420px] object-cover"
+            />
 
-          <div className="relative bg-white rounded-xl shadow-floating hover:shadow-2xl transition-shadow duration-500 border border-border p-6 z-10">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-text-primary">National Overview</h3>
-              <div className="flex items-center gap-2 px-3 py-1 bg-alert-orange/10 text-alert-orange rounded-full text-sm font-medium">
-                <div className="w-2 h-2 rounded-full bg-alert-orange animate-pulse" />
-                MODERATE RISK
+            {/* Top Indicator Overlay Chip */}
+            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-xs flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-alert-orange animate-pulse" />
+              <div>
+                <span className="text-[11px] font-bold text-text-primary block leading-tight">
+                  Alerts in real time
+                </span>
+                <span className="text-[10px] text-text-secondary font-mono">
+                  AI Probability: 87.4%
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-page rounded-lg p-4 flex flex-col items-center justify-center border border-border min-h-[160px] relative overflow-hidden hover:border-primary/30 transition-colors group cursor-default">
-                <MapPin className="w-12 h-12 text-border group-hover:text-primary/20 transition-colors mb-2" />
-                <span className="text-sm text-text-secondary">
-                  Rwanda Risk Map
-                </span>
-                <div className="absolute top-1/4 left-1/3 w-3 h-3 rounded-full bg-alert-red shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" />
-                <div
-                  className="absolute top-1/2 right-1/3 w-3 h-3 rounded-full bg-alert-orange shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse"
-                  style={{
-                    animationDelay: '0.5s'
-                  }} />
-                
-                <div
-                  className="absolute bottom-1/3 left-1/2 w-3 h-3 rounded-full bg-alert-yellow shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse"
-                  style={{
-                    animationDelay: '1s'
-                  }} />
-                
-                <div
-                  className="absolute top-1/3 right-1/4 w-3 h-3 rounded-full bg-alert-green shadow-[0_0_10px_rgba(22,163,74,0.5)] animate-pulse"
-                  style={{
-                    animationDelay: '1.5s'
-                  }} />
-                
+            {/* Bottom Indicator Overlay Chip */}
+            <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-semibold text-text-primary mb-1">
+                <span>Nationwide Telemetry</span>
+                <span className="text-primary font-mono text-[11px]">30 Districts Active</span>
               </div>
-
-              <div className="bg-page rounded-lg p-4 border border-border flex flex-col hover:border-primary/30 transition-colors cursor-default">
-                <span className="text-xs font-medium text-text-secondary mb-2">
-                  Weekly Disease Trends
-                </span>
-                <div className="flex-1 min-h-[120px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <Tooltip
-                        cursor={{
-                          fill: 'transparent'
-                        }}
-                        contentStyle={{
-                          borderRadius: '8px',
-                          border: 'none',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }} />
-                      
-                      <Bar
-                        dataKey="cases"
-                        fill="#0D9488"
-                        radius={[4, 4, 0, 0]} />
-                      
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 rounded-lg border border-alert-red/20 bg-alert-red/5">
-                <AlertTriangle className="w-5 h-5 text-alert-red shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-bold text-text-primary">
-                    Cholera Alert — Rusizi
-                  </h4>
-                  <p className="text-xs text-text-secondary mt-1">
-                    Cases exceeded threshold by 45% in last 48h.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg border border-alert-orange/20 bg-alert-orange/5">
-                <Activity className="w-5 h-5 text-alert-orange shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-sm font-bold text-text-primary">
-                    Malaria Warning — Kayonza
-                  </h4>
-                  <p className="text-xs text-text-secondary mt-1">
-                    AI predicts 80% probability of outbreak next week.
-                  </p>
-                </div>
-              </div>
+              <p className="text-[11px] text-text-secondary leading-snug">
+                Ingesting signals from 45,000+ community health workers and national hospital laboratories.
+              </p>
             </div>
           </div>
         </motion.div>
       </div>
-    </section>);
-
+    </section>
+  );
 }
