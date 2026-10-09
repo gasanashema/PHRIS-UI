@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, X } from 'lucide-react';
 import { WarningLayout } from '../../components/warning/WarningLayout';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
 import { SeverityBadge, StatusBadge, EmptyState } from '../../components/shared/Badges';
@@ -61,12 +62,12 @@ export function WarningDetail() {
   const recipients = [
   {
     who: `${alert.district} District Health Officer`,
-    channels: ['📱 SMS ✅', '📧 Email ✅'],
+    channels: ['SMS', 'Email'],
     ack: !!alert.acknowledgedAt
   },
-  { who: 'RBC Epidemiology Division', channels: ['📧 Email ✅', '🔔 In-app ✅'], ack: false },
-  { who: 'Dr. Jean Paul Habimana (Epi, RBC)', channels: ['📧 Email ✅', '📱 SMS ✅'], ack: false },
-  ...(alert.escalatedTo ? [{ who: alert.escalatedTo, channels: ['📧 Email ✅', '📱 SMS ✅'], ack: false }] : [])];
+  { who: 'RBC Epidemiology Division', channels: ['Email', 'In-app'], ack: false },
+  { who: 'Dr. Jean Paul Habimana (Epi, RBC)', channels: ['Email', 'SMS'], ack: false },
+  ...(alert.escalatedTo ? [{ who: alert.escalatedTo, channels: ['Email', 'SMS'], ack: false }] : [])];
 
 
   return (
@@ -96,8 +97,8 @@ export function WarningDetail() {
 
       {/* Status Banner */}
       <div className={`${m.bg} p-4 rounded-lg shadow-sm mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
-        <div className="font-bold text-[14px] leading-relaxed">
-          {m.emoji} {m.label} ALERT — {alert.id} | {alert.disease} | {alert.district} District
+        <div className="font-bold text-[14px] leading-relaxed flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-white inline-block" /> {m.label} ALERT — {alert.id} | {alert.disease} | {alert.district} District
           {alert.sector ? `, ${alert.sector} Sector` : ''}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium opacity-90">
@@ -105,7 +106,13 @@ export function WarningDetail() {
           <span className="hidden md:inline">|</span>
           <span>Status: {alert.status}</span>
           <span className="hidden md:inline">|</span>
-          <span>Acknowledged: {alert.acknowledgedBy ? `✅ ${alert.acknowledgedBy}` : '❌ Not yet'}</span>
+          <span className="flex items-center gap-1">
+            Acknowledged: {alert.acknowledgedBy ? (
+              <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> {alert.acknowledgedBy}</span>
+            ) : (
+              <span className="inline-flex items-center gap-1"><X className="w-3.5 h-3.5" /> Not yet</span>
+            )}
+          </span>
           {alert.escalatedTo &&
           <>
               <span className="hidden md:inline">|</span>
@@ -202,7 +209,7 @@ export function WarningDetail() {
               <ul className="p-6 space-y-3 text-[13px]">
                 {alert.reasons.map((r) =>
               <li key={r} className="flex items-start gap-2">
-                    <span>✅</span>
+                    <Check className="w-4 h-4 text-[#00A550] shrink-0 mt-0.5" />
                     <span className="text-epi-text">{r}</span>
                   </li>
               )}
@@ -260,8 +267,16 @@ export function WarningDetail() {
             <div key={r.who} className="pb-3 border-b border-border last:border-0">
                   <div className="text-[13px] font-bold text-epi-text mb-1">{r.who}</div>
                   <div className="flex flex-wrap gap-2 text-[11px] font-medium text-epi-muted">
-                    {r.channels.map((c) => <span key={c}>{c}</span>)}
-                    {r.ack && <span className="text-[#00A550] font-bold">✅ Acknowledged</span>}
+                    {r.channels.map((c) => (
+                      <span key={c} className="flex items-center gap-1 bg-epi-bg px-2 py-0.5 rounded text-epi-text">
+                        <Check className="w-3 h-3 text-[#00A550]" /> {c}
+                      </span>
+                    ))}
+                    {r.ack && (
+                      <span className="text-[#00A550] font-bold flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" /> Acknowledged
+                      </span>
+                    )}
                   </div>
                 </div>
             )}
@@ -301,7 +316,7 @@ export function WarningDetail() {
         <div className="lg:col-span-5 flex flex-col gap-6">
           <div className="bg-white rounded-lg shadow-card border border-border p-6">
             <h2 className="text-[16px] font-bold text-epi-text mb-4 flex items-center gap-2">
-              🚁 Nearest Rapid Response Team
+              Nearest Rapid Response Team
             </h2>
             <div className="bg-epi-bg/50 p-4 rounded border border-border mb-4">
               <div className="text-[14px] font-bold text-epi-text mb-3">RRT {alert.province} Province:</div>
@@ -312,7 +327,7 @@ export function WarningDetail() {
                 <div className="flex justify-between pt-2 border-t border-border">
                   <span className="text-epi-muted">Status:</span>
                   <span className={`font-bold ${rrtActive ? 'text-[#00A550]' : 'text-[#F97316]'}`}>
-                    {rrtActive ? '🟢 Deployed' : '🟠 On alert — not yet deployed'}
+                    {rrtActive ? '● Deployed' : '● On alert — not yet deployed'}
                   </span>
                 </div>
               </div>

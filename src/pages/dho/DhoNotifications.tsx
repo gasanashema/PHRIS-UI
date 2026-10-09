@@ -97,7 +97,7 @@ export function DhoNotifications() {
                 className={`w-full text-left px-5 py-4 flex gap-3 transition-colors ${selectedId === n.id ? 'bg-admin/10' : n.read ? 'hover:bg-admin-bg/50' : 'bg-admin/5 hover:bg-admin/10'}`}>
 
                     <span className="text-[16px] leading-5 shrink-0">
-                      {n.severity === 'info' ? 'ℹ️' : SEVERITY_META[n.severity].emoji}
+                      {n.severity === 'info' ? '' : SEVERITY_META[n.severity].emoji}
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="flex items-start justify-between gap-3">
@@ -133,7 +133,7 @@ export function DhoNotifications() {
                 <SeverityBadge severity={selected.severity} /> :
 
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-admin-info/10 text-admin-info">
-                      ℹ️ INFO
+                      INFO
                     </span>
                 }
                   <span className="text-[12px] text-admin-muted">{fmtDateTime(selected.at)}</span>

@@ -100,7 +100,7 @@ function AlertDialogs({
   if (!dialog) return null;
   const { kind, alert } = dialog;
   const where = alert.sector ? `${alert.sector}, ${alert.district}` : alert.district;
-  const heading = `${SEVERITY_META[alert.severity].emoji} ${alert.id} — ${alert.disease}, ${where}`;
+  const heading = `[${SEVERITY_META[alert.severity].label}] ${alert.id} — ${alert.disease}, ${where}`;
 
   if (kind === 'ack') {
     return (

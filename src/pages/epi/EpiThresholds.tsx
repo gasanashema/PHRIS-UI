@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
 import { useApp, useCurrentUser } from '../../store/AppStore';
 const THRESHOLDS = [
@@ -9,8 +10,8 @@ const THRESHOLDS = [
   val: 87,
   thres: 'Epidemic threshold (30)',
   over: '+190% over',
-  status: '🔴 Epidemic',
-  sent: '✅ Sent June 1',
+  status: '● Epidemic',
+  sent: 'Sent June 1',
   action: 'Active Investigation'
 },
 {
@@ -19,8 +20,8 @@ const THRESHOLDS = [
   val: 450,
   thres: 'Alert threshold (300)',
   over: '+50% over',
-  status: '🟠 Alert',
-  sent: '✅ Sent June 3',
+  status: '● Alert',
+  sent: 'Sent June 3',
   action: 'Monitoring'
 },
 {
@@ -29,8 +30,8 @@ const THRESHOLDS = [
   val: 3,
   thres: 'Watch threshold (2)',
   over: '+50% over',
-  status: '🟠 Alert',
-  sent: '✅ Sent June 5',
+  status: '● Alert',
+  sent: 'Sent June 5',
   action: 'Signal under review'
 },
 {
@@ -39,8 +40,8 @@ const THRESHOLDS = [
   val: 23,
   thres: 'Watch threshold (15)',
   over: '+53% over',
-  status: '🟡 Watch',
-  sent: '✅ Sent June 2',
+  status: '● Watch',
+  sent: 'Sent June 2',
   action: 'Monitoring'
 },
 {
@@ -49,8 +50,8 @@ const THRESHOLDS = [
   val: 34,
   thres: 'Watch threshold (30)',
   over: '+13% over',
-  status: '🟡 Watch',
-  sent: '✅ Sent June 4',
+  status: '● Watch',
+  sent: 'Sent June 4',
   action: 'Monitoring'
 },
 {
@@ -59,8 +60,8 @@ const THRESHOLDS = [
   val: 5,
   thres: 'Watch threshold (5)',
   over: 'At threshold',
-  status: '🟡 Watch',
-  sent: '⚠️ Borderline',
+  status: '● Watch',
+  sent: 'Borderline',
   action: 'Monitor closely'
 },
 {
@@ -69,7 +70,7 @@ const THRESHOLDS = [
   val: 178,
   thres: 'Alert threshold (200)',
   over: 'Below threshold',
-  status: '🟢 Normal',
+  status: '● Normal',
   sent: '—',
   action: 'Routine'
 },
@@ -79,7 +80,7 @@ const THRESHOLDS = [
   val: 12,
   thres: 'Well below',
   over: 'Below threshold',
-  status: '🟢 Normal',
+  status: '● Normal',
   sent: '—',
   action: 'Routine'
 }];
@@ -110,16 +111,16 @@ export function EpiThresholds() {
       
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="bg-epi-red/10 px-4 py-2 rounded-full border border-epi-red/20 text-[13px] font-bold text-epi-red shadow-sm">
-          🔴 1 Epidemic threshold crossed
+          ● 1 Epidemic threshold crossed
         </div>
         <div className="bg-epi-amber/10 px-4 py-2 rounded-full border border-epi-amber/20 text-[13px] font-bold text-epi-amber shadow-sm">
-          🟠 2 Alert thresholds crossed
+          ● 2 Alert thresholds crossed
         </div>
         <div className="bg-[#FEF08A]/40 px-4 py-2 rounded-full border border-[#FDE047] text-[13px] font-bold text-[#A16207] shadow-sm">
-          🟡 3 Watch thresholds crossed
+          ● 3 Watch thresholds crossed
         </div>
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-epi-accent shadow-sm">
-          🟢 6 Diseases within normal range
+          ● 6 Diseases within normal range
         </div>
       </div>
 
@@ -184,8 +185,15 @@ export function EpiThresholds() {
             Configure Thresholds →
           </Link> :
 
-        <button onClick={requestReview} disabled={requested} className="text-epi font-bold hover:underline disabled:opacity-60 disabled:no-underline whitespace-nowrap">
-            {requested ? '✓ Review requested from Admin' : 'Request threshold review (Admin only)'}
+        <button onClick={requestReview} disabled={requested} className="text-epi font-bold hover:underline disabled:opacity-60 disabled:no-underline whitespace-nowrap inline-flex items-center gap-1">
+            {requested ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>Review requested from Admin</span>
+              </>
+            ) : (
+              'Request threshold review (Admin only)'
+            )}
           </button>
         }
       </div>

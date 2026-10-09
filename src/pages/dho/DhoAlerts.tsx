@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, Search, FileSearch } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Search, FileSearch, FileText, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 import { useApp, useCurrentUser, sortAlerts } from '../../store/AppStore';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
@@ -69,12 +69,12 @@ export function DhoAlerts() {
 
   const chips: {id: Filter;label: string;}[] = [
   { id: 'open', label: `All Open (${counts.open})` },
-  { id: 'red', label: `🔴 Red (${counts.red})` },
-  { id: 'orange', label: `🟠 Orange (${counts.orange})` },
-  { id: 'yellow', label: `🟡 Yellow (${counts.yellow})` },
-  { id: 'unack', label: `⚠️ Unacknowledged (${counts.unack})` },
-  { id: 'ack', label: `✅ Acknowledged (${counts.ack})` },
-  { id: 'closed', label: `🗂 Resolved / Dismissed (${counts.closed})` }];
+  { id: 'red', label: `● Red (${counts.red})` },
+  { id: 'orange', label: `● Orange (${counts.orange})` },
+  { id: 'yellow', label: `● Yellow (${counts.yellow})` },
+  { id: 'unack', label: `Unacknowledged (${counts.unack})` },
+  { id: 'ack', label: `Acknowledged (${counts.ack})` },
+  { id: 'closed', label: `Resolved / Dismissed (${counts.closed})` }];
 
 
   return (
@@ -274,8 +274,14 @@ export function DhoAlerts() {
                   <div className="space-y-3 text-[13px]">
                     <div>
                       <span className="text-admin-muted">Acknowledged:</span>{' '}
-                      <strong className={a.acknowledgedAt ? 'text-admin-accent' : 'text-admin-red'}>
-                        {a.acknowledgedAt ? `✅ ${a.acknowledgedBy}, ${fmtDateTime(a.acknowledgedAt)}` : '❌ Not yet'}
+                      <strong className={a.acknowledgedAt ? 'text-admin-accent inline-flex items-center gap-1' : 'text-admin-red'}>
+                        {a.acknowledgedAt ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 inline" /> {a.acknowledgedBy}, {fmtDateTime(a.acknowledgedAt)}
+                          </>
+                        ) : (
+                          'Not yet'
+                        )}
                       </strong>
                     </div>
                     {a.status === 'active' &&
@@ -329,42 +335,37 @@ export function DhoAlerts() {
                 {isOpenStatus(a.status) &&
                 <>
                     <button
-                    onClick={() => dialogs.open('note', a)}
-                    className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors">
-
-                      📝 Add Response Note
+                      onClick={() => dialogs.open('note', a)}
+                      className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-admin-muted" /> Add Response Note
                     </button>
                     {a.status !== 'escalated' &&
-                  <button
-                    onClick={() => dialogs.open('escalate', a)}
-                    className="h-10 px-4 bg-white border border-admin-red text-admin-red text-[13px] font-semibold rounded-md hover:bg-admin-red/10 transition-colors">
-
-                        ⬆️ Escalate to RBC
+                      <button
+                        onClick={() => dialogs.open('escalate', a)}
+                        className="h-10 px-4 bg-white border border-admin-red text-admin-red text-[13px] font-semibold rounded-md hover:bg-admin-red/10 transition-colors flex items-center gap-2">
+                        <ArrowUpRight className="w-4 h-4" /> Escalate to RBC
                       </button>
-                  }
+                    }
                     {!a.investigationId &&
-                  <button
-                    onClick={() => dialogs.open('investigate', a)}
-                    className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors flex items-center gap-2">
-
+                      <button
+                        onClick={() => dialogs.open('investigate', a)}
+                        className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors flex items-center gap-2">
                         <FileSearch className="w-4 h-4" /> Request Investigation
                       </button>
-                  }
+                    }
                     {a.status !== 'active' &&
-                  <button
-                    onClick={() => dialogs.open('resolve', a)}
-                    className="h-10 px-4 bg-white border border-admin-accent text-admin-accent text-[13px] font-semibold rounded-md hover:bg-admin-accent/10 transition-colors">
-
-                        ✔️ Mark Resolved
+                      <button
+                        onClick={() => dialogs.open('resolve', a)}
+                        className="h-10 px-4 bg-white border border-admin-accent text-admin-accent text-[13px] font-semibold rounded-md hover:bg-admin-accent/10 transition-colors flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" /> Mark Resolved
                       </button>
-                  }
+                    }
                   </>
                 }
                 <Link
                   to={`/dho/alerts/${a.id}`}
-                  className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors flex items-center">
-
-                  📄 View Full Details
+                  className="h-10 px-4 bg-white border border-border text-admin-text text-[13px] font-semibold rounded-md hover:bg-admin-bg transition-colors flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-admin-muted" /> View Full Details
                 </Link>
               </div>
             </div>);

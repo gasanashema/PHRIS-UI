@@ -198,9 +198,19 @@ export function DhoLayout({
           <div className="flex items-center gap-3 lg:gap-4 shrink-0">
             <Link
               to="/dho/alerts"
-              className={`hidden xl:inline-flex px-3 py-1.5 rounded-full text-[12px] font-bold border ${levelMeta.soft} ${levelMeta.border}`}>
-
-              {levelMeta.emoji} {levelMeta.label} {level === 'green' ? 'STATUS' : 'ALERT'} — {district}
+              className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold border ${levelMeta.soft} ${levelMeta.border}`}>
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  level === 'red'
+                    ? 'bg-admin-red'
+                    : level === 'orange'
+                    ? 'bg-[#F97316]'
+                    : level === 'yellow'
+                    ? 'bg-yellow-500'
+                    : 'bg-admin-accent'
+                }`}
+              />
+              {levelMeta.label} {level === 'green' ? 'STATUS' : 'ALERT'} — {district}
             </Link>
             <HeaderActions fallbackRole="dho" />
           </div>

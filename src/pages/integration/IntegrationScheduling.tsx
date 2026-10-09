@@ -41,12 +41,12 @@ export function IntegrationScheduling() {
   const live = edit ? state.sources.find((x) => x.id === edit.id) : undefined;
 
   const status = (s: DataSource) => {
-    if (!s.enabled) return { label: '⚪ Paused', cls: 'text-epi-muted' };
-    if (s.connection === 'Manual Upload') return { label: '🟢 No schedule needed', cls: '' };
-    if (s.status === 'disconnected') return { label: '🔴 Offline', cls: 'text-epi-red' };
-    if (s.status === 'delayed') return { label: '🟡 Delayed today', cls: '' };
-    if (s.status === 'partial') return { label: '🟡 Partial', cls: '' };
-    return { label: '🟢 On schedule', cls: '' };
+    if (!s.enabled) return { label: '● Paused', cls: 'text-epi-muted' };
+    if (s.connection === 'Manual Upload') return { label: '● No schedule needed', cls: '' };
+    if (s.status === 'disconnected') return { label: '● Offline', cls: 'text-epi-red' };
+    if (s.status === 'delayed') return { label: '● Delayed today', cls: '' };
+    if (s.status === 'partial') return { label: '● Partial', cls: '' };
+    return { label: '● On schedule', cls: '' };
   };
 
   return (
@@ -87,7 +87,7 @@ export function IntegrationScheduling() {
                       {s.status === 'disconnected' && <span className="text-epi-red"> (last success)</span>}
                     </td>
                     <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">{manual ? 'When uploaded' : next ? fmtDateTime(next) : '—'}</td>
-                    <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${st.cls}`}>{s.syncing ? '⏳ Running' : st.label}</td>
+                    <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${st.cls}`}>{s.syncing ? '⏱ Running' : st.label}</td>
                     <td className="p-4 text-right whitespace-nowrap">
                       {manual ?
                       <span className="text-epi-muted">—</span> :

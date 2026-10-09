@@ -13,6 +13,7 @@ import {
   BarChart,
   Bar } from
 'recharts';
+import { MapPin } from 'lucide-react';
 import { DhoLayout } from '../../components/dho/DhoLayout';
 const weeks = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10'];
 const trendData = weeks.map((w, i) => ({
@@ -41,7 +42,7 @@ const ranking = [
 {
   name: 'Cholera',
   cases: 38,
-  trend: '↑ +340% 🔴',
+  trend: '↑ +340% ●',
   color: '#D32F2F',
   tColor: 'text-admin-red'
 },
@@ -450,8 +451,8 @@ export function DhoTrends() {
               </div>
             )}
             <div className="flex items-center gap-1 pt-2">
-              <span className="text-[10px] text-admin font-bold">
-                📍 Now (June)
+              <span className="text-[10px] text-admin font-bold inline-flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> Now (June)
               </span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, X, Phone } from 'lucide-react';
+import { Search, X, Phone, Building, Home, Mail, Check } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from 'recharts';
 import { DhoLayout } from '../../components/dho/DhoLayout';
@@ -10,8 +10,8 @@ const FACILITIES = [
   type: 'Hospital',
   sector: 'Huye',
   cases: '23',
-  report: '✅ Reported 08:12',
-  stock: '🟢 Good',
+  report: 'Reported 08:12',
+  stock: '● Good',
   stockColor: 'text-admin-accent',
   incharge: 'Dr. Mukamana',
   reported: true
@@ -21,8 +21,8 @@ const FACILITIES = [
   type: 'Health Center',
   sector: 'Tumba',
   cases: '8',
-  report: '✅ Reported 07:45',
-  stock: '🔴 Critical — ORS out',
+  report: 'Reported 07:45',
+  stock: '● Critical — ORS out',
   stockColor: 'text-admin-red',
   incharge: 'Nurse Bizimana',
   reported: true,
@@ -33,8 +33,8 @@ const FACILITIES = [
   type: 'Health Center',
   sector: 'Ngoma',
   cases: '14',
-  report: '✅ Reported 08:55',
-  stock: '🟡 Medium',
+  report: 'Reported 08:55',
+  stock: '● Medium',
   stockColor: 'text-admin-amber',
   incharge: 'Nurse Uwera',
   reported: true
@@ -44,8 +44,8 @@ const FACILITIES = [
   type: 'Health Center',
   sector: 'Mbazi',
   cases: '2',
-  report: '✅ Reported 09:00',
-  stock: '🟢 Good',
+  report: 'Reported 09:00',
+  stock: '● Good',
   stockColor: 'text-admin-accent',
   incharge: 'Nurse Kamanzi',
   reported: true
@@ -55,8 +55,8 @@ const FACILITIES = [
   type: 'Health Post',
   sector: 'Mukura',
   cases: '—',
-  report: '❌ Not Reported',
-  stock: '🟡 Medium',
+  report: 'Not Reported',
+  stock: '● Medium',
   stockColor: 'text-admin-amber',
   incharge: 'CHW Gasana',
   reported: false
@@ -138,16 +138,16 @@ export function DhoFacilities() {
       
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm">
-          🏥 3 Hospitals
+          3 Hospitals
         </div>
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm">
-          🏨 8 Health Centers
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm inline-flex items-center gap-1.5">
+          <Building className="w-4 h-4 text-admin-muted" /> 8 Health Centers
         </div>
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm">
-          🏠 4 Health Posts
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold shadow-sm inline-flex items-center gap-1.5">
+          <Home className="w-4 h-4 text-admin-muted" /> 4 Health Posts
         </div>
         <div className="bg-admin-amber/10 px-4 py-2 rounded-full border border-admin-amber/20 text-[13px] font-bold text-admin-amber shadow-sm">
-          ⚠️ {lowStock} facilities with low stock
+          {lowStock} facilities with low stock
         </div>
       </div>
 
@@ -215,8 +215,11 @@ export function DhoFacilities() {
                   <td className="px-4 py-3 text-admin-text">{f.cases}</td>
                   <td
                   className={`px-4 py-3 font-medium ${f.reported ? 'text-admin-text' : 'text-admin-amber'}`}>
-                  
-                    {!f.reported && state.remindersSent.includes(f.name) ? '📨 Reminder sent' : f.report}
+                    {!f.reported && state.remindersSent.includes(f.name) ? (
+                      <span className="inline-flex items-center gap-1 text-admin-accent"><Mail className="w-3.5 h-3.5" /> Reminder sent</span>
+                    ) : (
+                      f.report
+                    )}
                   </td>
                   <td className={`px-4 py-3 font-medium ${f.stockColor}`}>
                     {f.stock}
@@ -256,7 +259,7 @@ export function DhoFacilities() {
                         }}
                         className="text-admin-red hover:underline">
                         
-                            {flagged.includes(f.name) ? '⚠️ Flagged' : '⚠️ Flag'}
+                            {flagged.includes(f.name) ? 'Flagged' : 'Flag'}
                           </button>
                         </>
                     }
@@ -351,12 +354,18 @@ export function DhoFacilities() {
                 <h3 className="text-[13px] font-bold text-admin-text mb-2">
                   Reporting — Last 7 Days
                 </h3>
-                <div className="flex gap-1">
-                  {['✅', '✅', '✅', '❌', '✅', '✅', '✅'].map((d, i) =>
-                <span key={i} className="text-[16px]">
-                      {d}
+                <div className="flex gap-1.5 items-center">
+                  {[true, true, true, false, true, true, true].map((ok, i) => (
+                    <span
+                      key={i}
+                      title={ok ? 'Reported' : 'Missed'}
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
+                        ok ? 'bg-admin-accent/15 text-admin-accent' : 'bg-admin-red/15 text-admin-red'
+                      }`}
+                    >
+                      {ok ? <Check className="w-3.5 h-3.5" /> : '—'}
                     </span>
-                )}
+                  ))}
                 </div>
               </div>
             </div>
@@ -379,9 +388,15 @@ export function DhoFacilities() {
                 );
                 actions.toast('Emergency resupply request sent to RBC / Rwanda Medical Supply (simulated).');
               }}
-              className="h-10 bg-admin hover:bg-admin-hover disabled:opacity-60 text-white text-[14px] font-semibold rounded-md">
-              
-                {resupply.includes(detail.name) ? '✓ Resupply requested' : 'Request Emergency Resupply'}
+              className="h-10 bg-admin hover:bg-admin-hover disabled:opacity-60 text-white text-[14px] font-semibold rounded-md inline-flex items-center justify-center gap-1.5">
+                {resupply.includes(detail.name) ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Resupply requested</span>
+                  </>
+                ) : (
+                  'Request Emergency Resupply'
+                )}
               </button>
             </div>
           </div>

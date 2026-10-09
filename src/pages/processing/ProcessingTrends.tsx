@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 export function ProcessingTrends() {
   const [disease, setDisease] = useState('all');
@@ -19,15 +20,15 @@ export function ProcessingTrends() {
       
       {/* Top Strip */}
       <div className="flex flex-wrap items-center gap-4 text-[14px] font-bold bg-white px-4 py-3 rounded-lg shadow-sm border border-border mb-6 w-fit">
-        <span className="text-epi-red">🔴 2 Sudden spikes detected</span>
+        <span className="text-epi-red">● 2 Sudden spikes detected</span>
         <span className="text-border">|</span>
-        <span className="text-[#F97316]">🟠 5 Consistently rising trends</span>
+        <span className="text-[#F97316]">● 5 Consistently rising trends</span>
         <span className="text-border">|</span>
-        <span className="text-epi-amber">🟡 3 Seasonal patterns active</span>
+        <span className="text-epi-amber">● 3 Seasonal patterns active</span>
         <span className="text-border">|</span>
-        <span className="text-[#00A550]">🟢 14 Diseases stable</span>
+        <span className="text-[#00A550]">● 14 Diseases stable</span>
         <span className="text-border">|</span>
-        <span className="text-epi-muted">⚠️ 1 Suspicious drop flagged</span>
+        <span className="text-epi-muted">1 Suspicious drop flagged</span>
       </div>
 
       {/* Filter Bar */}
@@ -50,10 +51,10 @@ export function ProcessingTrends() {
         </select>
         <select value={level} onChange={(e) => setLevel(e.target.value)} aria-label="Alert level" className="text-[13px] font-medium text-epi-text border border-border rounded-md px-3 py-2 focus:outline-none bg-white shadow-sm">
           <option value="all">Alert level: All</option>
-          <option value="red">🔴 Red</option>
-          <option value="orange">🟠 Orange</option>
-          <option value="yellow">🟡 Yellow</option>
-          <option value="green">🟢 Green</option>
+          <option value="red">● Red</option>
+          <option value="orange">● Orange</option>
+          <option value="yellow">● Yellow</option>
+          <option value="green">● Green</option>
         </select>
         {filtered &&
         <button onClick={() => {setDisease('all');setDistrict('all');setType('all');setLevel('all');}} className="text-[13px] font-bold text-epi hover:underline">Clear filters</button>
@@ -66,7 +67,7 @@ export function ProcessingTrends() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[12px] font-bold bg-epi-red text-white px-2 py-0.5 rounded">
-                🔴 SUDDEN SPIKE DETECTED
+                ● SUDDEN SPIKE DETECTED
               </span>
               <h3 className="text-[16px] font-bold text-epi-text">
                 Cholera — Rusizi District
@@ -78,8 +79,8 @@ export function ProcessingTrends() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[13px]">
               <div>
                 <div className="text-epi-muted mb-1">Alert triggered:</div>
-                <div className="font-bold text-epi-text">
-                  ✅ Yes — ALT-2026-051 sent June 1
+                <div className="font-bold text-epi-text flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-[#00A550]" /> Yes — ALT-2026-051 sent June 1
                 </div>
               </div>
               <div>
@@ -122,7 +123,7 @@ export function ProcessingTrends() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[12px] font-bold bg-[#F97316] text-white px-2 py-0.5 rounded">
-                🟠 CONSISTENTLY RISING — 3 WEEKS
+                ● CONSISTENTLY RISING — 3 WEEKS
               </span>
               <h3 className="text-[16px] font-bold text-epi-text">
                 Malaria — Kayonza District
@@ -134,7 +135,7 @@ export function ProcessingTrends() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-[13px]">
               <div>
                 <div className="text-epi-muted mb-1">Alert triggered:</div>
-                <div className="font-bold text-epi-text">✅ Yes</div>
+                <div className="font-bold text-epi-text flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#00A550]" /> Yes</div>
               </div>
               <div>
                 <div className="text-epi-muted mb-1">Week-over-week:</div>
@@ -170,7 +171,7 @@ export function ProcessingTrends() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[12px] font-bold bg-epi-amber text-white px-2 py-0.5 rounded">
-                🟡 SEASONAL PATTERN — EXPECTED
+                ● SEASONAL PATTERN — EXPECTED
               </span>
               <h3 className="text-[16px] font-bold text-epi-text">
                 Malaria — Eastern Province
@@ -216,7 +217,7 @@ export function ProcessingTrends() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[12px] font-bold bg-epi-bg border border-border text-epi-text px-2 py-0.5 rounded">
-                ⚠️ SUSPICIOUS DROP — POSSIBLE UNDERREPORTING
+                SUSPICIOUS DROP — POSSIBLE UNDERREPORTING
               </span>
               <h3 className="text-[16px] font-bold text-epi-text">
                 CHW Reports — Mukura Sector
@@ -236,7 +237,7 @@ export function ProcessingTrends() {
               <div>
                 <div className="text-epi-muted mb-1">Alert:</div>
                 <div className="font-bold text-epi-amber">
-                  🟡 Flagged for DHO review
+                  ● Flagged for DHO review
                 </div>
               </div>
               <div>
@@ -269,7 +270,7 @@ export function ProcessingTrends() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[12px] font-bold bg-[#00A550] text-white px-2 py-0.5 rounded">
-                🟢 CONSISTENTLY FALLING
+                ● CONSISTENTLY FALLING
               </span>
               <h3 className="text-[16px] font-bold text-epi-text">
                 Measles — Kigali City

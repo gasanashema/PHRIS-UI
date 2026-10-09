@@ -59,8 +59,18 @@ export function AdminBackup() {
           <div className="text-[13px] text-admin-muted font-medium mb-1">Last Successful Backup</div>
           <div className="text-[20px] font-bold text-admin-text mb-3">{lastOk ? fmtDateTime(lastOk.at) : '—'}</div>
           <div className="mt-auto">
-            <span className="bg-admin-accent/10 text-admin-accent px-2 py-1 rounded text-[12px] font-bold">
-              {running ? '⏳ Backup in progress' : '🟢 Successful'}
+            <span className="inline-flex items-center gap-1.5 bg-admin-accent/10 text-admin-accent px-2 py-1 rounded text-[12px] font-bold">
+              {running ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-admin-amber animate-pulse" />
+                  Backup in progress
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-admin-accent" />
+                  Successful
+                </>
+              )}
             </span>
           </div>
         </div>
@@ -69,7 +79,10 @@ export function AdminBackup() {
           <div className="text-[13px] text-admin-muted font-medium mb-1">Next Scheduled Backup</div>
           <div className="text-[20px] font-bold text-admin-text mb-3">Tomorrow 03:00</div>
           <div className="mt-auto">
-            <span className="bg-admin-info/10 text-admin-info px-2 py-1 rounded text-[12px] font-bold">🟢 Scheduled</span>
+            <span className="inline-flex items-center gap-1.5 bg-admin-info/10 text-admin-info px-2 py-1 rounded text-[12px] font-bold">
+              <span className="w-2 h-2 rounded-full bg-admin-info" />
+              Scheduled
+            </span>
           </div>
         </div>
         <div className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col">
@@ -119,7 +132,22 @@ export function AdminBackup() {
                       <td className="px-5 py-3 text-admin-muted">{b.type}</td>
                       <td className="px-5 py-3 text-admin-muted">{b.size}</td>
                       <td className="px-5 py-3 font-bold whitespace-nowrap">
-                        {b.status === 'Success' ? '✅ Success' : b.status === 'Running' ? '⏳ Running' : '🔴 Failed'}
+                        {b.status === 'Success' ? (
+                          <span className="inline-flex items-center gap-1.5 text-admin-accent">
+                            <span className="w-2 h-2 rounded-full bg-admin-accent" />
+                            Success
+                          </span>
+                        ) : b.status === 'Running' ? (
+                          <span className="inline-flex items-center gap-1.5 text-admin-amber">
+                            <span className="w-2 h-2 rounded-full bg-admin-amber animate-pulse" />
+                            Running
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-admin-red">
+                            <span className="w-2 h-2 rounded-full bg-admin-red" />
+                            Failed
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-3 text-admin-muted">{b.type === 'Auto' ? 'System' : 'Administrator'}</td>
                       <td className="px-5 py-3 text-right whitespace-nowrap">

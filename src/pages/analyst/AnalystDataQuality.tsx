@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check } from 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 import { useApp } from '../../store/AppStore';
 import { DISTRICTS } from '../../data/seed';
@@ -11,7 +12,7 @@ const SOURCES = [
   acc: '91%',
   time: '88%',
   score: '91%',
-  status: '🟢 Good',
+  status: '● Good',
   action: 'View Details'
 },
 {
@@ -20,7 +21,7 @@ const SOURCES = [
   acc: '96%',
   time: '65%',
   score: '83%',
-  status: '🟡 Fair',
+  status: '● Fair',
   action: 'View · Flag'
 },
 {
@@ -29,7 +30,7 @@ const SOURCES = [
   acc: '85%',
   time: '72%',
   score: '78%',
-  status: '🟡 Fair',
+  status: '● Fair',
   action: 'View · Flag'
 },
 {
@@ -38,7 +39,7 @@ const SOURCES = [
   acc: '98%',
   time: 'N/A',
   score: '99%',
-  status: '🟢 Good',
+  status: '● Good',
   action: 'View'
 },
 {
@@ -47,7 +48,7 @@ const SOURCES = [
   acc: '88%',
   time: '30%',
   score: '54%',
-  status: '🔴 Critical',
+  status: '● Critical',
   action: 'View · Escalate',
   critical: true
 },
@@ -57,7 +58,7 @@ const SOURCES = [
   acc: '90%',
   time: '78%',
   score: '83%',
-  status: '🟡 Fair',
+  status: '● Fair',
   action: 'View · Flag'
 },
 {
@@ -66,7 +67,7 @@ const SOURCES = [
   acc: '83%',
   time: '55%',
   score: '70%',
-  status: '🟠 Poor',
+  status: '● Poor',
   action: 'View · Flag'
 },
 {
@@ -75,7 +76,7 @@ const SOURCES = [
   acc: '94%',
   time: '85%',
   score: '90%',
-  status: '🟢 Good',
+  status: '● Good',
   action: 'View'
 },
 {
@@ -84,7 +85,7 @@ const SOURCES = [
   acc: '89%',
   time: '80%',
   score: '85%',
-  status: '🟡 Fair',
+  status: '● Fair',
   action: 'View'
 }];
 
@@ -135,7 +136,7 @@ export function AnalystDataQuality() {
     actions.toast(`${name} ${escalate ? 'escalated to Integration & IT Admin' : 'flagged to the Integration team'}.`);
   };
   const doneBtn = (label: string) =>
-  <span className="inline-flex h-8 px-4 items-center bg-epi-accent/10 text-epi-accent text-[12px] font-bold rounded-md">✓ {label}</span>;
+    <span className="inline-flex h-8 px-4 items-center gap-1.5 bg-epi-accent/10 text-epi-accent text-[12px] font-bold rounded-md"><Check className="w-3.5 h-3.5" />{label}</span>;
 
   return (
     <AnalystLayout
@@ -145,16 +146,16 @@ export function AnalystDataQuality() {
       
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-epi-accent shadow-sm">
-          🟢 3 Sources: Good Quality
+          ● 3 Sources: Good Quality
         </div>
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-[#A16207] shadow-sm">
-          🟡 4 Sources: Fair
+          ● 4 Sources: Fair
         </div>
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-epi-amber shadow-sm">
-          🟠 2 Sources: Poor
+          ● 2 Sources: Poor
         </div>
         <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-epi-red shadow-sm">
-          🔴 1 Source: Critical
+          ● 1 Source: Critical
         </div>
       </div>
 
@@ -216,7 +217,7 @@ export function AnalystDataQuality() {
                     </Link>
                     {(row.action.includes('Flag') || row.action.includes('Escalate')) && (
                     flagged.includes(row.name) ?
-                    <span className="ml-3 text-[12px] font-bold text-epi-muted">✓ {row.action.includes('Escalate') ? 'Escalated' : 'Flagged'}</span> :
+                    <span className="ml-3 inline-flex items-center gap-1 text-[12px] font-bold text-epi-muted"><Check className="w-3.5 h-3.5 text-epi-accent" />{row.action.includes('Escalate') ? 'Escalated' : 'Flagged'}</span> :
 
                     <button
                       onClick={() => flagSource(row.name, row.action.includes('Escalate'))}
@@ -274,7 +275,7 @@ export function AnalystDataQuality() {
           <div className="space-y-4">
             <div className="border-l-4 border-l-epi-red border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-epi-red mb-1">
-                🔴 CRITICAL
+                ● CRITICAL
               </div>
               <div className="text-[13px] text-epi-text font-medium mb-3">
                 Rwanda Met Agency disconnected 3 days — environmental risk model
@@ -290,7 +291,7 @@ export function AnalystDataQuality() {
             </div>
             <div className="border-l-4 border-l-epi-amber border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-epi-amber mb-1">
-                🟠 HIGH
+                ● HIGH
               </div>
               <div className="text-[13px] text-epi-text font-medium mb-3">
                 CHW reports from Mukura sector not received 5 days
@@ -305,7 +306,7 @@ export function AnalystDataQuality() {
             </div>
             <div className="border-l-4 border-l-[#EAB308] border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-[#A16207] mb-1">
-                🟡 MEDIUM
+                ● MEDIUM
               </div>
               <div className="text-[13px] text-epi-text font-medium mb-3">
                 3 facilities in Kirehe submitted impossible values (negative
@@ -321,7 +322,7 @@ export function AnalystDataQuality() {
             </div>
             <div className="border-l-4 border-l-[#EAB308] border border-border rounded-r-lg p-4 bg-white">
               <div className="text-[11px] font-bold text-[#A16207] mb-1">
-                🟡 MEDIUM
+                ● MEDIUM
               </div>
               <div className="text-[13px] text-epi-text font-medium mb-3">
                 Lab turnaround time above 2-day target for Ruhengeri Hospital

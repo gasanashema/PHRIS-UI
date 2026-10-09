@@ -16,6 +16,7 @@ import {
   Plug,
   RefreshCw,
   Loader2,
+  Check,
   Search } from
 'lucide-react';
 import { useApp } from '../../store/AppStore';
@@ -38,11 +39,11 @@ export const SOURCE_ICONS: Record<DataSource['icon'], typeof Hospital> = {
 };
 
 export const STATUS_LABEL: Record<SourceStatus, {label: string;cls: string;}> = {
-  active: { label: '🟢 Active', cls: 'text-epi-text' },
-  delayed: { label: '🟡 Delayed', cls: 'text-epi-text' },
-  partial: { label: '🟡 Partial', cls: 'text-epi-text' },
-  disconnected: { label: '🔴 Disconnected', cls: 'text-epi-red' },
-  disabled: { label: '⚪ Disabled', cls: 'text-epi-muted' }
+  active: { label: '● Active', cls: 'text-epi-text' },
+  delayed: { label: '● Delayed', cls: 'text-epi-text' },
+  partial: { label: '● Partial', cls: 'text-epi-text' },
+  disconnected: { label: '● Disconnected', cls: 'text-epi-red' },
+  disabled: { label: '● Disabled', cls: 'text-epi-muted' }
 };
 
 const EMPTY: Omit<DataSource, 'id'> = {
@@ -186,7 +187,7 @@ export function IntegrationSources() {
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <span className={`text-[12px] font-bold bg-epi-bg px-2 py-1 rounded-full ${st.cls}`}>
-                    {src.syncing ? '⏳ Syncing…' : st.label}
+                    {src.syncing ? '⏱ Syncing…' : st.label}
                   </span>
                   <button
                     role="switch"
@@ -229,7 +230,7 @@ export function IntegrationSources() {
                   </div>
                 }
                 {src.coverage && <div className="text-[12px] text-epi-muted">{src.coverage}</div>}
-                {src.warning && <div className="text-[12px] font-medium text-epi-amber mt-2">⚠️ {src.warning}</div>}
+                {src.warning && <div className="text-[12px] font-medium text-epi-amber mt-2">{src.warning}</div>}
                 {src.error && <div className="text-[12px] font-medium text-epi-red mt-2">Error: {src.error}</div>}
               </div>
 
@@ -391,10 +392,15 @@ export function IntegrationSources() {
             <div
               className={`rounded-md p-3 text-[13px] font-medium ${test === 'testing' ? 'bg-epi-bg text-epi-muted' : test === 'ok' ? 'bg-[#00A550]/10 text-[#00A550]' : 'bg-epi-red/10 text-epi-red'}`}>
 
-                  {test === 'testing' && '⏳ Testing connection…'}
-                  {test === 'ok' && '✅ Connection successful — endpoint responded in 124 ms (simulated).'}
-                  {test === 'fail' &&
-              `❌ Connection failed — ${panel.source?.error ?? 'no URL configured'}.`}
+                  {test === 'testing' && (
+                    <span className="flex items-center gap-1.5"><Loader2 className="w-4 h-4 animate-spin text-epi-muted" /> Testing connection…</span>
+                  )}
+                  {test === 'ok' && (
+                    <span className="flex items-center gap-1.5 text-[#00A550]"><Check className="w-4 h-4" /> Connection successful — endpoint responded in 124 ms (simulated).</span>
+                  )}
+                  {test === 'fail' && (
+                    <span className="flex items-center gap-1.5 text-epi-red"><X className="w-4 h-4" /> Connection failed — {panel.source?.error ?? 'no URL configured'}.</span>
+                  )}
                 </div>
             }
             </div>

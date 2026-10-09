@@ -29,28 +29,24 @@ const REPORT_TYPES = [
 {
   id: 'weekly',
   icon: FileText,
-  emoji: '📋',
   title: 'Weekly Situation Report',
   desc: 'Complete weekly health status for submission to RBC'
 },
 {
   id: 'outbreak',
   icon: Activity,
-  emoji: '🦠',
   title: 'Disease Outbreak Summary',
   desc: 'Focused report on active disease alerts and response'
 },
 {
   id: 'facility',
   icon: Hospital,
-  emoji: '🏥',
   title: 'Facility Performance Report',
   desc: 'Reporting compliance and stock levels per facility'
 },
 {
   id: 'chw',
   icon: Users,
-  emoji: '👥',
   title: 'CHW Activity Report',
   desc: 'Community health worker coverage and activity summary'
 }];
@@ -333,7 +329,7 @@ export function DhoReports() {
                     aria-pressed={severities.includes(s)}
                     className={`flex-1 h-9 rounded-md text-[12px] font-semibold capitalize transition-colors ${severities.includes(s) ? 'bg-admin text-white' : 'bg-admin-bg text-admin-muted border border-border'}`}>
 
-                      {s === 'red' ? '🔴' : s === 'orange' ? '🟠' : '🟡'} {s}
+                      {s === 'red' ? '●' : s === 'orange' ? '●' : '●'} {s}
                     </button>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Check, AlertTriangle } from 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 import { useApp } from '../../store/AppStore';
 import type { DistrictRisk } from '../../types';
@@ -25,10 +26,10 @@ const DEFAULT_FACTORS: [string, number, string][] = [['Case trend', 0.32, 'bg-ep
 type Band = 'Critical' | 'High' | 'Moderate' | 'Low';
 const bandOf = (s: number): Band => s >= 80 ? 'Critical' : s >= 60 ? 'High' : s >= 40 ? 'Moderate' : 'Low';
 const BAND: Record<Band, {chip: string;ring: string;text: string;label: string;}> = {
-  Critical: { chip: 'bg-epi-red/10 text-epi-red border-epi-red/20', ring: 'border-epi-red', text: 'text-epi-red', label: '🔴 Critical' },
-  High: { chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20', ring: 'border-epi-amber', text: 'text-epi-amber', label: '🟠 High' },
-  Moderate: { chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]', ring: 'border-[#EAB308]', text: 'text-[#A16207]', label: '🟡 Moderate' },
-  Low: { chip: 'bg-white text-epi-accent border-border', ring: 'border-epi-accent', text: 'text-epi-accent', label: '🟢 Low' }
+  Critical: { chip: 'bg-epi-red/10 text-epi-red border-epi-red/20', ring: 'border-epi-red', text: 'text-epi-red', label: '● Critical' },
+  High: { chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20', ring: 'border-epi-amber', text: 'text-epi-amber', label: '● High' },
+  Moderate: { chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]', ring: 'border-[#EAB308]', text: 'text-[#A16207]', label: '● Moderate' },
+  Low: { chip: 'bg-white text-epi-accent border-border', ring: 'border-epi-accent', text: 'text-epi-accent', label: '● Low' }
 };
 const TREND: Record<DistrictRisk['trend'], string> = { up: '↑ Rising', down: '↓ Falling', stable: '→ Stable' };
 
@@ -43,8 +44,8 @@ export function AnalystRiskScores() {
 
   const validation = (d: string) => {
     const act = state.activity.find((a) => a.module === 'Prediction' && a.action.endsWith(`risk score — ${d}`));
-    if (act) return act.action.includes('flagged') ? '🚩 Flagged' : act.action.includes('adjusted') ? '✏️ Adjusted' : '✅ Validated';
-    return PRE_VALIDATED.includes(d) ? '✅ Validated' : '⚠️ Pending';
+    if (act) return act.action.includes('flagged') ? 'Flagged' : act.action.includes('adjusted') ? 'Adjusted' : 'Validated';
+    return PRE_VALIDATED.includes(d) ? 'Validated' : 'Pending';
   };
   const rows = state.districtRisk.
   filter((r) => band === 'All' || bandOf(r.score) === band).
@@ -173,7 +174,21 @@ export function AnalystRiskScores() {
                       {TREND[row.trend]}
                     </td>
                     <td className="px-4 py-3 font-medium">{row.confidence}%</td>
-                    <td className="px-4 py-3 font-medium whitespace-nowrap">{validation(row.district)}</td>
+                    <td className="px-4 py-3 font-medium whitespace-nowrap">
+                      {(() => {
+                        const status = validation(row.district);
+                        if (status === 'Validated') {
+                          return <span className="inline-flex items-center gap-1 text-epi-accent"><Check className="w-3.5 h-3.5" /> Validated</span>;
+                        }
+                        if (status === 'Flagged') {
+                          return <span className="inline-flex items-center gap-1 text-epi-red"><AlertTriangle className="w-3.5 h-3.5" /> Flagged</span>;
+                        }
+                        if (status === 'Adjusted') {
+                          return <span className="inline-flex items-center gap-1 text-epi"><span className="w-1.5 h-1.5 rounded-full bg-epi" /> Adjusted</span>;
+                        }
+                        return <span className="text-epi-muted">Pending</span>;
+                      })()}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <button
                       onClick={(e) => {
@@ -240,7 +255,7 @@ export function AnalystRiskScores() {
             <h3 className="text-[14px] font-bold text-epi-text mb-4 flex items-center justify-between gap-2">
               Analyst Validation
               <span className={`text-[12px] font-bold px-2 py-1 rounded ${selValidation.includes('Pending') ? 'text-epi-amber bg-epi-amber/10' : 'text-epi-accent bg-epi-accent/10'}`}>
-                {selValidation.includes('Pending') ? '⚠️ Pending validation' : selValidation}
+                {selValidation.includes('Pending') ? 'Pending validation' : selValidation}
               </span>
             </h3>
 

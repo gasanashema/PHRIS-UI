@@ -1,64 +1,66 @@
 import { useState } from 'react';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
 import { useApp } from '../../store/AppStore';
+import { Check } from 'lucide-react';
+
 const diseaseMapping = [
 {
   source: 'DHIS2',
   term: 'P. Falciparum',
   system: 'Malaria (Confirmed)',
   category: 'Infectious Disease',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'RBC Lab',
   term: 'V. Cholerae positive',
   system: 'Cholera (Confirmed)',
   category: 'Infectious Disease',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'CHW App',
   term: 'Impiswi',
   system: 'Diarrheal Disease',
   category: 'Gastrointestinal',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'CHW App',
   term: 'Malariya',
   system: 'Malaria (Suspected)',
   category: 'Infectious Disease',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'CHW App',
   term: 'Inkorora',
   system: 'Respiratory Infection',
   category: 'Respiratory',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'CHW App',
   term: 'Agahagarika',
-  system: '[Not mapped — select ▼]',
+  system: '[Not mapped — select]',
   category: 'Unknown',
-  status: '🟡 Pending',
+  status: 'Pending',
   isPending: true
 },
 {
   source: 'EMR',
   term: 'Acute febrile illness NEC',
-  system: '[Not mapped — select ▼]',
+  system: '[Not mapped — select]',
   category: 'Unknown',
-  status: '🟡 Pending',
+  status: 'Pending',
   isPending: true
 },
 {
   source: 'CHW App',
   term: "Uburwayi bw'ubutwari",
-  system: '[Not mapped — select ▼]',
+  system: '[Not mapped — select]',
   category: 'Unknown',
-  status: '🟡 Pending',
+  status: 'Pending',
   isPending: true
 }];
 
@@ -68,21 +70,21 @@ const facilityMapping = [
   code: 'RW-HY-001',
   system: 'Huye District Hospital',
   district: 'Huye',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'DHIS2',
   code: 'RW-MS-003',
   system: 'Musanze Health Centre',
   district: 'Musanze',
-  status: '✅ Mapped'
+  status: 'Mapped'
 },
 {
   source: 'EMR',
   code: 'RW-HY-099',
   system: '[Unknown — not in registry]',
   district: 'Huye',
-  status: '🔴 Error — resolve',
+  status: 'Error — resolve',
   isError: true
 },
 {
@@ -90,7 +92,7 @@ const facilityMapping = [
   code: 'FAC_KIG_0047',
   system: 'Kacyiru Health Centre',
   district: 'Gasabo',
-  status: '✅ Mapped'
+  status: 'Mapped'
 }];
 
 const STANDARD_TERMS = [
@@ -184,11 +186,11 @@ export function IntegrationMapping() {
       breadcrumb="Data Mapping">
 
       <div className="flex flex-wrap items-center gap-4 text-[14px] font-bold bg-white px-4 py-3 rounded-lg shadow-sm border border-border mb-6 w-fit max-w-full">
-        <span className="text-[#00A550]">✅ {(1240 + rows.filter((r) => !r.pending).length - 5).toLocaleString('en-US')} Terms Mapped</span>
+        <span className="text-[#00A550] flex items-center gap-1.5"><Check className="w-4 h-4" /> {(1240 + rows.filter((r) => !r.pending).length - 5).toLocaleString('en-US')} Terms Mapped</span>
         <span className="text-border">|</span>
-        <span className="text-epi-amber">🟡 {pending + 74} Terms Pending Mapping</span>
+        <span className="text-epi-amber flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-epi-amber inline-block" /> {pending + 74} Terms Pending Mapping</span>
         <span className="text-border">|</span>
-        <span className="text-epi-red">🔴 {rows.filter((r) => r.batch && r.pending).length + errors} Terms Causing Errors Today</span>
+        <span className="text-epi-red flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-epi-red inline-block" /> {rows.filter((r) => r.batch && r.pending).length + errors} Terms Causing Errors Today</span>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -250,8 +252,12 @@ export function IntegrationMapping() {
                       }
                     </td>
                     <td className="p-4 text-[13px] text-epi-muted">{m.category}</td>
-                    <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${m.pending ? 'text-epi-amber' : ''}`}>
-                      {m.pending ? '🟡 Pending' : '✅ Mapped'}
+                    <td className="p-4 text-[13px] font-bold whitespace-nowrap">
+                      {m.pending ? (
+                        <span className="flex items-center gap-1.5 text-epi-amber"><span className="w-2 h-2 rounded-full bg-epi-amber inline-block" /> Pending</span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-[#00A550]"><Check className="w-3.5 h-3.5" /> Mapped</span>
+                      )}
                     </td>
                     <td className="p-4 text-right whitespace-nowrap">
                       {isEditing ?
@@ -349,7 +355,7 @@ export function IntegrationMapping() {
                         </select>
                         <button
                       onClick={() => {
-                        setFacilities(facilities.map((f) => f.code === m.code ? { ...f, system: facilityChoice, status: '✅ Mapped', isError: false } : f));
+                        setFacilities(facilities.map((f) => f.code === m.code ? { ...f, system: facilityChoice, status: 'Mapped', isError: false } : f));
                         actions.logAdminEvent('Integration', `Mapped facility code ${m.code} → ${facilityChoice}`);
                         actions.toast(`${m.code} mapped to ${facilityChoice}. Held EMR records will be released on the next pipeline run.`);
                       }}
@@ -363,7 +369,13 @@ export function IntegrationMapping() {
                   }
                   </td>
                   <td className="p-4 text-[13px] text-epi-text">{m.district}</td>
-                  <td className={`p-4 text-[13px] font-bold ${m.isError ? 'text-epi-red' : ''}`}>{m.status}</td>
+                  <td className="p-4 text-[13px] font-bold">
+                    {m.isError ? (
+                      <span className="flex items-center gap-1.5 text-epi-red"><span className="w-2 h-2 rounded-full bg-epi-red inline-block" /> Error — resolve</span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-[#00A550]"><Check className="w-3.5 h-3.5" /> Mapped</span>
+                    )}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -386,7 +398,7 @@ export function IntegrationMapping() {
                 <li>'June 5, 2026' → '2026-06-05'</li>
               </ul>
             </div>
-            <div className="text-[13px] font-bold mt-auto">Status: 🟢 Active</div>
+            <div className="text-[13px] font-bold mt-auto">Status: ● Active</div>
           </div>
           <div className="bg-white rounded-lg p-6 shadow-card border border-border flex flex-col">
             <h3 className="text-[14px] font-bold text-epi-text mb-3">Phone Numbers</h3>
@@ -399,7 +411,7 @@ export function IntegrationMapping() {
                 <li>'788 123 456' → '+250 788 123 456'</li>
               </ul>
             </div>
-            <div className="text-[13px] font-bold mt-auto">Status: 🟢 Active</div>
+            <div className="text-[13px] font-bold mt-auto">Status: ● Active</div>
           </div>
           <div className="bg-white rounded-lg p-6 shadow-card border border-border flex flex-col">
             <h3 className="text-[14px] font-bold text-epi-text mb-3">Kinyarwanda Normalization</h3>
@@ -408,7 +420,7 @@ export function IntegrationMapping() {
               <p>{pending + 74} terms currently pending review. CHW app is primary source.</p>
             </div>
             <div className="flex items-center justify-between gap-2 mt-auto">
-              <div className="text-[13px] font-bold text-epi-amber">Status: 🟡 {pending + 74} pending</div>
+              <div className="text-[13px] font-bold text-epi-amber">Status: ● {pending + 74} pending</div>
               <button
                 onClick={() => {
                   setTab('Pending only');

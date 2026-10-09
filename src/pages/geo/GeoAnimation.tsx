@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GeoLayout } from '../../components/geo/GeoLayout';
-import { Play, Pause, SkipForward, SkipBack } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Check, Film } from 'lucide-react';
 
 interface Sector {name: string;x: number;y: number;cases: number[];} // cases per day (8 days)
 interface Scenario {
@@ -20,7 +20,7 @@ interface Scenario {
 const DATES = ['May 29', 'May 30', 'May 31', 'June 1', 'June 2', 'June 3', 'June 4', 'June 5'];
 const SCENARIOS: Scenario[] = [
 {
-  key: 'cholera-rusizi', disease: 'Cholera', icon: '💧', district: 'Rusizi', alertId: 'ALT-2026-001', dates: DATES,
+  key: 'cholera-rusizi', disease: 'Cholera', icon: '●', district: 'Rusizi', alertId: 'ALT-2026-001', dates: DATES,
   sectors: [
   { name: 'Bugarama', x: 25, y: 35, cases: [4, 9, 16, 24, 31, 38, 44, 41] },
   { name: 'Nzahaha', x: 55, y: 30, cases: [0, 0, 2, 6, 11, 17, 24, 22] },
@@ -29,14 +29,14 @@ const SCENARIOS: Scenario[] = [
   source: { x: 25, y: 35, label: 'Source: Bugarama water point' },
   response: { x: 28, y: 38, label: 'ORS + Water treatment deployed June 4', day: 6 },
   events: [
-  { day: 0, color: '#D32F2F', text: '🔴 First cases — Bugarama sector' },
-  { day: 3, color: '#F59E0B', text: '⚠️ Alert ALT-001 generated' },
-  { day: 5, color: '#1D72B8', text: '🔬 Lab confirmed cholera' },
-  { day: 6, color: '#00A550', text: '💉 ORS + water treatment deployed' },
-  { day: 7, color: '#00A550', text: '📉 Cases declining' }]
+  { day: 0, color: '#D32F2F', text: '● First cases — Bugarama sector' },
+  { day: 3, color: '#F59E0B', text: 'Alert ALT-001 generated' },
+  { day: 5, color: '#1D72B8', text: 'Lab confirmed cholera' },
+  { day: 6, color: '#00A550', text: 'ORS + water treatment deployed' },
+  { day: 7, color: '#00A550', text: 'Cases declining' }]
 },
 {
-  key: 'cholera-huye', disease: 'Cholera', icon: '💧', district: 'Huye', alertId: 'ALT-2026-051', dates: DATES,
+  key: 'cholera-huye', disease: 'Cholera', icon: '●', district: 'Huye', alertId: 'ALT-2026-051', dates: DATES,
   sectors: [
   { name: 'Tumba', x: 40, y: 40, cases: [0, 2, 4, 7, 10, 14, 19, 23] },
   { name: 'Ngoma', x: 60, y: 45, cases: [0, 0, 1, 2, 4, 6, 8, 11] },
@@ -44,12 +44,12 @@ const SCENARIOS: Scenario[] = [
   deaths: [0, 0, 0, 0, 0, 1, 1, 1],
   source: { x: 40, y: 40, label: 'Suspected source: Tumba spring' },
   events: [
-  { day: 1, color: '#D32F2F', text: '🔴 Cluster reported by Tumba HC' },
-  { day: 4, color: '#1D72B8', text: '🔬 RDT positive samples' },
-  { day: 7, color: '#F59E0B', text: '⚠️ Red alert ALT-051 generated' }]
+  { day: 1, color: '#D32F2F', text: '● Cluster reported by Tumba HC' },
+  { day: 4, color: '#1D72B8', text: 'RDT positive samples' },
+  { day: 7, color: '#F59E0B', text: 'Red alert ALT-051 generated' }]
 },
 {
-  key: 'malaria-kayonza', disease: 'Malaria', icon: '🦟', district: 'Kayonza', alertId: 'ALT-2026-002', dates: DATES,
+  key: 'malaria-kayonza', disease: 'Malaria', icon: '●', district: 'Kayonza', alertId: 'ALT-2026-002', dates: DATES,
   sectors: [
   { name: 'Rukara', x: 30, y: 30, cases: [40, 46, 55, 63, 72, 80, 86, 84] },
   { name: 'Mukarange', x: 60, y: 35, cases: [22, 25, 30, 36, 41, 47, 52, 50] },
@@ -58,10 +58,10 @@ const SCENARIOS: Scenario[] = [
   source: { x: 30, y: 30, label: 'Breeding sites: Rukara wetlands' },
   response: { x: 34, y: 34, label: 'Indoor residual spraying started June 4', day: 6 },
   events: [
-  { day: 0, color: '#D32F2F', text: '🔴 Cases above seasonal baseline' },
-  { day: 2, color: '#F59E0B', text: '⚠️ Alert ALT-002 generated' },
-  { day: 6, color: '#00A550', text: '🧴 Spraying campaign started' },
-  { day: 7, color: '#00A550', text: '📉 Growth slowing' }]
+  { day: 0, color: '#D32F2F', text: '● Cases above seasonal baseline' },
+  { day: 2, color: '#F59E0B', text: 'Alert ALT-002 generated' },
+  { day: 6, color: '#00A550', text: 'Spraying campaign started' },
+  { day: 7, color: '#00A550', text: 'Growth slowing' }]
 }];
 
 const SPEEDS: Record<string, number> = { '0.5x': 1600, '1x': 800, '2x': 400 };
@@ -108,8 +108,9 @@ export function GeoAnimation() {
     <GeoLayout breadcrumb="Spread Animation" hideHeader={true}>
       {/* Small Page Header */}
       <div className="absolute top-0 left-0 right-0 h-10 bg-white/90 backdrop-blur-sm border-b border-border flex items-center px-6 z-20">
-        <span className="text-[13px] font-bold text-epi-text truncate">
-          🎬 Outbreak Spread Animation | {sc.disease} — {sc.district} District | {sc.dates[0]} → {sc.dates[last]}, 2026
+        <span className="text-[13px] font-bold text-epi-text truncate inline-flex items-center gap-2">
+          <Film className="w-4 h-4 text-epi" />
+          <span>Outbreak Spread Animation | {sc.disease} — {sc.district} District | {sc.dates[0]} → {sc.dates[last]}, 2026</span>
         </span>
       </div>
 
@@ -119,7 +120,7 @@ export function GeoAnimation() {
           value={sc.disease}
           onChange={(e) => choose(SCENARIOS.find((s) => s.disease === e.target.value)!.key)}
           className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg">
-          {diseases.map((d) => <option key={d} value={d}>{SCENARIOS.find((s) => s.disease === d)!.icon} {d}</option>)}
+          {diseases.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
         <select value={key} onChange={(e) => choose(e.target.value)} className="text-[13px] font-bold text-epi-text border border-border rounded-md px-3 py-1.5 focus:outline-none bg-epi-bg">
           {SCENARIOS.filter((s) => s.disease === sc.disease).map((s) => <option key={s.key} value={s.key}>{s.district} District</option>)}
@@ -163,13 +164,15 @@ export function GeoAnimation() {
         })}
 
         <div className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center" style={{ top: `${sc.source.y}%`, left: `${sc.source.x}%` }}>
-          <div className="w-4 h-4 bg-[#1D72B8] rounded-full border-2 border-white shadow-sm flex items-center justify-center text-[8px]">{sc.icon}</div>
+          <div className="w-4 h-4 bg-[#1D72B8] rounded-full border-2 border-white shadow-sm flex items-center justify-center text-[10px] text-white font-bold">●</div>
           <span className="text-[10px] font-bold mt-1 bg-white/90 text-epi-text px-1 rounded shadow-sm whitespace-nowrap">{sc.source.label}</span>
         </div>
 
         {sc.response && day >= sc.response.day &&
         <div className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center" style={{ top: `${sc.response.y + 6}%`, left: `${sc.response.x + 4}%` }}>
-            <div className="w-4 h-4 bg-[#00A550] rounded-full border-2 border-white shadow-sm flex items-center justify-center text-[8px]">💉</div>
+            <div className="w-4 h-4 bg-[#00A550] rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white">
+              <Check className="w-2.5 h-2.5" />
+            </div>
             <span className="text-[10px] font-bold mt-1 bg-white/90 text-[#00A550] px-1 rounded shadow-sm whitespace-nowrap">{sc.response.label}</span>
           </div>
         }

@@ -110,9 +110,9 @@ export function WarningHistory() {
           </select>
           <select value={severity} onChange={(e) => setSeverity(e.target.value as typeof severity)} className="h-10 px-3 bg-white border border-border rounded-md text-[13px]">
             <option value="all">Severity: All</option>
-            <option value="red">🔴 Red</option>
-            <option value="orange">🟠 Orange</option>
-            <option value="yellow">🟡 Yellow</option>
+            <option value="red">● Red</option>
+            <option value="orange">● Orange</option>
+            <option value="yellow">● Yellow</option>
           </select>
           <select value={district} onChange={(e) => setDistrict(e.target.value)} className="h-10 px-3 bg-white border border-border rounded-md text-[13px]">
             {districts.map((d) =>

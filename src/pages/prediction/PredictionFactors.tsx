@@ -102,7 +102,7 @@ export function PredictionFactors() {
             <div className="text-[24px] font-bold text-epi-red flex items-center gap-2">
               91/100{' '}
               <span className="text-[12px] bg-epi-red text-white px-2 py-0.5 rounded uppercase">
-                🔴 CRITICAL
+                ● CRITICAL
               </span>
             </div>
           </div>
@@ -352,7 +352,7 @@ export function PredictionFactors() {
                     +22 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-epi-red">
-                    🔴 Critical
+                    ● Critical
                   </td>
                 </tr>
                 <tr className="hover:bg-epi-bg/50">
@@ -371,7 +371,7 @@ export function PredictionFactors() {
                     +20 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-epi-red">
-                    🔴 Critical
+                    ● Critical
                   </td>
                 </tr>
                 <tr className="hover:bg-epi-bg/50">
@@ -390,7 +390,7 @@ export function PredictionFactors() {
                     +25 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-epi-red">
-                    🔴 Critical
+                    ● Critical
                   </td>
                 </tr>
                 <tr className="hover:bg-epi-bg/50">
@@ -409,7 +409,7 @@ export function PredictionFactors() {
                     +15 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-[#F97316]">
-                    🟠 High
+                    ● High
                   </td>
                 </tr>
                 <tr className="hover:bg-epi-bg/50">
@@ -430,7 +430,7 @@ export function PredictionFactors() {
                     +9 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-[#F97316]">
-                    🟠 High
+                    ● High
                   </td>
                 </tr>
                 <tr className="hover:bg-epi-bg/50">
@@ -449,7 +449,7 @@ export function PredictionFactors() {
                     +2 pts
                   </td>
                   <td className="p-3 text-[13px] font-bold text-epi-amber">
-                    🟡 Watch
+                    ● Watch
                   </td>
                 </tr>
               </tbody>

@@ -84,10 +84,16 @@ export function ForgotPassword() {
               </a>
 
               <button
-              onClick={() => setResent(true)}
-              className="text-[14px] text-primary hover:underline font-medium">
-
-                {resent ? '✓ Reset email sent again' : 'Resend email'}
+                onClick={() => setResent(true)}
+                className="inline-flex items-center justify-center gap-1.5 text-[14px] text-primary hover:underline font-medium">
+                {resent ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-primary inline" />
+                    <span>Reset email sent again</span>
+                  </>
+                ) : (
+                  'Resend email'
+                )}
               </button>
               <p className="text-[12px] text-text-secondary">
                 Prototype: no email is actually sent — use “Open reset link” to continue.

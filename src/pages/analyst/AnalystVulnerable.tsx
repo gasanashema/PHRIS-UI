@@ -7,6 +7,7 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer } from
 'recharts';
+import { AlertCircle, XCircle } from 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 import { useApp } from '../../store/AppStore';
 import { downloadFile, fmtDate, nowISO } from '../../lib/format';
@@ -22,53 +23,53 @@ interface Group {
   coverage: string;
   score: number;
   radar: number[]; // 7 factors, 0–10
-  gaps: [string, string][]; // [icon, text]
+  gaps: [('critical' | 'warning'), string][];
   recommended: string[];
   cost: number; // RWF
   impact: string;
 }
-const FACTORS = ['Age risk factor', 'Nutritional status', 'Sanitation access', 'Distance to facility', 'Vaccination coverage', 'Poverty (Ubudehe)', 'Disease exposure'];
-const GROUPS: Group[] = [
+const FACTORS = ['Age risk factor', 'Nutritional status', 'Sanitation access', 'Distance to facility', 'Vaccination coverage', 'Poverty (Ubudehe)', 'Disease exposure'];const GROUPS: Group[] = [
 {
-  id: 'u5-rusizi', name: 'Children Under 5 — Rusizi District', district: 'Rusizi', level: 'Very High', risks: 'Cholera + Malnutrition', population: 12400, coverage: 'ORS ✅ | Nutrition ❌ (gap)', score: 91,
+  id: 'u5-rusizi', name: 'Children Under 5 — Rusizi District', district: 'Rusizi', level: 'Very High', risks: 'Cholera + Malnutrition', population: 12400, coverage: 'ORS Covered · Nutrition Gap', score: 91,
   radar: [9, 8, 8, 6, 5, 8, 9],
-  gaps: [['❌', 'Therapeutic feeding program — not covering Bugarama sector'], ['❌', 'WASH hygiene kits — out of stock at Rusizi HC since May'], ['⚠️', 'Vitamin A supplementation — only 61% coverage in this group']],
+  gaps: [['critical', 'Therapeutic feeding program — not covering Bugarama sector'], ['critical', 'WASH hygiene kits — out of stock at Rusizi HC since May'], ['warning', 'Vitamin A supplementation — only 61% coverage in this group']],
   recommended: ['Deploy therapeutic feeding to Bugarama immediately', 'Restock hygiene kits at Rusizi HC', 'Schedule Vitamin A campaign before August'],
   cost: 4_200_000, impact: 'Prevent ~340 cholera cases + reduce acute malnutrition by est. 18% in this group'
 },
 {
-  id: 'refugees-gicumbi', name: 'Refugees — Gicumbi Camp (Nyabiheke)', district: 'Gicumbi', level: 'High', risks: 'Multiple diseases + limited healthcare access', population: 15600, coverage: 'UNHCR ✅ | WASH ⚠️ partial', score: 78,
+  id: 'refugees-gicumbi', name: 'Refugees — Gicumbi Camp (Nyabiheke)', district: 'Gicumbi', level: 'High', risks: 'Multiple diseases + limited healthcare access', population: 15600, coverage: 'UNHCR Covered · WASH Partial', score: 78,
   radar: [6, 6, 8, 5, 6, 9, 8],
-  gaps: [['⚠️', 'Latrine ratio 1:38 — above the 1:20 emergency standard'], ['⚠️', 'Measles catch-up incomplete for new arrivals'], ['❌', 'No dedicated mental health service in camp']],
+  gaps: [['warning', 'Latrine ratio 1:38 — above the 1:20 emergency standard'], ['warning', 'Measles catch-up incomplete for new arrivals'], ['critical', 'No dedicated mental health service in camp']],
   recommended: ['Add 120 latrines with UNHCR WASH partner', 'Measles/rubella catch-up at registration point', 'Deploy psychosocial support team monthly'],
   cost: 6_800_000, impact: 'Reduce diarrheal incidence by est. 30% and close measles immunity gap'
 },
 {
-  id: 'elderly-kayonza', name: 'Elderly (65+) — Kayonza District', district: 'Kayonza', level: 'High', risks: 'Malaria complications', population: 8200, coverage: 'Malaria treatment ✅ | Bednet distribution ❌ (gap)', score: 72,
+  id: 'elderly-kayonza', name: 'Elderly (65+) — Kayonza District', district: 'Kayonza', level: 'High', risks: 'Malaria complications', population: 8200, coverage: 'Malaria Covered · Bednet Gap', score: 72,
   radar: [8, 5, 4, 7, 4, 6, 8],
-  gaps: [['❌', 'Bednet distribution — elderly-headed households not targeted'], ['⚠️', 'Home-based care visits by CHWs below 40%']],
+  gaps: [['critical', 'Bednet distribution — elderly-headed households not targeted'], ['warning', 'Home-based care visits by CHWs below 40%']],
   recommended: ['Targeted bednet distribution to 3,100 elderly-headed households', 'Include 65+ in CHW home-visit schedule during peak season'],
   cost: 2_600_000, impact: 'Prevent ~210 severe malaria cases this season'
 },
 {
-  id: 'pregnant-nyaruguru', name: 'Pregnant Women — Nyaruguru District', district: 'Nyaruguru', level: 'High', risks: 'Maternal mortality + distance to facility', population: 3100, coverage: 'ANC ✅ | Skilled birth ⚠️ 61%', score: 69,
+  id: 'pregnant-nyaruguru', name: 'Pregnant Women — Nyaruguru District', district: 'Nyaruguru', level: 'High', risks: 'Maternal mortality + distance to facility', population: 3100, coverage: 'ANC Covered · Skilled Birth 61%', score: 69,
   radar: [5, 6, 5, 9, 6, 7, 5],
-  gaps: [['⚠️', 'Skilled birth attendance 61% (target 90%)'], ['❌', 'No maternity waiting home near Ruheru and Nyabimata sectors']],
+  gaps: [['warning', 'Skilled birth attendance 61% (target 90%)'], ['critical', 'No maternity waiting home near Ruheru and Nyabimata sectors']],
   recommended: ['Open maternity waiting home at Ruheru HC', 'Ambulance pre-positioning for remote sectors', 'Community mobilisation for facility delivery'],
   cost: 9_400_000, impact: 'Raise skilled birth attendance to est. 78% within 12 months'
 },
 {
-  id: 'u5-nyamagabe', name: 'Children Under 5 — Nyamagabe District', district: 'Nyamagabe', level: 'Moderate', risks: 'Stunting + malnutrition', population: 9800, coverage: 'Nutrition ⚠️ partial | ECD ✅', score: 54,
+  id: 'u5-nyamagabe', name: 'Children Under 5 — Nyamagabe District', district: 'Nyamagabe', level: 'Moderate', risks: 'Stunting + malnutrition', population: 9800, coverage: 'Nutrition Partial · ECD Covered', score: 54,
   radar: [7, 7, 5, 6, 3, 6, 4],
-  gaps: [['⚠️', 'Fortified blended food reaches 58% of eligible children'], ['⚠️', 'Growth monitoring attendance falling since March']],
+  gaps: [['warning', 'Fortified blended food reaches 58% of eligible children'], ['warning', 'Growth monitoring attendance falling since March']],
   recommended: ['Expand fortified food distribution through ECD centres', 'SMS reminders for growth monitoring sessions'],
   cost: 3_100_000, impact: 'Reduce stunting prevalence by est. 3 points over 2 years'
-}];
+}
+];
 
 const LEVEL_STYLE: Record<Level, {chip: string;card: string;text: string;label: string;}> = {
-  'Very High': { chip: 'bg-epi-red/10 text-epi-red border-epi-red/20', card: 'border-2 border-epi-red bg-epi-red/5', text: 'text-epi-red', label: '🔴 VERY HIGH RISK' },
-  High: { chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20', card: 'border border-epi-amber bg-white', text: 'text-epi-amber', label: '🟠 HIGH RISK' },
-  Moderate: { chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]', card: 'border border-[#FDE047] bg-white', text: 'text-[#A16207]', label: '🟡 MODERATE' }
+  'Very High': { chip: 'bg-epi-red/10 text-epi-red border-epi-red/20', card: 'border-2 border-epi-red bg-epi-red/5', text: 'text-epi-red', label: '● VERY HIGH RISK' },
+  High: { chip: 'bg-epi-amber/10 text-epi-amber border-epi-amber/20', card: 'border border-epi-amber bg-white', text: 'text-epi-amber', label: '● HIGH RISK' },
+  Moderate: { chip: 'bg-[#FEF08A]/40 text-[#A16207] border-[#FDE047]', card: 'border border-[#FDE047] bg-white', text: 'text-[#A16207]', label: '● MODERATE' }
 };
 
 export function AnalystVulnerable() {
@@ -191,11 +192,16 @@ export function AnalystVulnerable() {
             <div className="bg-epi-bg border border-border rounded-lg p-4">
               <h3 className="text-[14px] font-bold text-epi-text mb-3">Coverage Gaps for This Group:</h3>
               <ul className="space-y-2 text-[13px] text-epi-text">
-                {g.gaps.map(([icon, text]) =>
-                <li key={text} className="flex items-start gap-2">
-                    <span className={icon === '❌' ? 'text-epi-red' : 'text-epi-amber'}>{icon}</span> {text}
+                {g.gaps.map(([type, text]) => (
+                  <li key={text} className="flex items-start gap-2">
+                    {type === 'critical' ? (
+                      <XCircle className="w-4 h-4 text-epi-red shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-epi-amber shrink-0 mt-0.5" />
+                    )}
+                    <span>{text}</span>
                   </li>
-                )}
+                ))}
               </ul>
             </div>
             <div className="bg-epi-bg border border-border rounded-lg p-4">

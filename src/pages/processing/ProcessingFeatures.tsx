@@ -1,4 +1,5 @@
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
+import { Cpu } from 'lucide-react';
 const jsonLines: {
   indent?: boolean;
   comment?: string;
@@ -180,7 +181,7 @@ export function ProcessingFeatures() {
       {/* Top Progress Card */}
       <div className="bg-epi text-white rounded-lg p-6 shadow-card mb-6">
         <h2 className="text-[16px] font-bold mb-4 flex items-center gap-2">
-          🧠 Feature Engineering Pipeline — Currently Running
+          <Cpu className="w-5 h-5 text-white" /> Feature Engineering Pipeline — Currently Running
         </h2>
         <div className="w-full bg-white/20 rounded-full h-2 mb-3">
           <div
@@ -306,7 +307,7 @@ export function ProcessingFeatures() {
 
             <div className="p-5 bg-epi/10 border-t border-epi/20">
               <div className="text-[13px] text-epi-text font-medium flex items-start gap-2">
-                <span className="text-[16px]">💡</span>
+                <span className="text-[16px]"></span>
                 <p>
                   With these features, the AI model can predict: Outbreak
                   probability, expected case count in 2–4 weeks, which

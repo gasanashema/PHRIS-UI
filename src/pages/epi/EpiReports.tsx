@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Activity, BarChart2, Globe } from 'lucide-react';
+import { FileText, Activity, BarChart2, Globe, Check, ClipboardList } from 'lucide-react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
 import { Modal, btnPrimary, btnSecondary } from '../../components/shared/Modal';
 import { SimulatedTag } from '../../components/shared/Badges';
@@ -148,13 +148,16 @@ export function EpiReports() {
       <div className="bg-epi text-white rounded-lg p-6 mb-8 shadow-card relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/4" />
         <div className="relative z-10">
-          <h2 className="text-[20px] font-bold mb-2">
-            📋 Weekly Epidemiological Bulletin — Week 23, 2026
+          <h2 className="text-[20px] font-bold mb-2 flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-white/90" />
+            <span>Weekly Epidemiological Bulletin — Week 23, 2026</span>
           </h2>
           <p className="text-[14px] text-white/80 mb-4">
-            {bulletinSent ?
-            `✅ ${bulletin!.status} · ${fmtDate(bulletin!.at)}` :
-            'Auto-generated from live data | Ready for review and distribution'}
+            {bulletinSent ? (
+              <span className="inline-flex items-center gap-1"><Check className="w-4 h-4" /> {bulletin!.status} · {fmtDate(bulletin!.at)}</span>
+            ) : (
+              'Auto-generated from live data | Ready for review and distribution'
+            )}
             <br />
             {RECIPIENTS} recipients | Last manual bulletin took 2.5 days — this was
             generated in 14 minutes
@@ -163,8 +166,15 @@ export function EpiReports() {
             <button onClick={() => setPreview(ensureBulletin())} className="h-10 px-5 bg-white text-epi text-[14px] font-bold rounded-md hover:bg-white/90">
               Review Bulletin
             </button>
-            <button onClick={approveBulletin} disabled={bulletinSent} className="h-10 px-5 bg-epi-accent text-white text-[14px] font-bold rounded-md hover:bg-epi-accent/90 disabled:opacity-60">
-              {bulletinSent ? 'Sent ✓' : 'Approve & Send'}
+            <button onClick={approveBulletin} disabled={bulletinSent} className="h-10 px-5 bg-epi-accent text-white text-[14px] font-bold rounded-md hover:bg-epi-accent/90 disabled:opacity-60 inline-flex items-center gap-1.5">
+              {bulletinSent ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Sent</span>
+                </>
+              ) : (
+                'Approve & Send'
+              )}
             </button>
             <button onClick={() => download(ensureBulletin())} className="h-10 px-5 border border-white/30 hover:bg-white/10 text-white text-[14px] font-bold rounded-md">
               Download (printable HTML)
@@ -197,7 +207,10 @@ export function EpiReports() {
                 </div>
                 <div>
                   Status:{' '}
-                  <span className="font-medium text-epi-accent">{last ? last.status : '✅ Sent to MOH and partners'}</span>
+                  <span className="font-medium text-epi-accent inline-flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" />
+                    {last ? last.status : 'Sent to MOH and partners'}
+                  </span>
                 </div>
               </div>
               <div className="flex gap-3 mt-auto">

@@ -14,6 +14,7 @@ import {
   BrainCircuit,
   Siren,
   Globe2,
+  Info,
   LayoutDashboard } from
 'lucide-react';
 import type { Role } from '../../types';
@@ -166,8 +167,22 @@ export function HeaderActions({ fallbackRole }: HeaderActionsProps) {
             onClick={() => openNotification(n.id, n.link)}
             className={`w-full text-left px-4 py-3 hover:bg-admin-bg/60 transition-colors flex gap-3 ${n.read ? '' : 'bg-admin/5'}`}>
 
-                <span className="text-[14px] leading-5 shrink-0">
-                  {n.severity === 'info' ? 'ℹ️' : SEVERITY_META[n.severity].emoji}
+                <span className="shrink-0 mt-0.5">
+                  {n.severity === 'info' ? (
+                    <Info className="w-4 h-4 text-admin-info" />
+                  ) : (
+                    <span
+                      className={`inline-block w-2.5 h-2.5 rounded-full ${
+                        n.severity === 'red'
+                          ? 'bg-admin-red'
+                          : n.severity === 'orange'
+                          ? 'bg-[#F97316]'
+                          : n.severity === 'yellow'
+                          ? 'bg-yellow-500'
+                          : 'bg-admin-accent'
+                      }`}
+                    />
+                  )}
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className={`block text-[13px] leading-snug ${n.read ? 'text-admin-text' : 'font-bold text-admin-text'}`}>

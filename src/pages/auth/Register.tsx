@@ -197,8 +197,8 @@ export function Register() {
                     Phone Number
                   </label>
                   <div className="flex">
-                    <div className="h-12 px-4 bg-section border border-border border-r-0 rounded-l-lg flex items-center gap-2 text-text-primary font-medium">
-                      🇷🇼 +250
+                    <div className="h-12 px-4 bg-section border border-border border-r-0 rounded-l-lg flex items-center gap-1.5 text-text-primary font-medium text-[13px]">
+                      <span className="font-mono text-[11px] font-bold text-primary bg-white px-1.5 py-0.5 rounded border border-border">RW</span> +250
                     </div>
                     <input
                       type="tel" value={form.phone} onChange={setField('phone')}

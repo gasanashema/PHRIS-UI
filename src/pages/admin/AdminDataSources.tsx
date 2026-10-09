@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, X, Loader2 } from 'lucide-react';
+import { AlertTriangle, X, Loader2, Check } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { DataSourceDetailsModal, DataSourceItem } from '../../components/admin/DataSourceDetailsModal';
@@ -92,18 +92,29 @@ export function AdminDataSources() {
       </div>
 
       <div className="flex flex-wrap gap-3 mb-8">
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm">🟢 {count('active')} Active</div>
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm">
-          🟡 {count('delayed') + count('partial')} Delayed / partial
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-admin-accent" />
+          {count('active')} Active
         </div>
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm">🔴 {count('disconnected')} Disconnected</div>
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-yellow-500" />
+          {count('delayed') + count('partial')} Delayed / partial
+        </div>
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-text shadow-sm flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-admin-red" />
+          {count('disconnected')} Disconnected
+        </div>
         {count('disabled') > 0 &&
-        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-muted shadow-sm">⚪ {count('disabled')} Disabled</div>
+        <div className="bg-white px-4 py-2 rounded-full border border-border text-[13px] font-bold text-admin-muted shadow-sm flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          {count('disabled')} Disabled
+        </div>
         }
         {attention > 0 &&
-        <div className="bg-admin-amber/10 px-4 py-2 rounded-full border border-admin-amber/20 text-[13px] font-bold text-admin-amber shadow-sm">
-            ⚠️ {attention} Need Attention
-          </div>
+        <div className="bg-admin-amber/10 px-4 py-2 rounded-full border border-admin-amber/20 text-[13px] font-bold text-admin-amber shadow-sm flex items-center gap-2">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          {attention} Need Attention
+        </div>
         }
       </div>
 
@@ -121,7 +132,7 @@ export function AdminDataSources() {
                   <h3 className="text-[15px] font-bold text-admin-text leading-tight max-w-[160px]">{item.name}</h3>
                 </div>
                 <span className="text-[12px] font-bold bg-admin-bg px-2 py-1 rounded whitespace-nowrap">
-                  {s.syncing ? '⏳ Syncing' : item.status}
+                  {s.syncing ? '⏱ Syncing' : item.status}
                 </span>
               </div>
 
@@ -171,7 +182,7 @@ export function AdminDataSources() {
 
           <AlertTriangle className="w-5 h-5 text-admin-amber shrink-0 mt-0.5" />
           <p className="text-[14px] text-admin-text font-medium">
-            <span className="font-bold">⚠️ Rwanda Meteorological Agency is disconnected ({timeAgo(met.lastSync)}).</span>{' '}
+            <span className="font-bold">Rwanda Meteorological Agency is disconnected ({timeAgo(met.lastSync)}).</span>{' '}
             Environmental risk predictions may be affected. Click to investigate →
           </p>
         </button>
@@ -244,8 +255,16 @@ export function AdminDataSources() {
 
                   {test === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
-                {test === 'ok' && <div className="text-[13px] font-medium text-admin-accent">✅ Endpoint responded (simulated).</div>}
-                {test === 'fail' && <div className="text-[13px] font-medium text-admin-red">❌ No endpoint URL configured.</div>}
+                {test === 'ok' && (
+                  <div className="text-[13px] font-medium text-admin-accent flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" /> Endpoint responded (simulated).
+                  </div>
+                )}
+                {test === 'fail' && (
+                  <div className="text-[13px] font-medium text-admin-red flex items-center gap-1.5">
+                    <X className="w-3.5 h-3.5" /> No endpoint URL configured.
+                  </div>
+                )}
               </div>
             </div>
             <div className="p-6 border-t border-border bg-admin-bg flex gap-3 shrink-0">

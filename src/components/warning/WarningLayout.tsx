@@ -48,11 +48,11 @@ export function WarningLayout({
         to="/warning/alerts"
         className="inline-flex bg-epi-red px-3 py-1.5 rounded-full text-[12px] font-bold text-white items-center gap-1.5 whitespace-nowrap">
 
-            🚨 {red.length} Red Alert{red.length > 1 ? 's' : ''} Active
+            <AlertTriangle className="w-3.5 h-3.5" /> {red.length} Red Alert{red.length > 1 ? 's' : ''} Active
           </Link> :
 
-      <span className="inline-flex bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-            🟢 No red alerts
+      <span className="inline-flex items-center gap-1.5 bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-[#00A550]" /> No red alerts
           </span>
 
       }
@@ -71,7 +71,7 @@ export function WarningLayout({
       <IdentityBanner tone={red.length > 0 ? 'danger' : 'calm'}>
           {red.length > 0 ?
         <>
-              <span className="font-bold">🚨 ACTIVE EMERGENCY</span>
+              <span className="inline-flex items-center gap-1.5 font-bold"><AlertTriangle className="w-3.5 h-3.5" /> ACTIVE EMERGENCY</span>
               <Sep />
               <span>
                 {red.length} Red Alert{red.length > 1 ? 's' : ''} Open
@@ -86,7 +86,7 @@ export function WarningLayout({
           )}
             </> :
 
-        <span className="font-bold">🟢 No red alerts open — routine monitoring</span>
+        <span className="inline-flex items-center gap-1.5 font-bold"><span className="w-2 h-2 rounded-full bg-emerald-400" /> No red alerts open — routine monitoring</span>
         }
           {latest &&
         <>

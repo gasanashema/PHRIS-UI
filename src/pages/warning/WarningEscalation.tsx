@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { WarningLayout } from '../../components/warning/WarningLayout';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Check } from 'lucide-react';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
 import { sortAlerts, useApp } from '../../store/AppStore';
 import { SEVERITY_META, demoNow, isOpenStatus } from '../../lib/format';
@@ -41,7 +41,7 @@ export function WarningEscalation() {
             {/* Level 1 */}
             <div className="w-full bg-epi/10 border-2 border-epi rounded-lg p-4 text-center relative">
               <div className="text-[16px] font-bold text-epi mb-2">
-                👤 Level 1: District Health Officer
+                Level 1: District Health Officer
               </div>
               <div className="text-[13px] text-epi-text mb-1">
                 Notified immediately on alert
@@ -62,7 +62,7 @@ export function WarningEscalation() {
             {/* Level 2 */}
             <div className="w-full bg-epi-amber/10 border-2 border-epi-amber rounded-lg p-4 text-center relative">
               <div className="text-[16px] font-bold text-epi-amber mb-2">
-                🏛️ Level 2: Provincial Health Director
+                Level 2: Provincial Health Director
               </div>
               <div className="text-[13px] text-epi-text mb-1">
                 Notified automatically
@@ -83,7 +83,7 @@ export function WarningEscalation() {
             {/* Level 3 */}
             <div className="w-full bg-[#F97316]/10 border-2 border-[#F97316] rounded-lg p-4 text-center relative">
               <div className="text-[16px] font-bold text-[#F97316] mb-2">
-                🔬 Level 3: RBC Epidemiology Division
+                Level 3: RBC Epidemiology Division
               </div>
               <div className="text-[13px] text-epi-text mb-1">
                 Notified — outbreak investigation
@@ -104,7 +104,7 @@ export function WarningEscalation() {
             {/* Level 4 */}
             <div className="w-full bg-epi-red/10 border-2 border-epi-red rounded-lg p-4 text-center relative">
               <div className="text-[16px] font-bold text-epi-red mb-2">
-                🏥 Level 4: Ministry of Health
+                Level 4: Ministry of Health
               </div>
               <div className="text-[13px] text-epi-text mb-1">
                 National emergency protocols triggered
@@ -122,7 +122,7 @@ export function WarningEscalation() {
             {/* Level 5 */}
             <div className="w-full bg-[#7B0000]/10 border-2 border-[#7B0000] rounded-lg p-4 text-center relative">
               <div className="text-[16px] font-bold text-[#7B0000] mb-2">
-                🌍 Level 5: WHO Rwanda Country Office
+                Level 5: WHO Rwanda Country Office
               </div>
               <div className="text-[13px] text-epi-text mb-1">
                 International health regulations activated
@@ -137,7 +137,7 @@ export function WarningEscalation() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <span className="text-[12px] font-bold bg-[#F97316] text-white px-2 py-0.5 rounded animate-pulse">
-                  ⚠️ AUTO-ESCALATION {overdueH > 0 ? 'OVERDUE' : 'PENDING'}
+                  AUTO-ESCALATION {overdueH > 0 ? 'OVERDUE' : 'PENDING'}
                 </span>
                 <Link to={`/warning/detail?id=${pending.id}`} className="text-[16px] font-bold text-epi-text hover:underline">
                   {pending.id} ({pending.disease} — {pending.district})
@@ -181,8 +181,8 @@ export function WarningEscalation() {
             </div>
           </div> :
 
-        <div className="lg:col-span-12 bg-[#00A550]/10 border-2 border-[#00A550] rounded-lg p-6 text-[14px] font-bold text-epi-text">
-            ✅ No pending auto-escalations — every open alert has been acknowledged.
+        <div className="lg:col-span-12 bg-[#00A550]/10 border-2 border-[#00A550] rounded-lg p-6 text-[14px] font-bold text-epi-text flex items-center gap-2">
+            <Check className="w-5 h-5 text-[#00A550]" /> No pending auto-escalations — every open alert has been acknowledged.
           </div>
         }
 
@@ -215,14 +215,17 @@ export function WarningEscalation() {
                   return (
                     <tr key={a.id} className={isPending ? 'bg-[#F97316]/5 hover:bg-[#F97316]/10' : 'hover:bg-epi-bg/50'}>
                       <td className="p-4 text-[13px] font-mono font-bold text-epi-text">
-                        {SEVERITY_META[a.severity].emoji} {a.id}
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full inline-block ${SEVERITY_META[a.severity].text.replace('text-', 'bg-')}`} />
+                          {a.id}
+                        </span>
                         <div className="font-sans font-normal text-[12px] text-epi-muted">{a.disease}, {a.district}</div>
                       </td>
                       <td className={`p-4 text-[13px] font-bold ${isPending ? 'text-epi' : 'text-[#F97316]'}`}>
                         {a.escalatedTo ?? 'Level 1 — District'}
                       </td>
                       <td className={`p-4 text-[13px] ${isPending && atLevel > state.rules.autoEscalateHours ? 'font-bold text-epi-red' : 'text-epi-text'}`}>
-                        {fmtDuration(atLevel)}{isPending && atLevel > state.rules.autoEscalateHours ? ' ⚠️' : ''}
+                        {fmtDuration(atLevel)}{isPending && atLevel > state.rules.autoEscalateHours ? ' ' : ''}
                       </td>
                       <td className="p-4 text-[13px] text-epi-text">
                         {isPending ? `${a.district} DHO — no response` : a.acknowledgedBy}

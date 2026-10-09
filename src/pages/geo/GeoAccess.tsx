@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X, Check, Mountain } from 'lucide-react';
 import { GeoLayout } from '../../components/geo/GeoLayout';
 import { useApp, useCurrentUser } from '../../store/AppStore';
 import { DISTRICT_XY, DISTRICT_POP_K } from '../../data/geo';
@@ -16,10 +17,10 @@ const BASE_MIN: Record<string, number> = {
 };
 const GAP_SECTOR: Record<string, string> = { Nyaruguru: 'Nkomane', Nyamagabe: 'Kitabi', Rutsiro: 'Mushonyi', Nyamasheke: 'Bushekeri', Ngororero: 'Muhanda', Burera: 'Kagogo', Karongi: 'Mutuntu', Rusizi: 'Bweyeye', Gakenke: 'Coko', Nyabihu: 'Jomba' };
 const BANDS = [
-{ max: 30, label: 'Within 30 min', color: '#104E49', text: 'text-[#00A550]', bar: 'bg-[#00A550]', icon: '🟢' },
-{ max: 60, label: '30 min–1 hour', color: '#00A550', text: 'text-epi-amber', bar: 'bg-epi-amber', icon: '🟡' },
-{ max: 120, label: '1–2 hours', color: '#F59E0B', text: 'text-[#F97316]', bar: 'bg-[#F97316]', icon: '🟠' },
-{ max: Infinity, label: '2+ hours', color: '#D32F2F', text: 'text-epi-red', bar: 'bg-epi-red', icon: '🔴' }];
+{ max: 30, label: 'Within 30 min', color: '#104E49', text: 'text-[#00A550]', bar: 'bg-[#00A550]', icon: '●' },
+{ max: 60, label: '30 min–1 hour', color: '#00A550', text: 'text-epi-amber', bar: 'bg-epi-amber', icon: '●' },
+{ max: 120, label: '1–2 hours', color: '#F59E0B', text: 'text-[#F97316]', bar: 'bg-[#F97316]', icon: '●' },
+{ max: Infinity, label: '2+ hours', color: '#D32F2F', text: 'text-epi-red', bar: 'bg-epi-red', icon: '●' }];
 
 const bandOf = (m: number) => BANDS.findIndex((b) => m <= b.max);
 const fmtMin = (m: number) => m < 60 ? `${Math.round(m)} min` : `${Math.floor(m / 60)}h ${String(Math.round(m % 60)).padStart(2, '0')}min`;
@@ -143,7 +144,7 @@ export function GeoAccess() {
                     }} />
                   }
                   {isGap &&
-                  <span className="relative bg-white/90 px-1 rounded text-[10px] font-bold text-epi-red whitespace-nowrap shadow-sm">⚠️ Coverage gap</span>
+                  <span className="relative bg-white/90 px-1 rounded text-[10px] font-bold text-epi-red whitespace-nowrap shadow-sm">Coverage gap</span>
                   }
                   <span className={`relative text-[10px] font-medium ${selected === r.district ? 'text-epi-text font-bold underline' : 'text-epi-text/70'} ${hidden ? 'opacity-40' : ''}`}>{r.district}</span>
                 </button>);
@@ -163,9 +164,9 @@ export function GeoAccess() {
           <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-xl border border-border p-4 w-72 max-w-[calc(100%-32px)] z-30">
               <div className="flex justify-between">
                 <h3 className={`text-[14px] font-bold flex items-center gap-2 mb-1 ${sel.band === 3 ? 'text-epi-red' : 'text-epi-text'}`}>
-                  {sel.band === 3 ? '⚠️ Coverage Gap Zone' : `${BANDS[sel.band].icon} Access Zone`}
+                  {sel.band === 3 ? 'Coverage Gap Zone' : `${BANDS[sel.band].icon} Access Zone`}
                 </h3>
-                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted text-[12px]">✕</button>
+                <button aria-label="Close" onClick={() => setSelected(null)} className="text-epi-muted hover:text-epi-text"><X className="w-4 h-4" /></button>
               </div>
               <div className="text-[12px] font-bold text-epi-text">
                 {GAP_SECTOR[sel.district] ? `${GAP_SECTOR[sel.district]} Sector, ` : ''}{sel.district} District
@@ -194,7 +195,7 @@ export function GeoAccess() {
               <div className="flex flex-col gap-2">
                 {sel.band >= 2 && (
               planned(sel.district) ?
-              <span className="w-full py-1.5 bg-epi-accent/10 text-epi-accent text-[11px] font-bold rounded text-center">✓ Mobile clinic planned</span> :
+              <span className="w-full py-1.5 bg-epi-accent/10 text-epi-accent text-[11px] font-bold rounded text-center inline-flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Mobile clinic planned</span> :
 
               <button onClick={() => planClinic(sel.district)} className="w-full py-1.5 bg-epi text-white text-[11px] font-bold rounded">
                       Plan Mobile Clinic →
@@ -262,7 +263,7 @@ export function GeoAccess() {
 
             <div className="bg-epi/10 border border-epi/20 rounded-lg p-4 mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[16px]">🏔️</span>
+                <Mountain className="w-4 h-4 text-epi" />
                 <h3 className="text-[13px] font-bold text-epi-text">Rwanda Terrain Note:</h3>
               </div>
               <p className="text-[12px] text-epi-text leading-relaxed">

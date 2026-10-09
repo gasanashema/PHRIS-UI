@@ -39,7 +39,7 @@ export function PredictionProbability() {
       
       {/* Explainer Banner */}
       <div className="bg-epi/10 border border-epi/20 p-4 rounded-lg mb-6 flex items-start gap-3">
-        <span className="text-[20px]">💡</span>
+        <span className="text-[20px]"></span>
         <div className="text-[13px] text-epi-text leading-relaxed">
           <span className="font-bold">How to read this:</span> A 91% probability
           means — if conditions stay the same and nothing is done, there is a
@@ -123,9 +123,9 @@ export function PredictionProbability() {
                           </div>
                         </td>
                         <td className="p-4 text-[13px] text-epi-text">{timeframe.replace('Timeframe: ', '')}</td>
-                        <td className="p-4 text-[13px] font-bold text-[#00A550]">{r.conf >= 85 ? '🟢 High' : '🟡 Medium'} ({r.conf}%)</td>
+                        <td className="p-4 text-[13px] font-bold text-[#00A550]">{r.conf >= 85 ? '● High' : '● Medium'} ({r.conf}%)</td>
                         <td className={`p-4 text-[13px] font-bold ${r.r0 > 2 ? 'text-epi-red' : r.r0 > 1 ? 'text-[#F97316]' : 'text-[#00A550]'}`}>{r.r0.toFixed(1)}</td>
-                        <td className="p-4 text-[13px] font-bold">{r.p >= 70 ? '🔴 Act immediately' : r.p >= 50 ? '🟠 Prepare response' : '🟡 Monitor'}</td>
+                        <td className="p-4 text-[13px] font-bold">{r.p >= 70 ? '● Act immediately' : r.p >= 50 ? '● Prepare response' : '● Monitor'}</td>
                         <td className="p-4 text-[13px] text-right">
                           <Link to={`/warning/detail?id=${r.a.id}`} className="text-epi font-medium hover:underline">{r.p >= 70 ? 'Respond' : 'Review'}</Link>
                         </td>
@@ -148,22 +148,22 @@ export function PredictionProbability() {
           <div className="flex flex-col gap-1">
             <div className="font-bold text-epi-text">&lt; 1.0</div>
             <div className="text-epi-muted">Disease dying out</div>
-            <div className="text-[#00A550] font-bold">🟢</div>
+            <div className="text-[#00A550] font-bold">●</div>
           </div>
           <div className="flex flex-col gap-1">
             <div className="font-bold text-epi-text">= 1.0</div>
             <div className="text-epi-muted">Stable, not growing</div>
-            <div className="text-epi-amber font-bold">🟡</div>
+            <div className="text-epi-amber font-bold">●</div>
           </div>
           <div className="flex flex-col gap-1">
             <div className="font-bold text-epi-text">1.1–2.0</div>
             <div className="text-epi-muted">Growing → alert</div>
-            <div className="text-[#F97316] font-bold">🟠</div>
+            <div className="text-[#F97316] font-bold">●</div>
           </div>
           <div className="flex flex-col gap-1">
             <div className="font-bold text-epi-text">&gt; 2.0</div>
             <div className="text-epi-muted">Rapidly spreading</div>
-            <div className="text-epi-red font-bold">🔴</div>
+            <div className="text-epi-red font-bold">●</div>
           </div>
         </div>
       </div>

@@ -130,7 +130,7 @@ export const SEVERITY_META: Record<
 {
   red: {
     label: 'RED',
-    emoji: '🔴',
+    emoji: '●',
     word: 'Critical',
     hex: '#D32F2F',
     text: 'text-admin-red',
@@ -141,7 +141,7 @@ export const SEVERITY_META: Record<
   },
   orange: {
     label: 'ORANGE',
-    emoji: '🟠',
+    emoji: '●',
     word: 'Alert',
     hex: '#F97316',
     text: 'text-[#F97316]',
@@ -152,7 +152,7 @@ export const SEVERITY_META: Record<
   },
   yellow: {
     label: 'YELLOW',
-    emoji: '🟡',
+    emoji: '●',
     word: 'Watch',
     hex: '#EAB308',
     text: 'text-yellow-600',
@@ -163,7 +163,7 @@ export const SEVERITY_META: Record<
   },
   green: {
     label: 'GREEN',
-    emoji: '🟢',
+    emoji: '●',
     word: 'Normal',
     hex: '#00A550',
     text: 'text-admin-accent',
@@ -176,33 +176,33 @@ export const SEVERITY_META: Record<
 
 export const STATUS_META: Record<
   AlertStatus,
-  {label: string;emoji: string;cls: string;}> =
-{
+  { label: string; emoji: string; cls: string }
+> = {
   active: {
     label: 'Unacknowledged',
-    emoji: '⚠️',
-    cls: 'bg-admin-red/10 text-admin-red border border-admin-red/20'
+    emoji: '●',
+    cls: 'bg-admin-red/10 text-admin-red border border-admin-red/20',
   },
   acknowledged: {
     label: 'Acknowledged',
-    emoji: '✅',
-    cls: 'bg-admin-accent/10 text-admin-accent border border-admin-accent/20'
+    emoji: '●',
+    cls: 'bg-admin-accent/10 text-admin-accent border border-admin-accent/20',
   },
   escalated: {
     label: 'Escalated',
-    emoji: '⬆️',
-    cls: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20'
+    emoji: '●',
+    cls: 'bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20',
   },
   resolved: {
     label: 'Resolved',
-    emoji: '✔️',
-    cls: 'bg-admin-info/10 text-admin-info border border-admin-info/20'
+    emoji: '●',
+    cls: 'bg-admin-info/10 text-admin-info border border-admin-info/20',
   },
   dismissed: {
     label: 'Dismissed',
-    emoji: '✖️',
-    cls: 'bg-admin-bg text-admin-muted border border-border'
-  }
+    emoji: '—',
+    cls: 'bg-admin-bg text-admin-muted border border-border',
+  },
 };
 
 export const isOpenStatus = (s: AlertStatus) =>

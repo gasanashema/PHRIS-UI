@@ -74,9 +74,10 @@ export function ProcessingLayout({
           <span>Rwanda National Health Data Pipeline</span>
           <Sep />
           <span>Records Processed: {fmtNumber(p.recordsProcessed)}</span>
-          <Sep />
-          <span>Overall Data Quality Score: {p.qualityScore}% {p.qualityScore >= 85 ? '🟢' : '🟡'}</span>
-          <Sep />
+          <span className="inline-flex items-center gap-1.5">
+            Overall Data Quality Score: {p.qualityScore}%
+            <span className={`w-2 h-2 rounded-full ${p.qualityScore >= 85 ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+          </span>
           <span>Latest batch: {p.lastBatchId}</span>
         </IdentityBanner>
       }>

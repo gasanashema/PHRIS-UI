@@ -55,7 +55,7 @@ export function WarningConfig() {
       breadcrumb="Alert Configuration">
 
       <div className="bg-epi-amber/10 border border-epi-amber/30 p-4 rounded-lg mb-6 flex items-start gap-3">
-        <span className="text-[20px]">⚙️</span>
+        <span className="text-[20px]"></span>
         <div className="text-[13px] text-epi-text leading-relaxed">
           Changes to alert thresholds affect all 30 districts and all 5 user roles. They apply to the
           next prediction run and are logged in the audit trail.
@@ -73,7 +73,7 @@ export function WarningConfig() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-epi-bg border-b border-border">
-                    {['Disease', '🟡 Yellow', '🟠 Orange', '🔴 Red', 'Unit', 'Last Updated', 'Edit'].map((h, i) =>
+                    {['Disease', '● Yellow', '● Orange', '● Red', 'Unit', 'Last Updated', 'Edit'].map((h, i) =>
                     <th
                       key={h}
                       className={`p-3 text-[12px] font-bold text-epi-muted uppercase tracking-wider ${i >= 1 && i <= 3 ? 'text-center' : ''} ${i === 6 ? 'text-right' : ''}`}>
@@ -162,8 +162,7 @@ export function WarningConfig() {
                         <td className="p-3 text-[13px] text-epi-muted">{t.updated}</td>
                         <td className="p-3 text-right">
                           <button onClick={() => startEdit(t)} className="text-[13px] text-epi hover:underline">
-                            Edit ✏️
-                          </button>
+                            Edit </button>
                         </td>
                       </tr>);
 
@@ -184,7 +183,7 @@ export function WarningConfig() {
                 title="Rule 1: Growth Rate Rule"
                 on={rules.growthEnabled}
                 onToggle={(v) => set('growthEnabled', v)}
-                desc={`Trigger 🟠 Orange if cases grow more than ${rules.growthPct}% in one week, regardless of count`}>
+                desc={`Trigger ● Orange if cases grow more than ${rules.growthPct}% in one week, regardless of count`}>
 
                 <NumberInput label="Threshold (%)" value={rules.growthPct} onChange={(v) => set('growthPct', v)} />
               </Rule>
@@ -192,7 +191,7 @@ export function WarningConfig() {
                 title="Rule 2: AI Probability Rule"
                 on={rules.aiEnabled}
                 onToggle={(v) => set('aiEnabled', v)}
-                desc={`Trigger 🟠 Orange if AI predicts ≥${rules.aiPct}% outbreak probability (🔴 Red at ≥${Math.min(100, rules.aiPct + 20)}%)`}>
+                desc={`Trigger ● Orange if AI predicts ≥${rules.aiPct}% outbreak probability (● Red at ≥${Math.min(100, rules.aiPct + 20)}%)`}>
 
                 <NumberInput label="Threshold (%)" value={rules.aiPct} onChange={(v) => set('aiPct', Math.min(90, v))} />
               </Rule>
@@ -200,7 +199,7 @@ export function WarningConfig() {
                 title="Rule 3: Doubling Time Rule"
                 on={rules.doublingEnabled}
                 onToggle={(v) => set('doublingEnabled', v)}
-                desc={`Trigger 🔴 Red if cases double faster than ${rules.doublingDays} days`}>
+                desc={`Trigger ● Red if cases double faster than ${rules.doublingDays} days`}>
 
                 <NumberInput label="Threshold (days)" value={rules.doublingDays} onChange={(v) => set('doublingDays', v)} />
               </Rule>
@@ -208,7 +207,7 @@ export function WarningConfig() {
                 title="Rule 4: Cross-Border Rule"
                 on={rules.crossBorderEnabled}
                 onToggle={(v) => set('crossBorderEnabled', v)}
-                desc="Trigger 🟡 Yellow automatically in border districts when a neighbouring country reports an outbreak">
+                desc="Trigger ● Yellow automatically in border districts when a neighbouring country reports an outbreak">
 
                 <div className="text-[11px] text-epi-muted italic">
                   Border districts: Rusizi, Rubavu, Nyamasheke, Burera, Musanze, Kirehe, Ngoma
@@ -221,14 +220,14 @@ export function WarningConfig() {
                 desc="Lower malaria and waterborne thresholds by 30% during rainy seasons (March–May, October–December)">
 
                 <div className={`text-[12px] font-bold ${rules.rainyEnabled ? 'text-epi' : 'text-epi-muted'}`}>
-                  🌧️ Rainy season multiplier currently {rules.rainyEnabled ? 'ACTIVE (June — ending soon)' : 'OFF'}
+                  Rainy season multiplier currently {rules.rainyEnabled ? 'ACTIVE (June — ending soon)' : 'OFF'}
                 </div>
               </Rule>
               <Rule
                 title="Rule 6: Compound Disease Rule"
                 on={rules.compoundEnabled}
                 onToggle={(v) => set('compoundEnabled', v)}
-                desc="Trigger 🔴 Red if TWO diseases rise simultaneously in the same district" />
+                desc="Trigger ● Red if TWO diseases rise simultaneously in the same district" />
 
               <div className="p-4 border border-border rounded-lg bg-epi-bg/30">
                 <h3 className="text-[14px] font-bold text-epi-text mb-2">Auto-escalation window</h3>

@@ -178,7 +178,7 @@ export function Profile() {
                   <label className="text-[14px] font-medium text-[#374151]">Phone Number</label>
                   <div className="flex">
                     <div className="h-12 px-4 bg-section border border-border border-r-0 rounded-l-lg flex items-center gap-2 text-text-primary font-medium">
-                      🇷🇼 +250
+                      RW +250
                     </div>
                     <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="flex-1 min-w-0 h-12 px-4 bg-page border border-border rounded-r-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                   </div>

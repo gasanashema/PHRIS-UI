@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check, MapPin, RefreshCw } from 'lucide-react';
 import { ProcessingLayout } from '../../components/processing/ProcessingLayout';
 import { Modal, FieldLabel, inputCls, btnPrimary, btnSecondary } from '../../components/shared/Modal';
 import { useApp } from '../../store/AppStore';
@@ -92,14 +92,16 @@ export function ProcessingScheduler() {
                 <div className={`absolute top-6 left-1/2 -translate-x-1/2 w-max text-[11px] font-medium text-center ${done ? 'text-epi' : 'text-epi-muted'}`}>
                   {String(t.h).padStart(2, '0')}:00
                   <br />
-                  {t.label} {done ? '✅' : '🔄'}
+                  <span className="flex items-center justify-center gap-1">
+                    {t.label} {done ? <Check className="w-3 h-3 text-[#00A550]" /> : <RefreshCw className="w-3 h-3 text-epi-muted" />}
+                  </span>
                 </div>
               </div>);
 
           })}
           <div className="absolute top-4 bottom-0 w-px border-l-2 border-dashed border-epi-amber z-0" style={{ left: `${nowPct}%` }}>
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold text-epi-amber whitespace-nowrap bg-white px-1">
-              📍 Now — {fmtTime(nowISO())}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-bold text-epi-amber whitespace-nowrap bg-white px-1 flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> Now — {fmtTime(nowISO())}
             </div>
           </div>
         </div>
@@ -145,10 +147,24 @@ export function ProcessingScheduler() {
                     <td className="p-4 text-[13px] text-epi-text">{d.frequency}</td>
                     <td className="p-4 text-[13px] text-epi-muted">{job?.duration && job.duration !== '—' ? job.duration : d.duration}</td>
                     <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">
-                      {job ? `${fmtTime(job.at)} ${job.status === 'failed' ? '🔴' : '✅'}` : '—'}
+                      {job ? (
+                        <span className="flex items-center gap-1.5">
+                          {fmtTime(job.at)}
+                          {job.status === 'failed' ? (
+                            <span className="w-2 h-2 rounded-full bg-epi-red inline-block" />
+                          ) : (
+                            <Check className="w-3.5 h-3.5 text-[#00A550]" />
+                          )}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td className={`p-4 text-[13px] font-bold whitespace-nowrap ${failed ? 'text-epi-red' : isRunning ? 'text-epi-amber' : 'text-[#00A550]'}`}>
-                      {isRunning ? '🟡 Running' : failed ? '🔴 Failed' : job ? '🟢 Success' : '⚪ Not run yet'}
+                      <span className="flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full inline-block ${failed ? 'bg-epi-red' : isRunning ? 'bg-epi-amber' : 'bg-[#00A550]'}`} />
+                        {isRunning ? 'Running' : failed ? 'Failed' : job ? 'Success' : 'Not run yet'}
+                      </span>
                     </td>
                     <td className="p-4 text-[13px] text-epi-text whitespace-nowrap">{failed ? 'Retry manually' : d.next}</td>
                     <td className="p-4 text-[13px] text-epi font-medium text-right whitespace-nowrap">

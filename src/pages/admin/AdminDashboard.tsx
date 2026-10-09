@@ -82,10 +82,19 @@ export function AdminDashboard() {
           <Bell className="w-5 h-5 text-admin-red mb-3" />
           <div className="text-[28px] font-bold text-admin-text leading-none mb-1">{open.length}</div>
           <div className="text-[13px] text-admin-muted font-medium">Active Risk Alerts</div>
-          <div className="text-[12px] font-medium mt-auto pt-2 flex gap-2">
-            <span className="text-admin-red">{bySev('red')} 🔴</span>
-            <span className="text-admin-amber">{bySev('orange')} 🟠</span>
-            <span className="text-yellow-600">{bySev('yellow')} 🟡</span>
+          <div className="text-[12px] font-medium mt-auto pt-2 flex items-center gap-3">
+            <span className="inline-flex items-center gap-1 text-admin-red">
+              <span className="w-2 h-2 rounded-full bg-admin-red" />
+              {bySev('red')} Red
+            </span>
+            <span className="inline-flex items-center gap-1 text-admin-amber">
+              <span className="w-2 h-2 rounded-full bg-[#F97316]" />
+              {bySev('orange')} Orange
+            </span>
+            <span className="inline-flex items-center gap-1 text-yellow-600">
+              <span className="w-2 h-2 rounded-full bg-yellow-500" />
+              {bySev('yellow')} Yellow
+            </span>
           </div>
         </Link>
         <Link to="/admin/data-sources" className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col hover:shadow-md">
@@ -137,7 +146,7 @@ export function AdminDashboard() {
                   return (
                     <tr key={s.id} className="hover:bg-admin-bg/30">
                       <td className="px-5 py-3 font-medium text-admin-text">{s.name}</td>
-                      <td className="px-5 py-3 whitespace-nowrap">{s.syncing ? '⏳ Syncing' : STATUS_LABEL[s.status].label}</td>
+                      <td className="px-5 py-3 whitespace-nowrap">{s.syncing ? '⏱ Syncing' : STATUS_LABEL[s.status].label}</td>
                       <td className="px-5 py-3 text-admin-muted whitespace-nowrap">{timeAgo(s.lastSync)}</td>
                       <td className="px-5 py-3 text-admin-muted">{s.connection === 'Manual Upload' && !s.recordsToday ? 'Static' : `${fmtNumber(s.recordsToday)} records`}</td>
                       <td className="px-5 py-3">

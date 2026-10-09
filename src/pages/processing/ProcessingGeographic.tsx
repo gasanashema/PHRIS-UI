@@ -5,12 +5,13 @@ import { DISTRICT_PROVINCE, HUYE_SECTORS } from '../../data/seed';
 import { fmtNumber } from '../../lib/format';
 
 type Level = 'cell' | 'sector' | 'district' | 'province' | 'national';
-const LEVELS: {id: Level;emoji: string;label: string;}[] = [
-{ id: 'cell', emoji: '🏘️', label: 'Village/Cell' },
-{ id: 'sector', emoji: '📍', label: 'Sector' },
-{ id: 'district', emoji: '🏛️', label: 'District' },
-{ id: 'province', emoji: '🗺️', label: 'Province' },
-{ id: 'national', emoji: '🌍', label: 'National' }];
+const LEVELS: { id: Level; label: string }[] = [
+  { id: 'cell', label: 'Village/Cell' },
+  { id: 'sector', label: 'Sector' },
+  { id: 'district', label: 'District' },
+  { id: 'province', label: 'Province' },
+  { id: 'national', label: 'National' }
+];
 
 
 interface AggRow {name: string;cases: number;population: number;}
@@ -78,9 +79,9 @@ export function ProcessingGeographic() {
         <button
           key={l.id}
           onClick={() => setLevel(l.id)}
-          className={`px-5 py-2.5 rounded-full text-[14px] font-bold flex items-center gap-2 shadow-sm transition-colors ${level === l.id ? 'bg-epi text-white' : 'bg-white border border-border text-epi-muted hover:bg-epi-bg'}`}>
+          className={`px-5 py-2.5 rounded-full text-[14px] font-bold shadow-sm transition-colors ${level === l.id ? 'bg-epi text-white' : 'bg-white border border-border text-epi-muted hover:bg-epi-bg'}`}>
 
-            <span>{l.emoji}</span> {l.label}
+            {l.label}
           </button>
         )}
       </div>
@@ -93,11 +94,11 @@ export function ProcessingGeographic() {
           <h2 className="text-[16px] font-bold text-epi-text mb-6">Administrative Hierarchy</h2>
           <div className="font-mono text-[13px] leading-7 text-epi-text space-y-0.5">
             {[
-            { d: 0, lvl: 'national' as Level, label: '🌍 Rwanda (National)' },
-            { d: 1, lvl: 'province' as Level, label: '🗺️ Southern Province' },
-            { d: 2, lvl: 'district' as Level, label: '🏛️ Huye District' },
-            { d: 3, lvl: 'sector' as Level, label: '📍 Tumba Sector' },
-            { d: 4, lvl: 'cell' as Level, label: '🏘️ Cyarwa Cell' }].
+            { d: 0, lvl: 'national' as Level, label: 'Rwanda (National)' },
+            { d: 1, lvl: 'province' as Level, label: 'Southern Province' },
+            { d: 2, lvl: 'district' as Level, label: 'Huye District' },
+            { d: 3, lvl: 'sector' as Level, label: 'Tumba Sector' },
+            { d: 4, lvl: 'cell' as Level, label: 'Cyarwa Cell' }].
             map((n) =>
             <button
               key={n.lvl}

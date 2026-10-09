@@ -23,9 +23,9 @@ const PAGE_SIZE = 8;
 const ROLES = ['Administrator', 'Epidemiologist', 'Public Health Analyst', 'District Health Officer', 'Data Integration Engineer'];
 const INSTITUTIONS = ['RBC', 'MOH', 'NISR', 'District Health Office', 'Health Center'];
 const STATUS_ICON: Record<AdminUser['status'], string> = {
-  Active: '🟢 Active',
-  Inactive: '🟡 Inactive',
-  'Pending Approval': '🟠 Pending Approval'
+  Active: 'Active',
+  Inactive: 'Inactive',
+  'Pending Approval': 'Pending Approval'
 };
 
 type Draft = Omit<AdminUser, 'id' | 'login'>;
@@ -258,7 +258,12 @@ export function AdminUsers() {
                     <td className="px-4 py-3 text-admin-muted">{u.inst}</td>
                     <td className="px-4 py-3 text-admin-muted">{u.dist}</td>
                     <td className="px-4 py-3 text-admin-muted">{u.login}</td>
-                    <td className="px-4 py-3 font-medium whitespace-nowrap">{STATUS_ICON[u.status]}</td>
+                    <td className="px-4 py-3 font-medium whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${u.status === 'Active' ? 'bg-admin-accent' : u.status === 'Inactive' ? 'bg-yellow-500' : 'bg-[#F97316]'}`} />
+                        {u.status}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       {pending ?
                       <div className="flex items-center justify-end gap-2 text-[12px] font-bold">

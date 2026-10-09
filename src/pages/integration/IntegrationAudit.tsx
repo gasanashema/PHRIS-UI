@@ -25,9 +25,9 @@ const HISTORY: AuditRow[] = [
 
 
 const STATUS_LABEL = {
-  success: '✅ Success',
-  partial: '⚠️ Imported with warnings',
-  failed: '🔴 FAILED'
+  success: 'Success',
+  partial: 'Imported with warnings',
+  failed: 'FAILED'
 };
 const PAGE = 8;
 

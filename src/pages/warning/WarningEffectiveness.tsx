@@ -52,7 +52,7 @@ export function WarningEffectiveness() {
           <div className="mt-auto flex justify-between items-end">
             <span className="text-[10px] text-epi-muted">Target: &gt;80%</span>
             <span className="text-[11px] font-bold text-epi-amber">
-              🟡 Below target
+              ● Below target
             </span>
           </div>
         </div>
@@ -77,7 +77,7 @@ export function WarningEffectiveness() {
                 Target: &gt;7 days
               </span>
               <span className="text-[11px] font-bold text-[#00A550]">
-                🟢 Above target
+                ● Above target
               </span>
             </div>
           </div>
@@ -100,7 +100,7 @@ export function WarningEffectiveness() {
                 Target: &lt;15%
               </span>
               <span className="text-[11px] font-bold text-[#F97316]">
-                🟠 Above target
+                ● Above target
               </span>
             </div>
           </div>
@@ -123,7 +123,7 @@ export function WarningEffectiveness() {
             <button onClick={() => setHowOpen(!howOpen)} className="text-[10px] font-bold text-epi hover:underline text-left">
               {howOpen ? 'Hide ↑' : 'How calculated →'}
             </button>
-            <span className="text-[11px] font-bold text-[#00A550]">🟢</span>
+            <span className="text-[11px] font-bold text-[#00A550]">●</span>
           </div>
         </div>
 
@@ -145,7 +145,7 @@ export function WarningEffectiveness() {
               <ArrowUpRight className="w-3 h-3 mr-0.5" /> Strong improvement
             </span>
             <div className="flex justify-end items-end">
-              <span className="text-[11px] font-bold text-[#00A550]">🟢</span>
+              <span className="text-[11px] font-bold text-[#00A550]">●</span>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function WarningEffectiveness() {
             </Link>
             <div className="flex justify-end items-end">
               <span className="text-[11px] font-bold text-epi-amber">
-                🟡 Below 100% target
+                ● Below 100% target
               </span>
             </div>
           </div>
@@ -246,7 +246,7 @@ export function WarningEffectiveness() {
           </div>
 
           <div className="mt-auto bg-epi/5 border border-epi/20 p-4 rounded text-[13px] font-bold text-epi text-center">
-            💡 Alerts with &gt;7 days lead time had 68% fewer peak cases
+            Alerts with &gt;7 days lead time had 68% fewer peak cases
           </div>
         </div>
 
@@ -387,8 +387,7 @@ export function WarningEffectiveness() {
                     71%
                   </td>
                   <td className="p-3 text-[13px] font-bold text-epi-red text-center">
-                    D ⚠️
-                  </td>
+                    D </td>
                 </tr>
               </tbody>
             </table>

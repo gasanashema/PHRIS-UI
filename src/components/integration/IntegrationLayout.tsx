@@ -52,13 +52,14 @@ export function IntegrationLayout({
       down > 0 ?
       <Link
         to="/integration/sources"
-        className="inline-flex bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-
-            🟠 {down} Source{down > 1 ? 's' : ''} Disconnected
+        className="inline-flex items-center gap-1.5 bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-[#F97316]" />
+            {down} Source{down > 1 ? 's' : ''} Disconnected
           </Link> :
 
-      <span className="inline-flex bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-            🟢 All sources connected
+      <span className="inline-flex items-center gap-1.5 bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-[#00A550]" />
+            All sources connected
           </span>
 
       }

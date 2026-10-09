@@ -10,6 +10,7 @@ import {
   ReferenceLine,
   Cell } from
 'recharts';
+import { BarChart3 } from 'lucide-react';
 import { AnalystLayout } from '../../components/analyst/AnalystLayout';
 import { useApp, useCurrentUser } from '../../store/AppStore';
 import { downloadFile, toCSV } from '../../lib/format';
@@ -267,8 +268,9 @@ export function AnalystCorrelation() {
           </div>
 
           <div className="bg-white rounded-lg shadow-card border border-border p-6">
-            <h3 className="text-[15px] font-bold text-epi-text mb-4">
-              📊 What This Means for Rwanda:
+            <h3 className="text-[15px] font-bold text-epi-text mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              What This Means for Rwanda:
             </h3>
             <ul className="space-y-3 text-[13px] text-epi-text mb-6">
               {insights.slice(1).map((t) =>

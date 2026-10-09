@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
-import { RefreshCw, CheckCircle2, Loader2, Clock, AlertCircle, AlertTriangle, PauseCircle } from 'lucide-react';
+import { RefreshCw, CheckCircle2, Loader2, Clock, AlertCircle, AlertTriangle, PauseCircle, TrendingDown, Check } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -214,7 +214,7 @@ export function IntegrationPipeline() {
                       <div className="text-[14px] font-bold text-epi-text">{s.name}</div>
                       {s.status === 'disconnected' &&
                       <Link to="/integration/sources" className="text-[11px] font-bold text-epi-red mt-1 hover:underline block">
-                          🔴 Source offline — reconnect →
+                          ● Source offline — reconnect →
                         </Link>
                       }
                     </td>
@@ -242,7 +242,7 @@ export function IntegrationPipeline() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[12px] text-epi-muted">📉 The 07:00 dip is the CHW App delay; the 08:00 spike is the DHIS2 + EMR batch sync.</p>
+          <p className="text-[12px] text-epi-muted flex items-center gap-1.5"><TrendingDown className="w-3.5 h-3.5 text-epi-muted" /> The 07:00 dip is the CHW App delay; the 08:00 spike is the DHIS2 + EMR batch sync.</p>
         </div>
 
         <div className="bg-white rounded-lg p-6 shadow-card border border-border flex flex-col">
@@ -271,9 +271,13 @@ export function IntegrationPipeline() {
           </div>
           <div className="mt-auto pt-4 border-t border-border flex items-center justify-between gap-3">
             <div className="text-[12px] font-medium text-epi-text">
-              <div className="mb-1">{totalErrors - needAction} auto-resolved ✅</div>
+              <div className="mb-1 flex items-center gap-1.5 text-[#00A550]">{totalErrors - needAction} auto-resolved <Check className="w-3.5 h-3.5" /></div>
               <div className={needAction ? 'text-epi-red font-bold' : 'text-[#00A550] font-bold'}>
-                {needAction ? `${needAction} source${needAction > 1 ? 's' : ''} require admin action 🔴` : 'No sources need action'}
+                {needAction ? (
+                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-epi-red inline-block" /> {needAction} source{needAction > 1 ? 's' : ''} require admin action</span>
+                ) : (
+                  'No sources need action'
+                )}
               </div>
             </div>
             <Link to="/integration/health" className="px-4 py-2 bg-white border border-epi text-epi text-[13px] font-bold rounded-md hover:bg-epi/5 transition-colors">

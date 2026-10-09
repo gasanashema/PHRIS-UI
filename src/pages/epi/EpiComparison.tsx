@@ -20,10 +20,10 @@ const DISTRICTS = [
   prov: 'Eastern',
   mal: 67,
   chol: 3,
-  risk: '🔴 Red',
+  risk: '● Red',
   rep: '92%',
   score: '84/100',
-  alert: '🔴 Active',
+  alert: '● Active',
   action: 'Investigate'
 },
 {
@@ -32,10 +32,10 @@ const DISTRICTS = [
   prov: 'Western',
   mal: 23,
   chol: 87,
-  risk: '🔴 Red',
+  risk: '● Red',
   rep: '88%',
   score: '91/100',
-  alert: '🔴 Active',
+  alert: '● Active',
   action: 'Investigate'
 },
 {
@@ -44,10 +44,10 @@ const DISTRICTS = [
   prov: 'Eastern',
   mal: 58,
   chol: 0,
-  risk: '🟠 Orange',
+  risk: '● Orange',
   rep: '95%',
   score: '72/100',
-  alert: '🟠 Alert',
+  alert: '● Alert',
   action: 'Monitor'
 },
 {
@@ -56,10 +56,10 @@ const DISTRICTS = [
   prov: 'Southern',
   mal: 45,
   chol: 0,
-  risk: '🟠 Orange',
+  risk: '● Orange',
   rep: '95%',
   score: '68/100',
-  alert: '🟠 Alert',
+  alert: '● Alert',
   action: 'Monitor'
 },
 {
@@ -68,10 +68,10 @@ const DISTRICTS = [
   prov: 'Southern',
   mal: 34,
   chol: 0,
-  risk: '🟠 Orange',
+  risk: '● Orange',
   rep: '90%',
   score: '61/100',
-  alert: '🟠 Alert',
+  alert: '● Alert',
   action: 'Monitor'
 },
 {
@@ -80,7 +80,7 @@ const DISTRICTS = [
   prov: 'Northern',
   mal: 12,
   chol: 0,
-  risk: '🟢 Green',
+  risk: '● Green',
   rep: '100%',
   score: '18/100',
   alert: '—',
@@ -92,11 +92,11 @@ const DISTRICTS = [
   prov: 'Western',
   mal: 15,
   chol: 0,
-  risk: '🟡 Yellow',
+  risk: '● Yellow',
   rep: '97%',
   score: '35/100',
   alert: '—',
-  action: '⚠️ Mpox border watch'
+  action: 'Mpox border watch'
 },
 {
   rank: 30,
@@ -104,7 +104,7 @@ const DISTRICTS = [
   prov: 'Kigali',
   mal: 8,
   chol: 0,
-  risk: '🟢 Green',
+  risk: '● Green',
   rep: '98%',
   score: '12/100',
   alert: '—',
@@ -239,7 +239,7 @@ export function EpiComparison() {
                     <td className="px-4 py-3 font-bold whitespace-nowrap">{row.risk}</td>
                     <td className={`px-4 py-3 text-epi-muted ${metric === 'rep' ? 'font-bold text-epi-text' : ''}`}>{row.rep}</td>
                     <td className={`px-4 py-3 ${metric === 'score' ? 'font-bold' : 'font-medium'}`}>{row.score}</td>
-                    <td className="px-4 py-3 font-bold whitespace-nowrap">{open ? open.severity === 'red' ? '🔴 Active' : open.severity === 'orange' ? '🟠 Active' : '🟡 Active' : '—'}</td>
+                    <td className="px-4 py-3 font-bold whitespace-nowrap">{open ? open.severity === 'red' ? '● Active' : open.severity === 'orange' ? '● Active' : '● Active' : '—'}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {open ?
                       <Link to={`/warning/detail?id=${open.id}`} className={`font-bold text-[12px] hover:underline ${isRed ? 'text-epi-red' : isOrange ? 'text-epi-amber' : 'text-epi'}`}>

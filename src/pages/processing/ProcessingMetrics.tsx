@@ -136,12 +136,12 @@ export function ProcessingMetrics() {
               {alert.disease} — {alert.sector ? `${alert.sector}, ` : ''}{alert.district} District — {period}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {card('Incidence Rate', 'New cases ÷ Population × 1,000', `${m.cases} ÷ ${fmtNumber(m.population)} × 1,000`, m.incidence.toFixed(2), '/ 1,000', 'People infected per 1,000 residents', m.incidence > 0.5 ? '🔴 Above threshold (0.5)' : '🟢 Below threshold (0.5)', m.incidence > 0.5 ? 'text-epi-red' : 'text-[#00A550]')}
-              {card('Case Fatality Rate', 'Deaths ÷ Cases × 100', `${m.deaths} ÷ ${m.cases} × 100`, `${m.cfr.toFixed(1)}%`, '', 'Of confirmed cases die', m.cfr >= 1 ? '🟠 Above target (<1%)' : '🟢 Within target (<1%)', m.cfr >= 1 ? 'text-[#F97316]' : 'text-[#00A550]')}
-              {card('Attack Rate', 'Cases ÷ Exposed × 100', `${m.cases} ÷ ${fmtNumber(m.exposed)} × 100`, `${m.attack.toFixed(1)}%`, '', 'Of exposed people infected', m.attack >= 20 ? '🔴 Very high' : '🟡 Elevated', m.attack >= 20 ? 'text-epi-red' : 'text-epi-amber')}
-              {card('R0 (Reproduction Number)', 'Avg contacts infected per case', `from ${alert.change} week-on-week growth`, m.r0.toFixed(1), '', `Each case infects ${m.r0.toFixed(1)} others`, m.r0 > 2 ? '🔴 Above 2.0' : m.r0 > 1 ? '🟠 Spreading (above 1.0)' : '🟢 Declining', m.r0 > 2 ? 'text-epi-red' : m.r0 > 1 ? 'text-[#F97316]' : 'text-[#00A550]')}
-              {card('Doubling Time', 'ln 2 ÷ ln(1 + weekly growth) × 7', `growth ${alert.change}/week`, m.doubling.toFixed(1), 'days', `Cases doubling every ${m.doubling.toFixed(1)} days at current rate`, m.doubling < state.rules.doublingDays ? '🔴 Rapid spread' : '🟡 Moderate spread', m.doubling < state.rules.doublingDays ? 'text-epi-red' : 'text-epi-amber')}
-              {card('Prevalence Rate', 'Total cases ÷ Population × 100', `${m.cases} ÷ ${fmtNumber(m.population)} × 100`, `${m.prevalence.toFixed(3)}%`, '', 'Of population currently affected', m.prevalence > 0.1 ? '🟠 Elevated' : '🟢 Low', m.prevalence > 0.1 ? 'text-[#F97316]' : 'text-[#00A550]')}
+              {card('Incidence Rate', 'New cases ÷ Population × 1,000', `${m.cases} ÷ ${fmtNumber(m.population)} × 1,000`, m.incidence.toFixed(2), '/ 1,000', 'People infected per 1,000 residents', m.incidence > 0.5 ? '● Above threshold (0.5)' : '● Below threshold (0.5)', m.incidence > 0.5 ? 'text-epi-red' : 'text-[#00A550]')}
+              {card('Case Fatality Rate', 'Deaths ÷ Cases × 100', `${m.deaths} ÷ ${m.cases} × 100`, `${m.cfr.toFixed(1)}%`, '', 'Of confirmed cases die', m.cfr >= 1 ? '● Above target (<1%)' : '● Within target (<1%)', m.cfr >= 1 ? 'text-[#F97316]' : 'text-[#00A550]')}
+              {card('Attack Rate', 'Cases ÷ Exposed × 100', `${m.cases} ÷ ${fmtNumber(m.exposed)} × 100`, `${m.attack.toFixed(1)}%`, '', 'Of exposed people infected', m.attack >= 20 ? '● Very high' : '● Elevated', m.attack >= 20 ? 'text-epi-red' : 'text-epi-amber')}
+              {card('R0 (Reproduction Number)', 'Avg contacts infected per case', `from ${alert.change} week-on-week growth`, m.r0.toFixed(1), '', `Each case infects ${m.r0.toFixed(1)} others`, m.r0 > 2 ? '● Above 2.0' : m.r0 > 1 ? '● Spreading (above 1.0)' : '● Declining', m.r0 > 2 ? 'text-epi-red' : m.r0 > 1 ? 'text-[#F97316]' : 'text-[#00A550]')}
+              {card('Doubling Time', 'ln 2 ÷ ln(1 + weekly growth) × 7', `growth ${alert.change}/week`, m.doubling.toFixed(1), 'days', `Cases doubling every ${m.doubling.toFixed(1)} days at current rate`, m.doubling < state.rules.doublingDays ? '● Rapid spread' : '● Moderate spread', m.doubling < state.rules.doublingDays ? 'text-epi-red' : 'text-epi-amber')}
+              {card('Prevalence Rate', 'Total cases ÷ Population × 100', `${m.cases} ÷ ${fmtNumber(m.population)} × 100`, `${m.prevalence.toFixed(3)}%`, '', 'Of population currently affected', m.prevalence > 0.1 ? '● Elevated' : '● Low', m.prevalence > 0.1 ? 'text-[#F97316]' : 'text-[#00A550]')}
             </div>
 
             <div className="bg-white rounded-lg p-5 shadow-card border border-border">
@@ -169,7 +169,7 @@ export function ProcessingMetrics() {
                 <div className="flex gap-3"><span className="text-epi-muted shrink-0">Step 2:</span><span>Population at risk ({alert.sector ?? alert.district}) = {fmtNumber(m.population)}</span></div>
                 <div className="flex gap-3"><span className="text-epi-muted shrink-0">Step 3:</span><span className="font-bold">{m.cases} ÷ {fmtNumber(m.population)} × 1,000 = {m.incidence.toFixed(2)}</span></div>
                 <div className="flex gap-3"><span className="text-epi-muted shrink-0">Step 4:</span><span>National threshold = 0.5</span></div>
-                <div className="flex gap-3"><span className="text-epi-muted shrink-0">Step 5:</span><span className={m.incidence > 0.5 ? 'text-epi-red font-bold' : 'text-[#00A550] font-bold'}>{m.incidence.toFixed(2)} {m.incidence > 0.5 ? '> 0.5 → 🔴 Alert' : '≤ 0.5 → 🟢 Normal'}</span></div>
+                <div className="flex gap-3"><span className="text-epi-muted shrink-0">Step 5:</span><span className={m.incidence > 0.5 ? 'text-epi-red font-bold' : 'text-[#00A550] font-bold'}>{m.incidence.toFixed(2)} {m.incidence > 0.5 ? '> 0.5 → ● Alert' : '≤ 0.5 → ● Normal'}</span></div>
               </div>
               <div className="mt-8 pt-4 border-t border-border text-[12px] text-epi-muted italic">
                 Population denominators sourced from NISR Rwanda Census 2022. Deaths and exposure are modelled estimates in this prototype.
