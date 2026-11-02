@@ -21,7 +21,7 @@ function Countdown({ alert, hours }: {alert: Alert;hours: number;}) {
   const due = new Date(addHours(alert.triggeredAt, hours)).getTime();
   const diff = due - demoNow().getTime();
   if (diff <= 0)
-  return <span className="text-epi-red">Overdue by {Math.round(-diff / 3600000)}h</span>;
+  return <span className="text-amber-800 font-semibold">Overdue by {Math.round(-diff / 3600000)}h</span>;
   const h = Math.floor(diff / 3600000);
   const m = Math.floor(diff % 3600000 / 60000);
   return <span>{String(h).padStart(2, '0')}:{String(m).padStart(2, '0')} remaining</span>;
@@ -90,7 +90,7 @@ export function WarningAlerts() {
   return (
     <WarningLayout
       title="Active Alerts"
-      subtitle={`${open.length} open alerts (${count('red')} red · ${count('orange')} orange · ${count('yellow')} yellow) — Rwanda national view`}
+      subtitle={`${open.length} open alerts (${count('red')} critical · ${count('orange')} high · ${count('yellow')} watch) — Rwanda national view`}
       breadcrumb="Active Alerts">
 
       {/* Filter Bar */}
@@ -98,9 +98,9 @@ export function WarningAlerts() {
         <div className="flex flex-wrap items-center gap-3">
           <select value={severity} onChange={(e) => setSeverity(e.target.value)} className={selectCls} aria-label="Severity">
             <option value="all">Severity: All</option>
-            <option value="red">● Red ({count('red')})</option>
-            <option value="orange">● Orange ({count('orange')})</option>
-            <option value="yellow">● Yellow ({count('yellow')})</option>
+            <option value="red">Critical ({count('red')})</option>
+            <option value="orange">High ({count('orange')})</option>
+            <option value="yellow">Watch ({count('yellow')})</option>
           </select>
           <select value={disease} onChange={(e) => setDisease(e.target.value)} className={selectCls} aria-label="Disease">
             <option value="all">Disease: All</option>
@@ -153,7 +153,7 @@ export function WarningAlerts() {
             <div
               key={a.id}
               onClick={() => toggle(a)}
-              className={`bg-white rounded-lg shadow-sm border-l-4 ${m.borderL} border-y border-r border-border p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-epi-bg/50 transition-colors`}>
+              className="bg-white rounded-lg shadow-sm border border-border p-4 flex items-center justify-between gap-3 cursor-pointer hover:bg-epi-bg/50 transition-colors">
 
                 <div className="flex flex-wrap items-center gap-3 min-w-0">
                   <SeverityBadge severity={a.severity} />
@@ -171,18 +171,17 @@ export function WarningAlerts() {
           return (
             <div
               key={a.id}
-              className={`bg-white rounded-lg shadow-card border-t-4 ${m.border} border-x border-b border-border overflow-hidden relative`}>
+              className="bg-white rounded-lg shadow-sm border border-border overflow-hidden relative">
 
-              <div className={`p-5 border-b border-border ${m.soft.split(' ')[0]} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+              <div className="p-4 border-b border-border bg-epi-bg/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className={`text-[13px] font-bold ${m.text}`}>
-                    {m.emoji} {m.label} ALERT
-                  </span>
-                  <span className="text-border">|</span>
+                  <SeverityBadge severity={a.severity} />
                   <span className="text-[13px] font-mono font-bold text-epi-text">{a.id}</span>
-                  <span className="text-border">|</span>
-                  <span className="text-[13px] text-epi-muted">
-                    Triggered {timeAgo(a.triggeredAt)} — {fmtDateTime(a.triggeredAt)}
+                  <span className="text-border">·</span>
+                  <span className="text-[14px] font-bold text-epi-text">{a.disease} — {a.district}</span>
+                  <span className="text-border">·</span>
+                  <span className="text-[12px] text-epi-muted">
+                    Triggered {timeAgo(a.triggeredAt)} ({fmtDateTime(a.triggeredAt)})
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -210,11 +209,11 @@ export function WarningAlerts() {
                     )}
                     <div className="flex justify-between mt-2 pt-2 border-t border-border">
                       <span className="text-epi-muted">Outbreak probability:</span>
-                      <span className={`font-bold ${m.text}`}>{a.probability}%</span>
+                      <span className="font-bold text-epi-text">{a.probability}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-epi-muted">Cases this week:</span>
-                      <span className={`font-bold ${m.text}`}>
+                      <span className="font-bold text-epi-text">
                         {a.cases} ({a.change} WoW)
                       </span>
                     </div>
@@ -320,7 +319,7 @@ export function WarningAlerts() {
                   }
                     <button
                     onClick={() => dialogs.open('escalate', a)}
-                    className={`px-4 py-2 text-[13px] font-bold rounded transition-colors ml-auto ${pending ? 'bg-epi-red text-white hover:bg-epi-red/90' : 'bg-white border border-epi-red text-epi-red hover:bg-epi-red/10'}`}>
+                    className={`px-4 py-2 text-[13px] font-bold rounded transition-colors ml-auto ${pending ? 'bg-epi hover:bg-epi-dark text-white' : 'bg-white border border-border text-epi-text hover:bg-epi-bg'}`}>
 
                       {pending ? "Escalate Now — Don't Wait" : 'Escalate Further'}
                     </button>

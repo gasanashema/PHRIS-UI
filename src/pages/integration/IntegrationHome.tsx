@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { IntegrationLayout } from '../../components/integration/IntegrationLayout';
 import {
   Plug,
   Database,
   ShieldCheck,
   AlertTriangle,
-  Clock,
   RefreshCw,
   Loader2,
-  TrendingDown } from
+  TrendingDown,
+  LogOut,
+  Users } from
 'lucide-react';
 import {
   BarChart,
@@ -28,7 +29,8 @@ import { useApp } from '../../store/AppStore';
 import { Modal } from '../../components/shared/Modal';
 import { STATUS_LABEL } from './IntegrationSources';
 import { demoNow, fmtDateTime, fmtNumber, timeAgo } from '../../lib/format';
-import type { DataSource } from '../../types';
+import { PERSONAS } from '../../data/seed';
+import type { DataSource, User } from '../../types';
 
 const dailyData = [
 { date: 'May 30', dhis2: 4100, emr: 2000, chw: 1200, pharmacy: 800, other: 500, avg: 8600 },
@@ -41,7 +43,38 @@ const dailyData = [
 
 export function IntegrationHome() {
   const { state, actions } = useApp();
+  const navigate = useNavigate();
   const [logFor, setLogFor] = useState<DataSource | null>(null);
+
+  const [rememberedUser] = useState<User>(() => {
+    try {
+      const stored = sessionStorage.getItem('phris_last_integration_user');
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // storage disabled
+    }
+    return PERSONAS.integration;
+  });
+
+  const handleLeaveIntegration = () => {
+    try {
+      sessionStorage.setItem('phris_last_integration_user', JSON.stringify(rememberedUser));
+    } catch {
+      // storage disabled
+    }
+
+    let prevUser = PERSONAS.admin;
+    try {
+      const prevStored = sessionStorage.getItem('phris_prev_user_before_integration');
+      if (prevStored) prevUser = JSON.parse(prevStored);
+    } catch {
+      // storage disabled
+    }
+
+    actions.login(prevUser.role);
+    actions.toast(`Left integration dashboard. Restored account: ${prevUser.name}`);
+    navigate('/admin');
+  };
   const src = state.sources;
   const enabled = src.filter((s) => s.enabled);
   const count = (st: string) => src.filter((s) => s.status === st).length;
@@ -49,8 +82,6 @@ export function IntegrationHome() {
   const live = enabled.filter((s) => s.status !== 'disconnected');
   const pass = live.length ? live.reduce((sum, s) => sum + s.quality, 0) / live.length : 0;
   const failures = state.syncLog.filter((l) => l.status !== 'success');
-  const ages = enabled.map((s) => (demoNow().getTime() - new Date(s.lastSync).getTime()) / 60000);
-  const avgAge = ages.length ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
   const met = src.find((s) => s.id === 'met');
   const byShort = (id: string) => src.find((s) => s.id === id)?.recordsToday ?? 0;
 
@@ -80,94 +111,111 @@ export function IntegrationHome() {
       subtitle={`All Rwanda health data sources | ${enabled.length} of ${src.length} enabled`}
       breadcrumb="Integration Home">
 
-      {/* Row 1: KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-epi-bg flex items-center justify-center">
-              <Plug className="w-4 h-4 text-epi-muted" />
-            </div>
-            <h3 className="text-[13px] font-bold text-epi-muted leading-tight">Total Sources</h3>
+      {/* Leave Integration Dashboard Notice / Quick Action */}
+      <div className="mb-6 bg-white border border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-admin/10 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 text-admin" />
           </div>
-          <div className="text-2xl font-bold text-epi-text mb-1">{src.length}</div>
-          <p className="text-[11px] text-epi-muted mb-2">Configured data sources</p>
-          <div className="space-y-1 text-[11px] font-medium mt-auto">
-            <div className="text-epi-text">{count('active')} ● Active</div>
-            <div className="text-epi-text">{count('delayed') + count('partial')} ● Delayed / partial</div>
-            <div className="text-epi-text">{count('disconnected')} ● Disconnected</div>
-            {count('disabled') > 0 && <div className="text-epi-muted">{count('disabled')} ● Disabled</div>}
+          <div>
+            <div className="text-[14px] font-bold text-admin-text">
+              Integration Dashboard Access
+            </div>
+            <div className="text-[12px] text-admin-muted">
+              Remembered previous user: <strong className="text-admin-text font-semibold">{rememberedUser.name}</strong> ({rememberedUser.roleLabel})
+            </div>
           </div>
         </div>
+        <button
+          onClick={handleLeaveIntegration}
+          id="leave-integration-home-btn"
+          className="inline-flex items-center justify-center gap-2 bg-admin hover:bg-admin-hover text-white px-4 py-2 rounded-md text-[13px] font-bold shadow-xs transition-colors shrink-0"
+        >
+          <LogOut className="w-4 h-4" />
+          Leave Integration Dashboard
+        </button>
+      </div>
 
-        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-epi/10 flex items-center justify-center">
-              <Database className="w-4 h-4 text-epi" />
-            </div>
-            <h3 className="text-[13px] font-bold text-epi-muted leading-tight">Records Today</h3>
-          </div>
-          <div className="text-2xl font-bold text-epi-text mb-1">{fmtNumber(records)}</div>
-          <p className="text-[11px] text-epi-muted mb-2">Records imported today</p>
-          {state.pendingRecords > 0 &&
-          <Link to="/processing" className="mt-auto text-[12px] font-bold text-epi hover:underline">
-              {fmtNumber(state.pendingRecords)} awaiting processing →
-            </Link>
-          }
-        </div>
-
-        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-epi-accent/10 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-epi-accent" />
-            </div>
-            <h3 className="text-[13px] font-bold text-epi-muted leading-tight">Validation Pass Rate</h3>
-          </div>
-          <div className="text-2xl font-bold text-epi-text mb-2">{pass.toFixed(1)}%</div>
-          <div className="w-full bg-epi-bg rounded-full h-1.5 mb-2">
-            <div className="bg-epi-accent h-1.5 rounded-full" style={{ width: `${pass}%` }}></div>
-          </div>
-          <Link to="/integration/validation" className="mt-auto text-[12px] font-bold text-epi hover:underline">
-            Review flagged records →
-          </Link>
-        </div>
-
-        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-epi-red/10 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4 text-epi-red" />
-            </div>
-            <h3 className="text-[13px] font-bold text-epi-muted leading-tight">Sync Failures / Partial</h3>
-          </div>
-          <div className="text-2xl font-bold text-epi-text mb-1">{failures.length}</div>
-          <p className="text-[11px] text-epi-muted mb-2">Recent runs that did not fully succeed</p>
-          <div className="space-y-1 text-[11px] font-medium mt-auto mb-2">
-            {failures.slice(0, 3).map((f) =>
-            <div key={f.id} className="text-epi-text">
-                {f.status === 'failed' ? '●' : '●'} {f.sourceName}
+      {/* Row 1: Minimal Top 4 KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-epi-muted font-medium">Total Sources</span>
+              <div className="w-8 h-8 rounded-full bg-epi-bg flex items-center justify-center">
+                <Plug className="w-4 h-4 text-epi-muted" />
               </div>
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-1">{src.length}</div>
+            <p className="text-[12px] text-epi-muted mb-2">Configured data sources</p>
+          </div>
+          <div className="pt-2 border-t border-border/60 flex flex-wrap items-center gap-3 text-[11px] font-medium">
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00A550]" /> {count('active')} Active</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#F97316]" /> {count('delayed') + count('partial')} Delayed</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-admin-red" /> {count('disconnected')} Offline</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-epi-muted font-medium">Records Today</span>
+              <div className="w-8 h-8 rounded-full bg-epi/10 flex items-center justify-center">
+                <Database className="w-4 h-4 text-epi" />
+              </div>
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-1">{fmtNumber(records)}</div>
+            <p className="text-[12px] text-epi-muted mb-2">Records imported today</p>
+          </div>
+          <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[12px]">
+            {state.pendingRecords > 0 ? (
+              <Link to="/processing" className="font-semibold text-epi hover:underline">
+                {fmtNumber(state.pendingRecords)} awaiting processing →
+              </Link>
+            ) : (
+              <span className="text-epi-muted">All records processed</span>
             )}
           </div>
-          <Link to="/integration/health" className="text-[12px] font-bold text-epi-red hover:underline text-left">
-            View source health →
-          </Link>
         </div>
 
-        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-epi-bg flex items-center justify-center">
-              <Clock className="w-4 h-4 text-epi-muted" />
+        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-epi-muted font-medium">Validation Pass Rate</span>
+              <div className="w-8 h-8 rounded-full bg-epi-accent/10 flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-epi-accent" />
+              </div>
             </div>
-            <h3 className="text-[13px] font-bold text-epi-muted leading-tight">Data Freshness</h3>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-2">{pass.toFixed(1)}%</div>
+            <div className="w-full bg-epi-bg rounded-full h-1.5 mb-2">
+              <div className="bg-epi-accent h-1.5 rounded-full" style={{ width: `${pass}%` }}></div>
+            </div>
           </div>
-          <div className="text-2xl font-bold text-epi-text mb-1">
-            {avgAge >= 120 ? `${(avgAge / 60).toFixed(1)} h` : `${avgAge} min`}
+          <div className="pt-2 border-t border-border/60 text-[12px]">
+            <Link to="/integration/validation" className="font-semibold text-epi hover:underline">
+              Review flagged records →
+            </Link>
           </div>
-          <p className="text-[11px] text-epi-muted mb-3">Average data age across enabled sources</p>
-          <div className="mt-auto">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold mb-1 ${avgAge <= 180 ? 'bg-epi-accent/10 text-epi-accent' : 'bg-epi-amber/10 text-epi-amber'}`}>
-              {avgAge <= 180 ? '● Acceptable' : '● Stale data'}
+        </div>
+
+        <div className="bg-white rounded-lg p-5 shadow-card border border-border flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[12px] text-epi-muted font-medium">Sync Failures / Partial</span>
+              <div className="w-8 h-8 rounded-full bg-epi-red/10 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-epi-red" />
+              </div>
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-1">{failures.length}</div>
+            <p className="text-[12px] text-epi-muted mb-2">Recent runs needing attention</p>
+          </div>
+          <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[12px]">
+            <span className="text-epi-muted">
+              {failures.length > 0 ? `${failures[0].sourceName} (${failures[0].status})` : 'All pipelines operational'}
             </span>
-            <p className="text-[11px] text-epi-muted">Target: under 3 hours</p>
+            <Link to="/integration/health" className="font-semibold text-epi-red hover:underline">
+              View health →
+            </Link>
           </div>
         </div>
       </div>

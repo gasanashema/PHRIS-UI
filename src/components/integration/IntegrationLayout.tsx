@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Home,
   Plug,
@@ -9,11 +9,15 @@ import {
   Map as MapIcon,
   Clock,
   Activity,
-  ClipboardList } from
+  ClipboardList,
+  LogOut } from
 'lucide-react';
 import { IdentityBanner, ModuleShell, Sep } from '../shared/ModuleShell';
 import { useApp } from '../../store/AppStore';
 import { fmtTime, timeAgo } from '../../lib/format';
+import { PERSONAS } from '../../data/seed';
+import type { User } from '../../types';
+
 interface IntegrationLayoutProps {
   title: string;
   subtitle?: string;
@@ -26,7 +30,8 @@ export function IntegrationLayout({
   breadcrumb,
   children
 }: IntegrationLayoutProps) {
-  const { state } = useApp();
+  const { state, actions } = useApp();
+  const navigate = useNavigate();
   const src = state.sources;
   const active = src.filter((s) => s.status === 'active').length;
   const degraded = src.filter((s) => s.status === 'delayed' || s.status === 'partial').length;
@@ -37,6 +42,48 @@ export function IntegrationLayout({
   map((s) => s.lastSync).
   sort().
   slice(-1)[0];
+
+  const [rememberedUser, setRememberedUser] = useState<User>(() => {
+    try {
+      const stored = sessionStorage.getItem('phris_last_integration_user');
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // storage disabled
+    }
+    return PERSONAS.integration;
+  });
+
+  useEffect(() => {
+    if (state.user && state.user.role === 'integration') {
+      try {
+        sessionStorage.setItem('phris_last_integration_user', JSON.stringify(state.user));
+        setRememberedUser(state.user);
+      } catch {
+        // storage disabled
+      }
+    }
+  }, [state.user]);
+
+  const handleLeaveIntegration = () => {
+    try {
+      sessionStorage.setItem('phris_last_integration_user', JSON.stringify(rememberedUser));
+    } catch {
+      // storage disabled
+    }
+
+    let prevUser = PERSONAS.admin;
+    try {
+      const prevStored = sessionStorage.getItem('phris_prev_user_before_integration');
+      if (prevStored) prevUser = JSON.parse(prevStored);
+    } catch {
+      // storage disabled
+    }
+
+    actions.login(prevUser.role);
+    actions.toast(`Left integration dashboard. Restored account: ${prevUser.name}`);
+    navigate('/admin');
+  };
+
   return (
     <ModuleShell
       fallbackRole="integration"
@@ -49,19 +96,32 @@ export function IntegrationLayout({
       searchPlaceholder="Search data sources..."
       searchTarget="/integration/sources"
       chip={
-      down > 0 ?
-      <Link
-        to="/integration/sources"
-        className="inline-flex items-center gap-1.5 bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-            <span className="w-2 h-2 rounded-full bg-[#F97316]" />
-            {down} Source{down > 1 ? 's' : ''} Disconnected
-          </Link> :
+        <div className="flex items-center gap-2.5">
+          {down > 0 ? (
+            <Link
+              to="/integration/sources"
+              className="inline-flex items-center gap-1.5 bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#F97316]" />
+              {down} Source{down > 1 ? 's' : ''} Disconnected
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-[#00A550]" />
+              All sources connected
+            </span>
+          )}
 
-      <span className="inline-flex items-center gap-1.5 bg-[#00A550]/10 text-[#00A550] border border-[#00A550]/30 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap">
-            <span className="w-2 h-2 rounded-full bg-[#00A550]" />
-            All sources connected
-          </span>
-
+          <button
+            onClick={handleLeaveIntegration}
+            id="leave-integration-header-btn"
+            className="inline-flex items-center gap-1.5 bg-[#104E49] hover:bg-[#0d3f3b] text-white px-3.5 py-1.5 rounded-full text-[12px] font-bold shadow-xs transition-colors whitespace-nowrap"
+            title={`Leave integration dashboard (Remembered user: ${rememberedUser.name})`}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Leave Integration Dashboard
+          </button>
+        </div>
       }
       nav={[
       { path: '/integration', icon: Home, label: 'Integration Home', exact: true },
@@ -88,6 +148,10 @@ export function IntegrationLayout({
           <Sep />
           <span>
             Last sync: {lastSync ? `${fmtTime(lastSync)} (${timeAgo(lastSync)})` : '—'}
+          </span>
+          <Sep />
+          <span className="text-white/90" title={`Integration user remembered: ${rememberedUser.name} (${rememberedUser.email})`}>
+            Remembered User: <strong className="text-white font-semibold">{rememberedUser.name}</strong> ({rememberedUser.roleLabel})
           </span>
           {state.pipeline.staleSources &&
         <>

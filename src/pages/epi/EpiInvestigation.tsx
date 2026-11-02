@@ -17,7 +17,13 @@ export function EpiInvestigation() {
 
       <InvestigationWorkspace
         selectedId={selected}
-        onSelect={(id) => setParams({ id })}
+        onSelect={(id) => {
+          if (id) {
+            setParams({ id });
+          } else {
+            setParams({});
+          }
+        }}
         alertLink={(alertId) => `/warning/detail?id=${alertId}`} />
 
     </EpiLayout>);

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Biohazard,
-  MapPin,
-  Plus,
+  ShieldAlert,
+  Bell,
   Activity,
-  Microscope,
-  ClipboardList } from
+  ClipboardList,
+  TrendingUp,
+  Plus,
+  ChevronLeft,
+  ChevronRight } from
 'lucide-react';
 import { EpiLayout } from '../../components/epi/EpiLayout';
 import { useAlertDialogs } from '../../components/shared/AlertDialogs';
@@ -14,14 +16,26 @@ import { Modal } from '../../components/shared/Modal';
 import { SeverityBadge } from '../../components/shared/Badges';
 import { sortAlerts, useApp } from '../../store/AppStore';
 import { fmtDate, fmtTime, isOpenStatus, nowISO } from '../../lib/format';
-const SURVEILLANCE = [
+import type { Severity } from '../../types';
+
+interface SurveillanceItem {
+  disease: string;
+  cases: number;
+  vs: string;
+  trend: string;
+  districts: string;
+  risk: Severity;
+  action: string;
+}
+
+const SURVEILLANCE: SurveillanceItem[] = [
 {
   disease: 'Malaria',
   cases: 450,
   vs: '+12%',
   trend: '↑ Rising',
   districts: '18 districts',
-  risk: '● Orange',
+  risk: 'orange',
   action: 'Investigate'
 },
 {
@@ -30,7 +44,7 @@ const SURVEILLANCE = [
   vs: '+45%',
   trend: '↑ Sharp Rise',
   districts: '3 districts',
-  risk: '● Red',
+  risk: 'red',
   action: 'Active Investigation →'
 },
 {
@@ -39,7 +53,7 @@ const SURVEILLANCE = [
   vs: '-5%',
   trend: '↓ Falling',
   districts: '4 districts',
-  risk: '● Yellow',
+  risk: 'yellow',
   action: 'Monitor'
 },
 {
@@ -48,7 +62,7 @@ const SURVEILLANCE = [
   vs: '+8%',
   trend: '↑ Rising',
   districts: '6 districts',
-  risk: '● Yellow',
+  risk: 'yellow',
   action: 'Monitor'
 },
 {
@@ -57,7 +71,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ Stable',
   districts: '2 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'Routine'
 },
 {
@@ -66,7 +80,7 @@ const SURVEILLANCE = [
   vs: '+3%',
   trend: '→ Stable',
   districts: '22 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'Routine'
 },
 {
@@ -74,8 +88,8 @@ const SURVEILLANCE = [
   cases: 3,
   vs: '+200%',
   trend: '↑ Alert',
-  districts: '1 district (Rubavu — DRC border)',
-  risk: '● Orange',
+  districts: '1 district (Rubavu)',
+  risk: 'orange',
   action: 'Investigate'
 },
 {
@@ -84,7 +98,7 @@ const SURVEILLANCE = [
   vs: '-20%',
   trend: '↓ Falling',
   districts: '2 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'Routine'
 },
 {
@@ -93,7 +107,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ None',
   districts: '0 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'Cross-border watch'
 },
 {
@@ -102,7 +116,7 @@ const SURVEILLANCE = [
   vs: '0%',
   trend: '→ None',
   districts: '0 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'DRC border watch'
 },
 {
@@ -111,7 +125,7 @@ const SURVEILLANCE = [
   vs: '+1%',
   trend: '→ Stable',
   districts: '12 districts',
-  risk: '● Yellow',
+  risk: 'yellow',
   action: 'Monitor'
 },
 {
@@ -120,7 +134,7 @@ const SURVEILLANCE = [
   vs: '-8%',
   trend: '↓ Falling',
   districts: '15 districts',
-  risk: '● Green',
+  risk: 'green',
   action: 'Routine'
 }];
 
@@ -136,7 +150,11 @@ export function EpiOverview() {
   const requested = invOpen.filter((i) => i.status === 'requested');
   const candidates = open.filter((a) => !a.investigationId);
   const level = red.length > 0 ? 'high' : open.some((a) => a.severity === 'orange') ? 'moderate' : 'low';
-  const levelCls = level === 'high' ? 'text-epi-red' : level === 'moderate' ? 'text-epi-amber' : 'text-[#00A550]';
+
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const totalPages = Math.ceil(SURVEILLANCE.length / pageSize);
+  const displayedSurveillance = SURVEILLANCE.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <EpiLayout
@@ -144,99 +162,121 @@ export function EpiOverview() {
       subtitle={`${fmtDate(nowISO())} | Rwanda — All Districts | Last updated: ${fmtTime(state.pipeline.lastRunAt)}`}
       breadcrumb="National Overview">
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-        <div className={`rounded-lg p-4 flex flex-col justify-between border ${level === 'high' ? 'bg-epi-red/10 border-epi-red/30' : level === 'moderate' ? 'bg-epi-amber/10 border-epi-amber/30' : 'bg-[#00A550]/10 border-[#00A550]/30'}`}>
-          <div className={`text-[13px] font-bold mb-2 ${levelCls}`}>National Risk Level</div>
-          <div className={`text-[20px] font-bold mb-1 ${levelCls}`}>
-            {level === 'high' ? '● HIGH RISK' : level === 'moderate' ? '● MODERATE RISK' : '● LOW RISK'}
+      {/* Row 1: Top 4 KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Link
+          to="/warning/alerts"
+          className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-epi-muted font-medium">National Threat Level</span>
+              <ShieldAlert className={`w-5 h-5 ${level === 'high' ? 'text-epi-red' : level === 'moderate' ? 'text-[#F97316]' : 'text-[#00A550]'}`} />
+            </div>
+            <div className="text-[24px] font-bold text-epi-text leading-none mb-2 flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${level === 'high' ? 'bg-epi-red' : level === 'moderate' ? 'bg-[#F97316]' : 'bg-[#00A550]'}`} />
+              <span>{level === 'high' ? 'High Risk' : level === 'moderate' ? 'Moderate Risk' : 'Low Risk'}</span>
+            </div>
           </div>
-          <div className="text-[11px] text-epi-text font-medium">
-            {red.length} red alert{red.length === 1 ? '' : 's'} — {red.length ? 'immediate attention required' : 'no outbreaks at red level'}
-          </div>
-        </div>
-
-        <div className="bg-white border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-[13px] font-medium text-epi-muted mb-2">
-            <Biohazard className="w-4 h-4 text-epi-red" /> Red-Level Outbreaks
-          </div>
-          <div className="text-[24px] font-bold text-epi-text mb-1">{red.length}</div>
-          <div className="text-[11px] text-epi-muted space-y-0.5 mb-2">
-            {red.slice(0, 3).map((a) =>
-            <Link key={a.id} to={`/warning/detail?id=${a.id}`} className="block font-medium text-epi-red hover:underline">
-                {a.disease} — {a.district} ●
-              </Link>
+          <div className="text-[12px] font-medium pt-1 text-epi-muted">
+            {red.length > 0 ? (
+              <span className="text-epi-red font-semibold">{red.length} critical alert{red.length > 1 ? 's' : ''} active</span>
+            ) : (
+              <span className="text-[#00A550] font-semibold">All indicators within baseline</span>
             )}
           </div>
-          <Link to="/epi/investigations" className="text-[11px] font-bold text-epi hover:underline mt-auto">
-            Open investigations →
-          </Link>
-        </div>
+        </Link>
 
-        <div className="bg-white border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-[13px] font-medium text-epi-muted mb-2">
-            <MapPin className="w-4 h-4 text-epi-amber" /> Districts Under Watch
+        <Link
+          to="/warning/alerts"
+          className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-epi-muted font-medium">Active Alerts</span>
+              <Bell className="w-5 h-5 text-epi-red" />
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-2">{open.length}</div>
           </div>
-          <div className="text-[24px] font-bold text-epi-text mb-1">{watch.length}</div>
-          <div className="text-[11px] text-epi-muted mb-2">{watch.join(', ')}</div>
-          <Link to="/epi/comparison" className="text-[11px] font-bold text-epi hover:underline mt-auto">
-            View district comparison →
-          </Link>
-        </div>
+          <div className="text-[12px] font-medium pt-1 flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-epi-text font-semibold" title="Critical alerts">
+              <span className="w-2 h-2 rounded-full bg-epi-red shrink-0" />
+              {red.length}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-epi-text font-semibold" title="High alerts">
+              <span className="w-2 h-2 rounded-full bg-[#F97316] shrink-0" />
+              {open.filter((a) => a.severity === 'orange').length}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-epi-text font-semibold" title="Watch alerts">
+              <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
+              {open.filter((a) => a.severity === 'yellow').length}
+            </span>
+          </div>
+        </Link>
 
-        <div className="bg-white border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-[13px] font-medium text-epi-muted mb-2">
-            <Activity className="w-4 h-4 text-epi-amber" /> New Cases This Week
+        <Link
+          to="/epi/investigations"
+          className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-epi-muted font-medium">Active Investigations</span>
+              <ClipboardList className="w-5 h-5 text-epi" />
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-2">{invOpen.length}</div>
           </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-[24px] font-bold text-epi-text">1,240</span>
-            <span className="text-[12px] font-bold text-epi-amber">↑ +8% vs last week</span>
+          <div className="text-[12px] font-medium pt-1">
+            {requested.length > 0 ? (
+              <span className="text-epi-red font-semibold">{requested.length} awaiting district review</span>
+            ) : (
+              <span className="text-epi-muted">Active in {watch.length || 1} districts</span>
+            )}
           </div>
-          <Link to="/epi/surveillance" className="text-[11px] font-bold text-epi hover:underline mt-auto">
-            Open surveillance →
-          </Link>
-        </div>
+        </Link>
 
-        <div className="bg-white border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-[13px] font-medium text-epi-muted mb-2">
-            <Microscope className="w-4 h-4 text-epi" /> Open Alerts
+        <Link
+          to="/epi/surveillance"
+          className="bg-white p-5 rounded-lg shadow-sm border border-border flex flex-col justify-between hover:shadow-md transition-shadow"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[13px] text-epi-muted font-medium">New Cases This Week</span>
+              <Activity className="w-5 h-5 text-[#F97316]" />
+            </div>
+            <div className="text-[28px] font-bold text-epi-text leading-none mb-2">1,240</div>
           </div>
-          <div className="text-[24px] font-bold text-epi-text mb-1">{open.length}</div>
-          <Link to="/warning/alerts" className="text-[11px] font-bold text-epi hover:underline mt-auto">
-            Early Warning →
-          </Link>
-        </div>
-
-        <div className="bg-white border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between relative">
-          {requested.length > 0 &&
-          <div className="absolute top-4 right-4 bg-epi-red text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Action</div>
-          }
-          <div className="flex items-center gap-2 text-[13px] font-medium text-epi-muted mb-2">
-            <ClipboardList className="w-4 h-4 text-epi" /> Open Investigations
+          <div className="text-[12px] font-medium pt-1 flex items-center gap-1 text-[#F97316] font-semibold">
+            <TrendingUp className="w-3.5 h-3.5 shrink-0" /> +8% vs previous week
           </div>
-          <div className="text-[24px] font-bold text-epi-text mb-1">{invOpen.length}</div>
-          <div className="text-[11px] text-epi-muted mt-auto">{requested.length} awaiting acceptance from districts</div>
-        </div>
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[65%_minmax(0,1fr)] gap-6">
+      <div className="space-y-6">
+        {/* Active Disease Monitoring — Full Width with Pagination */}
         <div className="bg-white rounded-lg shadow-card border border-border overflow-hidden">
-          <div className="p-5 border-b border-border">
-            <h2 className="text-[16px] font-bold text-epi-text">Active Disease Monitoring — This Week</h2>
+          <div className="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 className="text-[16px] font-bold text-epi-text">Active Disease Monitoring — This Week</h2>
+              <p className="text-[12px] text-epi-muted mt-0.5">National surveillance across all reporting health facilities and community health worker networks</p>
+            </div>
+            <div className="text-[12px] text-epi-muted font-medium">
+              Total monitored: <span className="font-bold text-epi-text">{SURVEILLANCE.length} diseases</span>
+            </div>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-[13px]">
               <thead className="bg-epi-bg/50 text-epi-muted font-medium border-b border-border">
                 <tr>
-                  {['Disease', 'Cases This Week', 'vs Last Week', 'Trend', 'Districts Affected', 'Risk Level', 'Action'].map((h) =>
-                  <th key={h} className="px-4 py-3">{h}</th>
-                  )}
+                  {['Disease', 'Cases This Week', 'vs Last Week', 'Trend', 'Districts Affected', 'Risk Level', 'Action'].map((h) => (
+                    <th key={h} className="px-4 py-3">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {SURVEILLANCE.map((row, i) => {
-                  const isRed = row.risk.includes('Red');
-                  const isOrange = row.risk.includes('Orange');
+                {displayedSurveillance.map((row, i) => {
+                  const isRed = row.risk === 'red';
+                  const isOrange = row.risk === 'orange';
                   return (
                     <tr key={i} className={`hover:bg-epi-bg/30 ${isRed ? 'bg-epi-red/5' : isOrange ? 'bg-epi-amber/5' : ''}`}>
                       <td className="px-4 py-3 font-bold text-epi-text">{row.disease}</td>
@@ -244,63 +284,126 @@ export function EpiOverview() {
                       <td className="px-4 py-3 text-epi-muted">{row.vs}</td>
                       <td className={`px-4 py-3 font-medium ${row.trend.includes('↑') ? 'text-epi-amber' : row.trend.includes('↓') ? 'text-epi-accent' : 'text-epi-muted'}`}>{row.trend}</td>
                       <td className="px-4 py-3 text-epi-muted">{row.districts}</td>
-                      <td className="px-4 py-3 font-medium whitespace-nowrap">{row.risk}</td>
+                      <td className="px-4 py-3 whitespace-nowrap"><SeverityBadge severity={row.risk} /></td>
                       <td className="px-4 py-3">
                         <Link
                           to={`/warning/history?q=${encodeURIComponent(row.disease)}`}
-                          className={`font-bold text-[12px] hover:underline ${isRed ? 'text-epi-red' : isOrange ? 'text-epi-amber' : 'text-epi'}`}>
-
+                          className={`font-bold text-[12px] hover:underline ${isRed ? 'text-epi-red' : isOrange ? 'text-epi-amber' : 'text-epi'}`}
+                        >
                           {row.action}
                         </Link>
                       </td>
-                    </tr>);
-
+                    </tr>
+                  );
                 })}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          <div className="p-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-[13px]">
+            <div className="text-epi-muted">
+              Showing <span className="font-semibold text-epi-text">{(page - 1) * pageSize + 1}</span> to <span className="font-semibold text-epi-text">{Math.min(page * pageSize, SURVEILLANCE.length)}</span> of <span className="font-semibold text-epi-text">{SURVEILLANCE.length}</span> diseases
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-border bg-white text-epi-text hover:bg-epi-bg/60 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] font-medium transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPage(p)}
+                    className={`w-8 h-8 rounded-md text-[12px] font-semibold transition-colors ${
+                      page === p
+                        ? 'bg-epi text-white'
+                        : 'border border-border bg-white text-epi-text hover:bg-epi-bg/60'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-border bg-white text-epi-text hover:bg-epi-bg/60 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] font-medium transition-colors"
+              >
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-card border border-border p-5 flex flex-col h-fit">
-          <div className="mb-4">
-            <h2 className="text-[16px] font-bold text-epi-text">Outbreak Investigations</h2>
-            <p className="text-[13px] text-epi-muted">{invOpen.length} open investigations</p>
+        {/* Outbreak Investigations Widget — Bottom of the Table */}
+        <div className="bg-white rounded-lg shadow-card border border-border p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+            <div>
+              <h2 className="text-[16px] font-bold text-epi-text">Outbreak Field Investigations</h2>
+              <p className="text-[13px] text-epi-muted">{invOpen.length} open investigations across active health districts</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/epi/investigations"
+                className="text-[13px] font-bold text-epi hover:underline"
+              >
+                View all investigations →
+              </Link>
+              <button
+                onClick={() => setPicker(true)}
+                className="h-9 px-4 bg-epi hover:bg-epi-dark text-white text-[13px] font-bold rounded-md flex items-center gap-2 transition-colors"
+              >
+                <Plus className="w-4 h-4" /> New Investigation
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-3 mb-4">
-            {invOpen.slice(0, 4).map((inv) => {
-              const tone = inv.status === 'requested' ? 'border-l-[#EAB308]' : inv.priority === 'Critical' ? 'border-l-epi-red' : 'border-l-epi-amber';
-              const label = inv.status === 'requested' ? 'text-[#EAB308]' : inv.priority === 'Critical' ? 'text-epi-red' : 'text-epi-amber';
-              return (
-                <div key={inv.id} className={`border-l-4 ${tone} border border-border rounded-r-lg p-4 bg-white`}>
-                  <div className={`text-[11px] font-bold mb-1 ${label}`}>
-                    {inv.status === 'requested' ? '● REQUESTED BY DISTRICT' : inv.priority === 'Critical' ? '● ACTIVE OUTBREAK' : '● UNDER INVESTIGATION'}
+          {invOpen.length === 0 ? (
+            <div className="text-center py-8 text-epi-muted text-[13px] border border-dashed border-border rounded-lg">
+              No active outbreak investigations currently underway.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {invOpen.slice(0, 4).map((inv) => {
+                const tone = inv.status === 'requested' ? 'border-l-[#EAB308]' : inv.priority === 'Critical' ? 'border-l-epi-red' : 'border-l-epi-amber';
+                const label = inv.status === 'requested' ? 'text-[#EAB308]' : inv.priority === 'Critical' ? 'text-epi-red' : 'text-epi-amber';
+                const dotBg = inv.status === 'requested' ? 'bg-[#EAB308]' : inv.priority === 'Critical' ? 'bg-epi-red' : 'bg-epi-amber';
+                return (
+                  <div key={inv.id} className={`border-l-4 ${tone} border border-border rounded-r-lg p-4 bg-white flex flex-col justify-between hover:shadow-sm transition-shadow`}>
+                    <div>
+                      <div className={`text-[11px] font-bold mb-1.5 flex items-center gap-1.5 ${label}`}>
+                        <span className={`w-2 h-2 rounded-full inline-block ${dotBg}`} />
+                        <span>{inv.status === 'requested' ? 'REQUESTED BY DISTRICT' : inv.priority === 'Critical' ? 'ACTIVE OUTBREAK' : 'UNDER INVESTIGATION'}</span>
+                      </div>
+                      <div className="text-[14px] font-bold text-epi-text mb-2 line-clamp-1">
+                        {inv.disease} — {inv.sector ? `${inv.sector}, ` : ''}{inv.district}
+                      </div>
+                      <div className="text-[12px] text-epi-muted space-y-1 mb-4">
+                        <div>Opened: {fmtDate(inv.openedAt)} | Cases: <span className="font-medium text-epi-text">{inv.cases}</span></div>
+                        <div className="truncate">Lead: {inv.lead}</div>
+                        <div className="font-medium text-epi-text text-[11px] line-clamp-2 bg-epi-bg/40 p-1.5 rounded">
+                          Latest: {inv.updates[inv.updates.length - 1]?.text}
+                        </div>
+                      </div>
+                    </div>
+                    <Link
+                      to={`/epi/investigations?id=${inv.id}`}
+                      className="inline-flex h-8 w-full bg-epi hover:bg-epi-dark text-white text-[12px] font-semibold rounded-md items-center justify-center transition-colors"
+                    >
+                      {inv.status === 'requested' ? 'Review Request' : 'Open Investigation'}
+                    </Link>
                   </div>
-                  <div className="text-[14px] font-bold text-epi-text mb-2">
-                    {inv.disease} — {inv.sector ? `${inv.sector}, ` : ''}{inv.district}
-                  </div>
-                  <div className="text-[12px] text-epi-muted space-y-1 mb-3">
-                    <div>Opened: {fmtDate(inv.openedAt)} | Cases: {inv.cases}</div>
-                    <div>Lead: {inv.lead}</div>
-                    <div className="font-medium text-epi-text">Latest: {inv.updates[inv.updates.length - 1]?.text}</div>
-                  </div>
-                  <Link
-                    to={`/epi/investigations?id=${inv.id}`}
-                    className="inline-flex h-8 px-4 bg-epi hover:bg-epi-dark text-white text-[12px] font-semibold rounded-md items-center justify-center">
-
-                    {inv.status === 'requested' ? 'Review Request' : 'Open Investigation'}
-                  </Link>
-                </div>);
-
-            })}
-          </div>
-
-          <button
-            onClick={() => setPicker(true)}
-            className="w-full h-10 border-2 border-epi text-epi hover:bg-epi/5 text-[13px] font-bold rounded-md flex items-center justify-center gap-2 mt-auto">
-
-            <Plus className="w-4 h-4" /> New Investigation
-          </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
